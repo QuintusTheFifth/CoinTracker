@@ -1,0 +1,40 @@
+<div class="card">
+  <div class="card-header">
+    {{ pageTitle }}
+  </div>
+  <h1>Track your cryptocurrency holdings</h1>
+
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md2">Filter by:</div>
+      <div class="col-md-4">
+        <input type="text" [(ngModel)]="listFilter" />
+      </div>
+    </div>
+    <div class="row" *ngIf="listFilter">
+      <div class="col-md-6">
+        <h4>Filtered by: {{listFilter}}</h4>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table mb-0" *ngIf="coins && coins.length">
+        <thead>
+          <tr>
+            <th>Currency</th>
+            <th>Price</th>
+            <th>Amount</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let coin of filteredCoins">
+            <td>{{ coin.coinName }}</td>
+            <td>{{ coin.price|currency:'EUR' }}</td>
+            <td>{{ coin.amount }}</td>
+            <td>{{ coin.total }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
