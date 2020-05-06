@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   <a class='navbar-brand'>{{pageTitle}}</a>
   <ul class='nav nav-pills'>
     <li><a class='nav-link' [routerLink]="['/welcome']">Home</a></li>
-    <li><a class='nav-link'[routerLink]="['/coins']">Coin List</a></li>
+    <li><a class='nav-link'[routerLink]="['/coins-list']">Coin List</a></li>
   </ul>
 </nav>
 <div class='container'>
@@ -16,4 +16,5 @@ import { Component } from '@angular/core';
 export class AppComponent {
   
   public pageTitle: string= "CoinTracker";
+  title: any;
 }

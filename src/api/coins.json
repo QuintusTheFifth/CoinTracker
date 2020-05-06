@@ -1,0 +1,20 @@
+[
+    {
+      "id": 1,
+      "coinName": "XRP",
+      "price": 0.1889,
+      "amount": 25,
+      "total": 0,
+      "exchange": null,
+      "date": null
+    },
+    {
+      "id": 2,
+      "coinName": "BNB",
+      "price": 15.45,
+      "amount": 2000,
+      "total": 0,
+      "exchange": null,
+      "date": null
+    }
+  ]
