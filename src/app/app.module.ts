@@ -6,6 +6,11 @@ import { AppComponent } from './app.component';
 import { RouterModule } from '@angular/router';
 import { CoinListComponent } from './coins/coin-list.component';
 import { HttpClientModule } from '@angular/common/http';
+import { AddCoinComponent } from './coins/add-coin.component';
+import { CoinModule } from './coins/coin.module';
+import { MatDialog } from '@angular/material/dialog';
+
+
 
 @NgModule({
   declarations: [
@@ -21,6 +26,7 @@ import { HttpClientModule } from '@angular/common/http';
       { path: "", redirectTo: "coin-list", pathMatch: "full" },
       { path: "**", redirectTo: "coin-list", pathMatch: "full" },
     ]),
+    CoinModule,
   ],
   bootstrap: [AppComponent],
 })
