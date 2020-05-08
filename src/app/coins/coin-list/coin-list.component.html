@@ -3,23 +3,24 @@
     {{ pageTitle }}
   </div>
   <h1>Track your cryptocurrency holdings</h1>
-
-<br>
-  <a [routerLink]="['/coin-add']">
-    <button class="btn btn-primary pull-right">
-      Add a coin
-    </button>
-  </a>
+  <br>
+  <button class="btn btn-primary" type="submit"  width="20px" (click)="onCreate()">
+    Add a coin
+  </button>
 
   <div class="card-body">
     <div class="table-responsive">
       <table class="table mb-0" *ngIf="coins && coins.length">
         <thead>
+          <tr><h2>Total: {{ customerTotal|currency:'EUR':'symbol':'1.2-2'}}</h2></tr>
           <tr>
             <th>Currency</th>
-            <th>Price</th>
+            <th>Price
+              <span class="pulsating-circle"></span>
+            </th>
             <th>Amount</th>
             <th>Total</th>
+            <th></th>
           </tr>
         </thead>
         <tbody *ngIf="coins">
@@ -28,9 +29,14 @@
             <td>{{coin.price |currency:'EUR':'symbol':'1.2-2'}}</td>
             <td>{{coin.amount }}</td>
             <td>{{(coin.amount * coin.price)|currency:'EUR':'symbol':'1.2-2'}}</td>
+            <td id="let row"> 
+              <button mat-icon-button ><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button color="warn"
+              ><mat-icon>delete_outline</mat-icon></button>
+            </td>
           </tr>
         </tbody>
-       
+
       </table>
     </div>
 
