@@ -11,8 +11,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import{MatDialogModule, MatDialog,MatDialogRef} from '@angular/material/dialog';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatChipsModule} from '@angular/material/chips';
+import {MatTooltipModule } from '@angular/material/tooltip';
 import { MatchMedia } from '@angular/flex-layout/core/typings/match-media';
-
+import 'hammerjs';
 
 
 @NgModule({
@@ -25,10 +26,12 @@ import { MatchMedia } from '@angular/flex-layout/core/typings/match-media';
       {path:"coin-add",component:AddCoinComponent}
     ]),
     CommonModule,
+    MatTooltipModule,
     MaterialModule,
     ReactiveFormsModule,
     MatInputModule,
     MatDialogModule,
+    BrowserAnimationsModule,
     BrowserModule,
     MaterialModule,
     ReactiveFormsModule,
