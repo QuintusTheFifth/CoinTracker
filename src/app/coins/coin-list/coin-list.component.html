@@ -1,70 +1,70 @@
-<div class="card">
-  <div class="card-header">
-    {{ pageTitle }}
-  </div>
-  <br>
-  <h1>Track your cryptocurrency holdings</h1>
-  <button class="btn btn-primary pull-right" (click)="onCreate()">
-    Add a coin
+<h1 class="md-display-4">Track your cryptocurrency holdings!</h1>
+<div class="search-div">
+  <button mat-raised-button (click)="onCreate()">
+    <mat-icon>add</mat-icon>Add a coin
   </button>
-  <div class="card-body">
-    <div class="table-responsive">
-      <table class="table mb-0" *ngIf="coinsIndividu$">
-        <thead>
-          <tr>
-            <h2>Total: {{ customerTotal|currency:'EUR':'symbol':'1.2-2'}}</h2>
-          </tr>
-          <tr>
-            <th>Currency</th>
-            <th matTooltip="Live Price"
-            matTooltipPosition="above"
-            >Price
-              <span class="pulsating-circle"></span>
-            </th>
-            <th>Amount</th>
-            <th>Total</th>
-            <th></th>
-          </tr>
-        </thead>
-          <div *ngIf="(coinsIndividu$ | async); else loadingOrError">
-          <tbody *ngIf="coins">
-            <tr *ngFor="let coin of coinsIndividu$ | async">
-            <td>{{ coin.name }}</td>
-            <td>{{coin.currentPrice |currency:'EUR':'symbol':'1.2-2'}}</td>
-            <td>{{coin.amount }}</td>
-            <td>{{(coin.amount * coin.price)|currency:'EUR':'symbol':'1.2-2'}}</td>
-            <td id="let row">
-              <button mat-icon-button>
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn">
-                <mat-icon>delete_outline</mat-icon>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </div>
-      <ng-template #loadingOrError>
-        <span *ngIf="errorMessage; else loading">
-          Error loading the recipe list: {{ errorMessage }}. <br/>
-      Please try again later.
-        </span>
-        <ng-template #loading>
-          <mat-spinner></mat-spinner>
-        </ng-template>
-      </ng-template>
-    </table>
-       <!--  <ng-template #loadingOrError>
-          <mat-card class="error" *ngIf="errorMessage; else loading">
-             Error loading the recipe list: {{ errorMessage }}. <br/>
-              Please try again later.
-            <ng-template #loading>
-              <mat-spinner></mat-spinner>
-            </ng-template>
-          </mat-card>
-        </ng-template>  -->
-     <!--  </div> -->
-      
-    </div>
-  </div>
-  
+</div>
+<div *ngIf="(filteredCoins$); else loadingOrError">
+  <mat-table [dataSource]="filteredCoins$" class="mat-elevation-z8">
+    <!-- Symbol Column -->
+    <ng-container matColumnDef="symbol">
+      <mat-header-cell *matHeaderCellDef> Symbol </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+    </ng-container>
+
+    <!-- Price Column -->
+    <ng-container matColumnDef="price">
+      <mat-header-cell *matHeaderCellDef> Price <span class="pulsating-circle"></span> </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        {{element.currentPrice
+      |currency:'EUR'}} </mat-cell>
+    </ng-container>
+
+    <!-- Amount Column -->
+    <ng-container matColumnDef="amount">
+      <mat-header-cell *matHeaderCellDef> Amount </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.amount}} </mat-cell>
+    </ng-container>
+
+    <!-- Total Column -->
+    <ng-container matColumnDef="total">
+      <mat-header-cell *matHeaderCellDef> Total </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        {{element.amount * element.currentPrice
+      |currency:'EUR':'symbol':'1.2-2'}}
+      </mat-cell>
+    </ng-container>
+
+    <!-- Buttons -->
+    <ng-container matColumnDef="buttons">
+      <mat-header-cell *matHeaderCellDef>
+        <h1>=
+          {{ customerTotal|currency:'EUR':'symbol':'1.2-2'}}
+        </h1>
+      </mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        <button mat-icon-button>
+          <mat-icon>launch</mat-icon>
+        </button>
+        <button mat-icon-button color="warn">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    <!--  <mat-footer-row *matFooterRowDef="['loading']" [ngClass]="{'hide':filteredCoins$!=null}"></mat-footer-row>
+  <mat-footer-row *matFooterRowDef="['noData']" [ngClass]="{'hide':!(filteredCoins$!=null && filteredCoins$.length==0)}"></mat-footer-row> -->
+  </mat-table>
+</div>
+<ng-template #loadingOrError>
+  <span *ngIf="errorMessage; else loading">
+    Error loading the recipe list: {{ errorMessage }}. <br />
+    Please try again later.
+  </span>
+  <ng-template #loading>
+    <mat-spinner></mat-spinner>
+  </ng-template>
+</ng-template>
+<mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="10" showFirstLastButtons></mat-paginator>

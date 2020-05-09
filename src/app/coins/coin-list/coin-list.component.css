@@ -1,4 +1,8 @@
 
+table {
+  width: 100%;
+}
+
   .pulsating-circle {
     display:inline-block;
     position: relative;
@@ -89,4 +93,23 @@
               transform: scale(0.8);
     }
   }
+
+  
+.md-display-4{
+  text-align:left;
+}
+
+.md-display-2{
+  text-align:right;
+}
+
+.matHeaderCellDef-buttons{
+  text-align:left;
+}
+
+h1{
+  margin-top:20px;
+  margin-left:10px;
+}
+
   

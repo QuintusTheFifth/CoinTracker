@@ -2,12 +2,23 @@ import { Component, OnInit, Output, ɵEMPTY_MAP } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Coin } from '../coin';
-import { ArgumentOutOfRangeError, Observable, EMPTY } from 'rxjs';
+import {
+  ArgumentOutOfRangeError,
+  Observable,
+  EMPTY,
+  BehaviorSubject,
+} from 'rxjs';
 import { AddCoinComponent } from '../add-coin/add-coin.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { CoinsService } from '../services/coin.data.service';
-import { catchError } from 'rxjs/operators';
-import { CoinObject } from '../coinObject.model';
+import { catchError, delay, findIndex, filter } from 'rxjs/operators';
+
+export interface PeriodicElement {
+  symbol: string;
+  price: number;
+  amount: number;
+  total: number;
+}
 
 @Component({
   templateUrl: './coin-list.component.html',
@@ -19,72 +30,74 @@ export class CoinListComponent implements OnInit {
   imageMargin = 2;
   errorMessage = '';
 
-  private _coinsIndividu: Coin[];
+  displayedColumns: string[] = [
+    'symbol',
+    'price',
+    'amount',
+    'total',
+    'buttons',
+  ];
 
-  private _fetchCoins$:Observable<Coin[]>;
+  private _fetchCoins$: Observable<Coin[]>;
+  filteredCoins$: Coin[];
 
   customerTotal: number = 0;
 
-  constructor(private _coinService: CoinsService, private dialog: MatDialog) {
+  constructor(private _coinService: CoinsService, private dialog: MatDialog) {}
+
+  get coinsIndividu$(): Observable<Coin[]> {
+    return this._fetchCoins$;
   }
 
-
-  // dit gebruiken?
-  get coinsIndividu$(): Observable<Coin[]>{
-   return this._fetchCoins$;
-  }
-
- /*  get coins2$(): Observable<Coin[]> {
-    return this.coinService.getCoinsCustomer2$;
-  } */
-
+  coins: Coin[] = [];
 
   coinNames: any;
 
-
-  newCoins: CoinObject[]=[]
-
   ngOnInit(): void {
-    this._fetchCoins$=this._coinService.allCoins$.pipe(
-      catchError(err=>{
-        this.errorMessage=err;
+    this._fetchCoins$ = this._coinService.allCoins$.pipe(
+      catchError((err) => {
+        this.errorMessage = err;
         return EMPTY;
       })
-    )
-    this.coinsIndividu$.subscribe((val)=>{
-     // console.log(Object.keys(val[0]));
-     //this.coins=val.map(a=> new Coin(a._name,a._amount,a._priceBought,a._dateBought,a._exchange));
-     this.newCoins=val.map(a=> new CoinObject(a._name,a._amount));
-     console.log(this.newCoins);
-     console.log(this.coinNames);
-     
-    });
+    );
 
-   this.geefPrijzen();
-  
+    console.log(this.coinsIndividu$);
+
+    this.geefPrijzen();
   }
 
   geefPrijzen() {
-    console.log("?")
-    this.newCoins.forEach((coin)=> {
-      console.log("???")
-      console.log(coin.amount);
-      this._coinService.getLiveCoinPrices(name).subscribe((res) => {
+    this.coinsIndividu$.subscribe((coins) => {
+      this.coins = coins;
+      console.log(coins);
+      for (var coin of coins) {
+        console.log(coin._name);
+        this._coinService.getLiveCoinPrices(coin._name).subscribe((res) => {
+          console.log(Object.keys(res)[0]);
 
-        // vind de gepaste coin en pas prijs aan
-        var currentCoin = this.coinNames.find(
-          (x) => x === Object.keys(res)[0]
-        );
-        currentCoin.currentPrice = Object.values(res)[0].EUR;
+          // vind de gepaste coin en pas prijs aan
+          var currentCoin = coins.find((x) => x._name === Object.keys(res)[0]);
+          currentCoin.currentPrice = Object.values(res)[0].EUR;
 
-        // bereken totaal
-        this.customerTotal += currentCoin.price * currentCoin.amount;
-      });
+          coins.forEach((x) => {
+            if (x._name === currentCoin._name && x.id !== currentCoin.id) {
+              x._amount += currentCoin._amount;
+              var index = coins.findIndex((x) => x.name === currentCoin.name);
+              coins.splice(index, 1);
+              this.filteredCoins$ = coins;
+            }
+          });
+
+          // bereken totaal
+          this.customerTotal += (currentCoin.price * currentCoin.amount);
+        });
+      }
+      console.log(this.coins);
     });
   }
 
   addNewCoin(newCoin: Coin) {
-    this.newCoins.push(newCoin);
+    this.coins.push(newCoin);
     this.geefPrijzen();
     this.customerTotal += newCoin.amount * newCoin.price;
   }

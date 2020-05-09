@@ -15,6 +15,10 @@ import {MatTooltipModule } from '@angular/material/tooltip';
 import { MatchMedia } from '@angular/flex-layout/core/typings/match-media';
 import 'hammerjs';
 import { HttpClientModule } from '@angular/common/http';
+import {MatTableModule} from '@angular/material/table';
+import {MatPaginatorModule} from '@angular/material/paginator';
+
+
 
 
 @NgModule({
@@ -29,6 +33,7 @@ import { HttpClientModule } from '@angular/common/http';
     CommonModule,
     MatTooltipModule,
     MaterialModule,
+    MatPaginatorModule,
     ReactiveFormsModule,
     MatInputModule,
     MatDialogModule,
@@ -39,7 +44,8 @@ import { HttpClientModule } from '@angular/common/http';
     FormsModule,
     MatGridListModule,
     MatChipsModule,
-    HttpClientModule
+    HttpClientModule,
+    MatTableModule,
   ],
   entryComponents:[AddCoinComponent]
 })
