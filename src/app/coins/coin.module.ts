@@ -14,6 +14,7 @@ import {MatChipsModule} from '@angular/material/chips';
 import {MatTooltipModule } from '@angular/material/tooltip';
 import { MatchMedia } from '@angular/flex-layout/core/typings/match-media';
 import 'hammerjs';
+import { HttpClientModule } from '@angular/common/http';
 
 
 @NgModule({
@@ -37,7 +38,8 @@ import 'hammerjs';
     ReactiveFormsModule,
     FormsModule,
     MatGridListModule,
-    MatChipsModule
+    MatChipsModule,
+    HttpClientModule
   ],
   entryComponents:[AddCoinComponent]
 })

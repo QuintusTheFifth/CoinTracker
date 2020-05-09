@@ -2,16 +2,14 @@
   <div class="card-header">
     {{ pageTitle }}
   </div>
-  <h1>Track your cryptocurrency holdings</h1>
   <br>
-  <button class="btn btn-primary" type="submit" width="20px" (click)="onCreate()">
+  <h1>Track your cryptocurrency holdings</h1>
+  <button class="btn btn-primary pull-right" (click)="onCreate()">
     Add a coin
   </button>
-
-
   <div class="card-body">
     <div class="table-responsive">
-      <table class="table mb-0" *ngIf="coins && coins.length">
+      <table class="table mb-0" *ngIf="coinsIndividu$">
         <thead>
           <tr>
             <h2>Total: {{ customerTotal|currency:'EUR':'symbol':'1.2-2'}}</h2>
@@ -28,10 +26,11 @@
             <th></th>
           </tr>
         </thead>
-        <tbody *ngIf="coins">
-          <tr *ngFor="let coin of coins">
-            <td>{{ coin.coinName }}</td>
-            <td>{{coin.price |currency:'EUR':'symbol':'1.2-2'}}</td>
+          <div *ngIf="(coinsIndividu$ | async); else loadingOrError">
+          <tbody *ngIf="coins">
+            <tr *ngFor="let coin of coinsIndividu$ | async">
+            <td>{{ coin.name }}</td>
+            <td>{{coin.currentPrice |currency:'EUR':'symbol':'1.2-2'}}</td>
             <td>{{coin.amount }}</td>
             <td>{{(coin.amount * coin.price)|currency:'EUR':'symbol':'1.2-2'}}</td>
             <td id="let row">
@@ -44,8 +43,28 @@
             </td>
           </tr>
         </tbody>
-
-      </table>
+      </div>
+      <ng-template #loadingOrError>
+        <span *ngIf="errorMessage; else loading">
+          Error loading the recipe list: {{ errorMessage }}. <br/>
+      Please try again later.
+        </span>
+        <ng-template #loading>
+          <mat-spinner></mat-spinner>
+        </ng-template>
+      </ng-template>
+    </table>
+       <!--  <ng-template #loadingOrError>
+          <mat-card class="error" *ngIf="errorMessage; else loading">
+             Error loading the recipe list: {{ errorMessage }}. <br/>
+              Please try again later.
+            <ng-template #loading>
+              <mat-spinner></mat-spinner>
+            </ng-template>
+          </mat-card>
+        </ng-template>  -->
+     <!--  </div> -->
+      
     </div>
-
   </div>
+  
