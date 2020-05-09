@@ -4,6 +4,17 @@
 @import "~font-awesome/css/font-awesome.min.css";
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 
+h1 {
+  padding-left:20px;
+  text-align:center;
+}
+
+/* .card-header{
+  text-align:center;
+} */
+.btn-primary{
+  width:10em;
+}
 div.card-header {
  font-size: large;
 }

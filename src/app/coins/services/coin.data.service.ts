@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { throwError, Observable } from 'rxjs';
-import { ICoin, Coin } from '../coin';
-import { catchError, tap } from 'rxjs/operators';
+import { throwError, Observable, BehaviorSubject } from 'rxjs';
+import { Coin } from '../coin';
+import { catchError, tap, delay } from 'rxjs/operators';
 import {
   HttpClientModule,
   HttpClient,
@@ -10,58 +10,40 @@ import {
 import { map } from 'rxjs/operators';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { CoinListComponent } from '../coin-list/coin-list.component';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CoinsService {
-  getCoinsCustomer() {
-    return this.coinsList;
+  private _coinsIndividu$ = new BehaviorSubject<Coin[]>([]);
+  private _coins:Coin[];
+
+  constructor(private _http: HttpClient) {
+    this.coinsIndividu$.subscribe((coins: Coin[]) => {
+      this._coins = coins;
+      this._coinsIndividu$.next(this._coins);
+    });
   }
 
-  coinsList: Coin[] = [
-    {
-      coinName: 'XRP',
-      price: null,
-      amount: 2000,
-      exchange: '',
-      date: null,
-      total: 0,
-    },
-    {
-      coinName: 'BNB',
-      price: null,
-      amount: 25,
-      date: null,
-      exchange: '',
-      total: 0,
-    },
-    {
-      coinName: 'BTC',
-      price: null,
-      amount: 0.4,
-      date: null,
-      exchange: '',
-      total: 0,
-    },
-  ];
+  get coinsIndividu$(): Observable<Coin[]> {
+    return this._http.get(`${environment.apiUrl}/coins/`).pipe(
+      delay(2000),
+      catchError(this.handleError),
+      //tap(console.log),
+      map((list: any[]): Coin[] => list.map(Coin.fromJSON))
+    );
+  }
 
-  addNewCoin(coin) {
-    for (let item of this.coinsList) {
-      if (coin.coinName === item.coinName) {
-        item.amount += coin.amount;
-        return;
-      }
-    }
-    this.coinsList.push({
-      total: coin.amount * coin.price,
-      coinName: coin.coinName,
-      price: 0,
-      amount: coin.amount,
-      exchange: coin.exchange,
-      date: coin.date,
-    });
-    console.log(this.coinsList);
+  get allCoins$(): Observable<Coin[]> {
+    return this._coinsIndividu$;
+  }
+
+  addNewCoin(coin: Coin) {
+    return this._http
+      .post(`${environment.apiUrl}/coins/`, coin.toJSON())
+      .pipe(catchError(this.handleError), map(Coin.fromJSON))
+      .subscribe();
   }
 
   form: FormGroup = new FormGroup({
@@ -76,7 +58,7 @@ export class CoinsService {
   });
 
   initializeFormGroup() {
- /*    const now = new Date();
+    /*    const now = new Date();
     const today = new Date(
       now.getFullYear(),
       now.getMonth(),
@@ -97,15 +79,7 @@ export class CoinsService {
   private coinUrl = 'apicoins.json';
   result: any;
 
-  constructor(private _http: HttpClient) {}
-  /*   getCoins(): Observable<ICoin[]> {
-    return this.http.get<ICoin[]>(this.coinUrl).pipe(
-      tap((data) => console.log("All: " + JSON.stringify(data))),
-      catchError(this.handleError)
-    );
-} */
-
-  getPrice(coinName: string) {
+  getLiveCoinPrices(coinName: string) {
     return this._http
       .get(
         `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${coinName}&tsyms=EUR`
@@ -113,11 +87,23 @@ export class CoinsService {
       .pipe(map((result) => (this.result = result || [])));
   }
 
-  getCoins() {
-    return this._http.get('https://api.coincap.io/v2/assets');
+  getCoinSymbols() {
+    return this._http
+      .get('https://api.coincap.io/v2/assets')
+      .pipe(map((result) => Object.values(result)[0]));
   }
 
-  private handleError(err: HttpErrorResponse) {
+  deleteCoin(coin: Coin) {
+    return this._http
+      .delete(`${environment.apiUrl}/coins/${coin.id}`)
+      .pipe(tap(console.log), catchError(this.handleError))
+      .subscribe(() => {
+        this._coins = this._coins.filter((c) => c.id != coin.id);
+        this._coinsIndividu$.next(this._coins);
+      });
+  }
+
+  private handleError(err: HttpErrorResponse): Observable<never> {
     // in a  real world app, we may send the servver to some remote logging infrastructure
     // instead of just logging it to the console
     let errorMessage = '';

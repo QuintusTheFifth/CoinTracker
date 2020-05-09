@@ -3,9 +3,16 @@
   <span class="fill-remaining-space"></span>
   <button class="btn-dialog-close" mat-stroked-button (click)="onClose()" tabIndex="-1"><mat-icon>clear</mat-icon></button>
 </mat-toolbar> -->
-<form [formGroup]="service.form" class="normal-form" (submit)="onSubmit()">
+<form [formGroup]="coinService.form" class="normal-form" (submit)="onSubmit()">
   <mat-grid-list cols="1" rowHeight="350px">
     <div class="controls-container">
+      <div class="col-md-4">
+      </div>
+      <mat-form-field>
+        <input matInput (keyup)='filterCoin$.next($event.target.value)'
+        type='text'
+        placeholder='filter coin name...'>
+      </mat-form-field>
       <mat-form-field>
         <input formControlName="coinName" type="text" matInput placeholder="Coin" aria-label="coin name"
         required #spy>
@@ -30,7 +37,7 @@
         </mat-select>
       </mat-form-field>
       <div class="button-row">
-        <button mat-raised-button color="primary" type="submit" [disabled]="!service.form.valid">Add coin</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!coinService.form.valid">Add coin</button>
         <button mat-raised-button color="warn" (click)="onClear()">Clear</button>
       </div>
     </div>

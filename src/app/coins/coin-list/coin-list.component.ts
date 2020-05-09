@@ -1,11 +1,13 @@
-import { Component, OnInit, Output } from '@angular/core';
+import { Component, OnInit, Output, ɵEMPTY_MAP } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { ICoin, Coin } from '../coin';
-import { ArgumentOutOfRangeError } from 'rxjs';
+import { Coin } from '../coin';
+import { ArgumentOutOfRangeError, Observable, EMPTY } from 'rxjs';
 import { AddCoinComponent } from '../add-coin/add-coin.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { CoinsService } from '../services/coins.service';
+import { CoinsService } from '../services/coin.data.service';
+import { catchError } from 'rxjs/operators';
+import { CoinObject } from '../coinObject.model';
 
 @Component({
   templateUrl: './coin-list.component.html',
@@ -17,64 +19,83 @@ export class CoinListComponent implements OnInit {
   imageMargin = 2;
   errorMessage = '';
 
-  customerTotal:number=0
+  private _coinsIndividu: Coin[];
 
-  constructor(
-    private coinService: CoinsService,
-    private dialog: MatDialog
-  ) {}
+  private _fetchCoins$:Observable<Coin[]>;
 
-  coins :Coin[]=this.coinService.getCoinsCustomer();
+  customerTotal: number = 0;
 
-  objectKeys = Object.keys;
-  cryptos: any;
-
-  filteredCoins: ICoin[];
- 
-  ngOnInit(): void {
-
-    this.getPrijzen();
-   
-    console.log(this.coins);
-
-    this.filteredCoins = this.coins;
+  constructor(private _coinService: CoinsService, private dialog: MatDialog) {
   }
 
-  getPrijzen(){
-    for (var coin of this.coins) {
-      this.coinService.getPrice(coin.coinName).subscribe((res) => {
-        console.log(Object.values(res)[0].EUR);
-        console.log(Object.keys(res)[0]);
 
+  // dit gebruiken?
+  get coinsIndividu$(): Observable<Coin[]>{
+   return this._fetchCoins$;
+  }
+
+ /*  get coins2$(): Observable<Coin[]> {
+    return this.coinService.getCoinsCustomer2$;
+  } */
+
+
+  coinNames: any;
+
+
+  newCoins: CoinObject[]=[]
+
+  ngOnInit(): void {
+    this._fetchCoins$=this._coinService.allCoins$.pipe(
+      catchError(err=>{
+        this.errorMessage=err;
+        return EMPTY;
+      })
+    )
+    this.coinsIndividu$.subscribe((val)=>{
+     // console.log(Object.keys(val[0]));
+     //this.coins=val.map(a=> new Coin(a._name,a._amount,a._priceBought,a._dateBought,a._exchange));
+     this.newCoins=val.map(a=> new CoinObject(a._name,a._amount));
+     console.log(this.newCoins);
+     console.log(this.coinNames);
+     
+    });
+
+   this.geefPrijzen();
+  
+  }
+
+  geefPrijzen() {
+    console.log("?")
+    this.newCoins.forEach((coin)=> {
+      console.log("???")
+      console.log(coin.amount);
+      this._coinService.getLiveCoinPrices(name).subscribe((res) => {
 
         // vind de gepaste coin en pas prijs aan
-        var currentCoin=this.coins.find(
-          (x) => x.coinName === Object.keys(res)[0]
-        )
-      currentCoin.price = Object.values(res)[0].EUR;
+        var currentCoin = this.coinNames.find(
+          (x) => x === Object.keys(res)[0]
+        );
+        currentCoin.currentPrice = Object.values(res)[0].EUR;
 
-      // bereken totaal
-      this.customerTotal+=(currentCoin.price*currentCoin.amount);
+        // bereken totaal
+        this.customerTotal += currentCoin.price * currentCoin.amount;
       });
-    }
+    });
   }
+
   addNewCoin(newCoin: Coin) {
-    this.coins.push(newCoin);
-    this.getPrijzen();
-    console.log(this.coins);
-    this.customerTotal+=(newCoin.amount*newCoin.price);
-    console.log(this.customerTotal);
+    this.newCoins.push(newCoin);
+    this.geefPrijzen();
+    this.customerTotal += newCoin.amount * newCoin.price;
   }
 
-  onCreate(){
-    this.coinService.initializeFormGroup();
+  onCreate() {
+    this._coinService.initializeFormGroup();
     const dialogConfig = new MatDialogConfig();
-    dialogConfig.autoFocus=true;
-    dialogConfig.width="40%";
-    this.dialog.open(AddCoinComponent,dialogConfig);
+    dialogConfig.autoFocus = true;
+    dialogConfig.width = '40%';
+    this.dialog.open(AddCoinComponent, dialogConfig);
   }
 
-  onEdit(coin){
-    
-  }
+  onEdit(coin) {}
 }
