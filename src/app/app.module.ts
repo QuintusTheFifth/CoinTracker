@@ -10,7 +10,6 @@ import { CoinModule } from './coins/coin.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { UserModule } from './user/user.module';
 
-
 @NgModule({
   declarations: [
     AppComponent,
