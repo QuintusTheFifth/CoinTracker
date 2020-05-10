@@ -28,7 +28,7 @@ export class CoinsService {
 
   get coinsIndividu$(): Observable<Coin[]> {
     return this._http.get(`${environment.apiUrl}/coins/`).pipe(
-      delay(2000),
+     // delay(2000),
       catchError(this.handleError),
       //tap(console.log),
       map((list: any[]): Coin[] => list.map(Coin.fromJSON))
