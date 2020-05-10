@@ -1,3 +1,4 @@
+<div class="content">
 <h1 class="md-display-4">Track your cryptocurrency holdings!</h1>
 <div class="search-div">
   <button mat-raised-button (click)="onCreate()">
@@ -28,7 +29,8 @@
 
     <!-- Total Column -->
     <ng-container matColumnDef="total">
-      <mat-header-cell *matHeaderCellDef> Total </mat-header-cell>
+      <mat-header-cell *matHeaderCellDef> Total
+      </mat-header-cell>
       <mat-cell *matCellDef="let element">
         {{element.amount * element.currentPrice
       |currency:'EUR':'symbol':'1.2-2'}}
@@ -38,13 +40,13 @@
     <!-- Buttons -->
     <ng-container matColumnDef="buttons">
       <mat-header-cell *matHeaderCellDef>
-        <h1>=
+        <h2>
           {{ customerTotal|currency:'EUR':'symbol':'1.2-2'}}
-        </h1>
+        </h2>
       </mat-header-cell>
       <mat-cell *matCellDef="let row">
         <button mat-icon-button>
-          <mat-icon>launch</mat-icon>
+          <mat-icon>edit</mat-icon>
         </button>
         <button mat-icon-button color="warn">
           <mat-icon>delete_outline</mat-icon>
@@ -68,3 +70,4 @@
   </ng-template>
 </ng-template>
 <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="10" showFirstLastButtons></mat-paginator>
+</div>
