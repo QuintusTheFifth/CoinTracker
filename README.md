@@ -1,4 +1,5 @@
 # CoinTracker
+Cryptocurrency portfolio die je coins bijhoudt, alsook de prijzen en totaal bedrag.
 
 Run de API, nadien de applicatie.
 
