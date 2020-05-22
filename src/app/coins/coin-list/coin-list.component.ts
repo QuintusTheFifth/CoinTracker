@@ -13,6 +13,7 @@ import { AddCoinComponent } from '../add-coin/add-coin.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { CoinsService } from '../services/coin.data.service';
 import { catchError, delay, findIndex, filter } from 'rxjs/operators';
+import { NotificationService } from '../services/notification.service';
 
 export interface PeriodicElement {
   symbol: string;
@@ -48,7 +49,8 @@ export class CoinListComponent implements OnInit {
   private _fetchCoins$: Observable<Coin[]>;
   filteredCoins$: Observable<Coin[]>;
 
-  constructor(private _coinService: CoinsService, private dialog: MatDialog) {}
+  constructor(private _coinService: CoinsService, private dialog: MatDialog,
+    private notificationService: NotificationService) {}
 
   get coinsIndividu$(): Observable<Coin[]> {
     return this._fetchCoins$;
@@ -113,7 +115,7 @@ export class CoinListComponent implements OnInit {
   onDelete(coin) {
     if (confirm('Are you sure you want to delete this coin?')) {
       this._coinService.deleteCoin(coin);
-      //this.notificationService.warn('! Deleted successfully');
+      this.notificationService.warn('Removed successfully!');
     }
   }
 }

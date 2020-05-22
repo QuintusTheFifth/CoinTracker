@@ -18,7 +18,7 @@ import { HttpClientModule } from '@angular/common/http';
 import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-
+import{MatSnackBarModule}from '@angular/material/snack-bar';
 
 
 
@@ -48,7 +48,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatChipsModule,
     HttpClientModule,
     MatTableModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatSnackBarModule
   ],
   entryComponents:[AddCoinComponent]
 })

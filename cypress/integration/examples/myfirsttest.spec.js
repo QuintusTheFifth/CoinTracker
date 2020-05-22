@@ -1,8 +1,11 @@
 
 describe('My First Test', function(){
+  it('Does not do so much!',function(){
+    expect(true).to.equal(true);
+  })
     it('our app runs', function(){
         cy.visit('');
-        cy.get('button').should('be.disabled');
+        cy.get('[data-cy=add]').should('be.enabled');
     })
     it('mock coin get', function(){
         cy.server();
@@ -13,7 +16,7 @@ describe('My First Test', function(){
     response: 'fixture:coins.json'
           });
           cy.visit('');
-  cy.get('[data-cy=coinCard]').should('have.length', 3);
+  cy.get('[data-cy=coinCard]').should('have', 3);
     })
     it('on error should show error message', function(){
         cy.server();

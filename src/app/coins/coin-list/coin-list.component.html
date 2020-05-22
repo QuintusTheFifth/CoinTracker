@@ -1,12 +1,12 @@
 <div class="content">
 <h1 class="md-display-4">Track your cryptocurrency holdings!</h1>
 <div class="search-div">
-  <button mat-raised-button (click)="onCreate()">
+  <button mat-raised-button (click)="onCreate()" data-cy=add>
     <mat-icon>add</mat-icon>Add a coin
   </button>
 </div>
 <div *ngIf="(filteredCoins$); else loadingOrError">
-  <mat-table [dataSource]="filteredCoins$" class="mat-elevation-z8">
+  <mat-table [dataSource]="filteredCoins$" data-cy="coinCard" class="mat-elevation-z8">
     <!-- Symbol Column -->
     <ng-container matColumnDef="symbol">
       <mat-header-cell *matHeaderCellDef> Symbol </mat-header-cell>
@@ -61,11 +61,11 @@
   <mat-footer-row *matFooterRowDef="['noData']" [ngClass]="{'hide':!(filteredCoins$!=null && filteredCoins$.length==0)}"></mat-footer-row> -->
   </mat-table>
 </div>
-<ng-template #loadingOrError>
-  <span *ngIf="errorMessage; else loading">
+<ng-template #loadingOrError >
+  <mat-card class="error" *ngIf="errorMessage; else loading" data-cy='appError'>
     Error loading the recipe list: {{ errorMessage }}. <br />
     Please try again later.
-  </span>
+  </mat-card>
   <ng-template #loading>
     <mat-spinner></mat-spinner>
   </ng-template>
