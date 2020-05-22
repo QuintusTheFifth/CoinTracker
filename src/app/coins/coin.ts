@@ -6,24 +6,21 @@ export interface CoinJson {
   priceBought:number;
   exchange:string;
   date:string;
-  customerId:number;
 }
 
 export class Coin{
 
   private _id:number;
-  private _customerId: number;
   public currentPrice:number;
 
   constructor(public _name: string,
      public _amount: number,
      public _priceBought:number,
-     public _dateBought:Date,
+     public _dateBought= new Date(),
      public _exchange:string) {
    }
 
   static fromJSON(json: CoinJson): Coin{
-
     const coin = new Coin(
       json.name,
       json.amount,
@@ -33,7 +30,6 @@ export class Coin{
     );
       coin._id=json.id;
     return coin;
-    
   }
 
   toJSON(): CoinJson {
@@ -41,11 +37,11 @@ export class Coin{
      name:this.name,
      amount:this.amount,
      priceBought:this.priceBought,
-     exchange:this.exchange,
      date:this.dateBought.toString(),
-     customerId:this.customerId
+     exchange:this.exchange,
     };
   }
+
   get id(): number{
     return this._id;
   }
@@ -68,10 +64,6 @@ export class Coin{
 
   get dateBought():Date{
     return this._dateBought;
-  }
-
-  get customerId():number{
-    return this._customerId;
   }
 
   get price():number{

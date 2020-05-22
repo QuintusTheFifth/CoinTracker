@@ -7,6 +7,7 @@ import {
   Observable,
   EMPTY,
   BehaviorSubject,
+  of,
 } from 'rxjs';
 import { AddCoinComponent } from '../add-coin/add-coin.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -38,10 +39,14 @@ export class CoinListComponent implements OnInit {
     'buttons',
   ];
 
-  private _fetchCoins$: Observable<Coin[]>;
-  filteredCoins$: Coin[];
+  getTotal() {
+    return this.coins
+      .map((t) => t._amount * t.currentPrice)
+      .reduce((acc, value) => acc + value, 0);
+  }
 
-  customerTotal: number = 0;
+  private _fetchCoins$: Observable<Coin[]>;
+  filteredCoins$: Observable<Coin[]>;
 
   constructor(private _coinService: CoinsService, private dialog: MatDialog) {}
 
@@ -51,8 +56,6 @@ export class CoinListComponent implements OnInit {
 
   coins: Coin[] = [];
 
-  coinNames: any;
-
   ngOnInit(): void {
     this._fetchCoins$ = this._coinService.allCoins$.pipe(
       catchError((err) => {
@@ -61,20 +64,17 @@ export class CoinListComponent implements OnInit {
       })
     );
 
-    console.log(this.coinsIndividu$);
-
+    console.log(this._coinService.getCoinSymbols());
+    
     this.geefPrijzen();
   }
 
   geefPrijzen() {
     this.coinsIndividu$.subscribe((coins) => {
-      this.coins = coins;
       console.log(coins);
+      this.coins = coins;
       for (var coin of coins) {
-        console.log(coin._name);
         this._coinService.getLiveCoinPrices(coin._name).subscribe((res) => {
-          console.log(Object.keys(res)[0]);
-
           // vind de gepaste coin en pas prijs aan
           var currentCoin = coins.find((x) => x._name === Object.keys(res)[0]);
           currentCoin.currentPrice = Object.values(res)[0].EUR;
@@ -84,22 +84,13 @@ export class CoinListComponent implements OnInit {
               x._amount += currentCoin._amount;
               var index = coins.findIndex((x) => x.name === currentCoin.name);
               coins.splice(index, 1);
-              this.filteredCoins$ = coins;
             }
           });
 
-          // bereken totaal
-          this.customerTotal += (currentCoin.price * currentCoin.amount);
+          this.filteredCoins$ = of(coins);
         });
       }
-      console.log(this.coins);
     });
-  }
-
-  addNewCoin(newCoin: Coin) {
-    this.coins.push(newCoin);
-    this.geefPrijzen();
-    this.customerTotal += newCoin.amount * newCoin.price;
   }
 
   onCreate() {
@@ -110,5 +101,19 @@ export class CoinListComponent implements OnInit {
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
 
-  onEdit(coin) {}
+  onEdit(row) {
+    console.log(row);
+    this._coinService.populateForm(row);
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.autoFocus = true;
+    dialogConfig.width = '40%';
+    this.dialog.open(AddCoinComponent, dialogConfig);
+  }
+
+  onDelete(coin) {
+    if (confirm('Are you sure you want to delete this coin?')) {
+      this._coinService.deleteCoin(coin);
+      //this.notificationService.warn('! Deleted successfully');
+    }
+  }
 }

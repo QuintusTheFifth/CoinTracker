@@ -6,3 +6,13 @@
   .example-container > * {
     width: 100%;
   }
+
+  .example-form {
+    min-width: 100px;
+    max-width: 100px;
+    width: 20%;
+  }
+  
+  .example-full-width {
+    width: 20%;
+  }

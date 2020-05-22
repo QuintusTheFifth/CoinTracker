@@ -41,14 +41,15 @@
     <ng-container matColumnDef="buttons">
       <mat-header-cell *matHeaderCellDef>
         <h2>
-          {{ customerTotal|currency:'EUR':'symbol':'1.2-2'}}
+          
+          {{ getTotal()|currency:'EUR':'symbol':'1.2-2'}}
         </h2>
       </mat-header-cell>
       <mat-cell *matCellDef="let row">
-        <button mat-icon-button>
+        <button mat-icon-button (click)="onEdit(row)">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button color="warn">
+        <button mat-icon-button color="warn" (click)="onDelete(row)">
           <mat-icon>delete_outline</mat-icon>
         </button>
       </mat-cell>

@@ -7,12 +7,18 @@ import {
   FormBuilder,
   FormArray,
 } from '@angular/forms';
+
 import { Subject } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 
-import { EMPTY } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { CoinsService } from '../services/coin.data.service';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  map,
+  startWith,
+  catchError,
+} from 'rxjs/operators';
 
 @Component({
   selector: 'app-add-coin',
@@ -22,67 +28,95 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 export class AddCoinComponent implements OnInit {
   coinSubmit: Coin;
 
+  myControl = new FormControl();
+  options: string[] = [
+    'BTC',
+    'XRP',
+    'USDT',
+    'BCH',
+    'TRX',
+    'LTC',
+    'BNB',
+    'XLM',
+    'ETH',
+  ];
+  filteredOptions: Observable<string[]>;
+
   public filterCoinName: string;
   public filterCoin$ = new Subject<string>();
 
   PageTitle: string = 'Add a holding';
   public coin: FormGroup;
 
+  public errorMessage: string = '';
+
+  public confirmationMessage: string = '';
+
   constructor(
     public coinService: CoinsService,
-    public dialogRef: MatDialogRef<AddCoinComponent>
+    public dialogRef: MatDialogRef<AddCoinComponent>,
+    private fb: FormBuilder
   ) {
     this.filterCoin$
-    .pipe(distinctUntilChanged(),
-    map(val=>val.toLowerCase())
-    )
-    .subscribe(
-      val=>this.filterCoinName = val);
+      .pipe(
+        distinctUntilChanged(),
+        map((val) => val.toLowerCase())
+      )
+      .subscribe((val) => (this.filterCoinName = val));
+
+    this.coin = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2)]],
+    });
   }
 
-  /* _listFilter = '';
-  get listFilter(): string {
-    return this._listFilter;
-  } */
-
-  /* set listFilter(value: string) {
-    this._listFilter = value;
-    this.filteredCoins = this.listFilter
-      ? this.performFilter(this.listFilter)
-      : this.coins;
-  } */
-
- /*  filteredCoins: ICoin[]; */
   coins: Coin[];
 
-  coinSymbols: any[]= [];
-
-  /* performFilter(filterBy: string): ICoin[] {
-    filterBy = filterBy.toLocaleLowerCase();
-    return this.coins.filter(
-      (coin: ICoin) =>
-        coin.coinName.toLocaleLowerCase().indexOf(filterBy) !== -1
-    );
-  } */
+  coinSymbols: any[] = [];
 
   ngOnInit(): void {
-    this.getCoinSymbols();
+    this.filteredOptions = this.myControl.valueChanges.pipe(
+      startWith(''),
+      map((value) => this._filter(value))
+    );
+  }
+  private _filter(value: string): string[] {
+    const filterValue = value.toLowerCase();
+
+    return this.options.filter(
+      (option) => option.toLowerCase().indexOf(filterValue) === 0
+    );
   }
 
-  getCoinSymbols(){
+  getCoinSymbols() {
     this.coinService.getCoinSymbols().subscribe((res) => {
-      Object.keys(res).forEach(key => {
-          console.log(res[key].symbol);
-          this.coinSymbols.push((res[key].symbol));
+      Object.keys(res).forEach((key) => {
+        console.log(res[key].symbol);
+        this.coinSymbols.push(res[key].symbol);
+      });
     });
-
-     
-    })
   }
 
   onSubmit() {
     if (this.coinService.form.valid) {
-      this.coinService.addNewCoin(this.coinService.form.value);
+      this.coinService
+        .addNewCoin(
+          new Coin(
+            this.coinService.form.value.coinName,
+            this.coinService.form.value.amount,
+            this.coinService.form.value.priceBought,
+            this.coinService.form.value.date,
+            this.coinService.form.value.exchange
+          )
+        )
+        .pipe(
+          catchError((err) => {
+            this.errorMessage = err;
+            return EMPTY;
+          })
+        )
+        .subscribe((c: Coin) => {
+          this.confirmationMessage = `a recipe for ${c._name} was successfully added`;
+        });
       this.coinService.form.reset();
       this.coinService.initializeFormGroup();
       this.onClose();
