@@ -81,16 +81,9 @@ export class CoinsService {
 
   initializeFormGroup() {
     console.log(this.getCoinSymbols());
-    /*  const now = new Date();
-    const today = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      now.getHours()
-    ); */
     this.form.setValue({
       coinName: 'BTC',
-      amount: 0.03,
+      amount: 1,
       priceBought: 1,
       exchange: '',
       date: '',

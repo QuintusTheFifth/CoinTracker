@@ -19,6 +19,7 @@ import {
   startWith,
   catchError,
 } from 'rxjs/operators';
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-add-coin',
@@ -55,7 +56,7 @@ export class AddCoinComponent implements OnInit {
   constructor(
     public coinService: CoinsService,
     public dialogRef: MatDialogRef<AddCoinComponent>,
-    private fb: FormBuilder
+    private fb: FormBuilder,  private notificationService: NotificationService
   ) {
     this.filterCoin$
       .pipe(
@@ -119,7 +120,10 @@ export class AddCoinComponent implements OnInit {
         });
       this.coinService.form.reset();
       this.coinService.initializeFormGroup();
+      this.notificationService.success(':: Added successfully');
+      window.location.reload();
       this.onClose();
+
     }
   }
 

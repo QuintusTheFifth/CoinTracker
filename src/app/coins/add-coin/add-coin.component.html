@@ -12,8 +12,8 @@
                matInput
                required #spy
                [formControl]="myControl"
-               formControlName="coinName"
                [matAutocomplete]="auto"
+               data-cy="filterInput"
               >
         <mat-autocomplete  #auto="matAutocomplete" isOpen="false">
           <mat-option *ngFor="let option of filteredOptions | async" placeholder="Coin" [value]="option">
@@ -21,6 +21,10 @@
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
+      <!-- <mat-form-field>
+        <input formControlName="coinName" type="text" matInput placeholder="Coin" aria-label="coin name"
+        required #spy>
+      </mat-form-field> -->
       <mat-form-field>
         <input formControlName="amount" type="number" matInput placeholder="Amount" aria-label="amount"
         required #spy>

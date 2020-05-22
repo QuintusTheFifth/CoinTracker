@@ -35,8 +35,8 @@ export class Coin{
   toJSON(): CoinJson {
     return <CoinJson>{
      name:this.name,
-     amount:this.amount,
      priceBought:this.priceBought,
+     amount:this.amount,
      date:this.dateBought.toString(),
      exchange:this.exchange,
     };

@@ -37,12 +37,6 @@ const appRoutes: Routes=[
     CoinModule,
     UserModule,
     LayoutModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatSidenavModule,
-    MatIconModule,
-    MatListModule,
-    MatAutocompleteModule
   ],
   providers: [httpInterceptorProviders],
   bootstrap: [AppComponent],
