@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { throwError, Observable, BehaviorSubject } from 'rxjs';
 import { Coin } from '../coin';
-import { catchError, tap, delay } from 'rxjs/operators';
+import { catchError, tap, delay, switchMap } from 'rxjs/operators';
 import {
   HttpClientModule,
   HttpClient,
   HttpErrorResponse,
+  HttpParams,
 } from '@angular/common/http';
+import * as _ from 'lodash';
 import { map } from 'rxjs/operators';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { CoinListComponent } from '../coin-list/coin-list.component';
@@ -16,8 +18,18 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class CoinsService {
+
+  populateForm(coin) {
+    this.form.setValue({
+      coinName: coin._name,
+      amount: coin._amount,
+      priceBought: coin._priceBought,
+      exchange: coin._exchange,
+      date: coin._dateBought,
+    });
+  }
   private _coinsIndividu$ = new BehaviorSubject<Coin[]>([]);
-  private _coins:Coin[];
+  private _coins: Coin[];
 
   constructor(private _http: HttpClient) {
     this.coinsIndividu$.subscribe((coins: Coin[]) => {
@@ -28,7 +40,7 @@ export class CoinsService {
 
   get coinsIndividu$(): Observable<Coin[]> {
     return this._http.get(`${environment.apiUrl}/coins/`).pipe(
-     // delay(2000),
+      // delay(2000),
       catchError(this.handleError),
       //tap(console.log),
       map((list: any[]): Coin[] => list.map(Coin.fromJSON))
@@ -40,10 +52,20 @@ export class CoinsService {
   }
 
   addNewCoin(coin: Coin) {
-    return this._http
-      .post(`${environment.apiUrl}/coins/`, coin.toJSON())
-      .pipe(catchError(this.handleError), map(Coin.fromJSON))
-      .subscribe();
+    console.log(coin);
+   return this._http
+   .post(`${environment.apiUrl}/coins/`, coin.toJSON())
+   .pipe(catchError(this.handleError), map(Coin.fromJSON))
+   .pipe(
+    // temporary fix, while we use the behaviorsubject as a cache stream
+    catchError((err) => {
+      return throwError(err);
+    }),
+    tap((c: Coin) => {
+      console.log(c);
+    })
+  );
+   
   }
 
   form: FormGroup = new FormGroup({
@@ -51,14 +73,15 @@ export class CoinsService {
       Validators.required,
       Validators.minLength(2),
     ]),
-    priceBought: new FormControl(0),
     amount: new FormControl(0, [Validators.required, Validators.min(0.01)]),
+    priceBought: new FormControl(0),
     exchange: new FormControl(''),
     date: new FormControl(''),
   });
 
   initializeFormGroup() {
-    /*    const now = new Date();
+    console.log(this.getCoinSymbols());
+    /*  const now = new Date();
     const today = new Date(
       now.getFullYear(),
       now.getMonth(),
@@ -66,17 +89,14 @@ export class CoinsService {
       now.getHours()
     ); */
     this.form.setValue({
-      coinName: 'XRP',
-      priceBought: 50,
-      amount: 200,
+      coinName: 'BTC',
+      amount: 0.03,
+      priceBought: 1,
       exchange: '',
       date: '',
     });
   }
 
-  private API_KEY: string = 'e1d125c0-d5ed-4165-85eb-ddc177c4f134';
-  private url: 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map';
-  private coinUrl = 'apicoins.json';
   result: any;
 
   getLiveCoinPrices(coinName: string) {
@@ -90,7 +110,7 @@ export class CoinsService {
   getCoinSymbols() {
     return this._http
       .get('https://api.coincap.io/v2/assets')
-      .pipe(map((result) => Object.values(result)[0]));
+      .pipe(map((result) => Object.values(result)[0]))
   }
 
   deleteCoin(coin: Coin) {

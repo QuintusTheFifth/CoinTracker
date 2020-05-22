@@ -17,6 +17,8 @@ import 'hammerjs';
 import { HttpClientModule } from '@angular/common/http';
 import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+
 
 
 
@@ -46,6 +48,7 @@ import {MatPaginatorModule} from '@angular/material/paginator';
     MatChipsModule,
     HttpClientModule,
     MatTableModule,
+    MatAutocompleteModule
   ],
   entryComponents:[AddCoinComponent]
 })

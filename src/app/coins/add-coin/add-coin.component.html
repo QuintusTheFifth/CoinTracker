@@ -1,29 +1,33 @@
-<!-- <mat-toolbar>
-  <span>{{service.form.controls['$key'].value?"Modify Employee":"New Employee"}}</span>
-  <span class="fill-remaining-space"></span>
-  <button class="btn-dialog-close" mat-stroked-button (click)="onClose()" tabIndex="-1"><mat-icon>clear</mat-icon></button>
-</mat-toolbar> -->
 <form [formGroup]="coinService.form" class="normal-form" (submit)="onSubmit()">
   <mat-grid-list cols="1" rowHeight="350px">
     <div class="controls-container">
       <div class="col-md-4">
       </div>
-      <mat-form-field>
-        <input matInput (keyup)='filterCoin$.next($event.target.value)'
-        type='text'
-        placeholder='filter coin name...'>
-      </mat-form-field>
-      <mat-form-field>
-        <input formControlName="coinName" type="text" matInput placeholder="Coin" aria-label="coin name"
-        required #spy>
-      </mat-form-field>
-      <mat-form-field>
-        <input formControlName="priceBought" type="number" matInput placeholder="Price Bought" aria-label="price bought">
+      <mat-form-field class="example-full-width">
+        <input 
+        formControlName="coinName"
+        type="text"
+               placeholder="Coin"
+               aria-label="coin name"
+               matInput
+               required #spy
+               [formControl]="myControl"
+               formControlName="coinName"
+               [matAutocomplete]="auto"
+              >
+        <mat-autocomplete  #auto="matAutocomplete" isOpen="false">
+          <mat-option *ngFor="let option of filteredOptions | async" placeholder="Coin" [value]="option">
+            {{option}}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
       <mat-form-field>
         <input formControlName="amount" type="number" matInput placeholder="Amount" aria-label="amount"
         required #spy>
         <mat-error>More than 0 units required</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <input formControlName="priceBought" type="number" matInput placeholder="Price Bought" aria-label="price bought">
       </mat-form-field>
       <mat-form-field>
         <input formControlName="date" type="date" matInput placeholder="Date">
@@ -33,11 +37,12 @@
           <mat-option>None</mat-option>
           <mat-option value="Binance">Binance</mat-option>
           <mat-option value="UpBit">UpBit</mat-option>
-          <mat-option value="Bittrex">NotBittrex</mat-option>
+          <mat-option value="Bittrex">Bittrex</mat-option>
         </mat-select>
       </mat-form-field>
       <div class="button-row">
-        <button mat-raised-button color="primary" type="submit" [disabled]="!coinService.form.valid">Add coin</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!coinService.form.valid">
+          Save</button>
         <button mat-raised-button color="warn" (click)="onClear()">Clear</button>
       </div>
     </div>

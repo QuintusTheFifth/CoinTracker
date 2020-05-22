@@ -1,6 +1,13 @@
 <nav class='navbar navbar-expand navbar-light bg-light'>
-    <a class='navbar-brand'>{{pageTitle}}</a>
+    <ul class='nav nav-pills'>
+      <li><a class='navbar-brand'[routerLink]="['/coin-list']">{{pageTitle}}</a></li>
+      <li><a class='nav-link' [routerLink]="['/login']">login</a></li>
+      <li><a class='nav-link'[routerLink]="['/register']">register</a></li>
+    </ul>
   </nav>
   <div class='container'>
   <router-outlet></router-outlet>
   </div>
+ <!-- <app-main-nav>
+  <router-outlet></router-outlet>
+</app-main-nav> -->
