@@ -1,5 +1,5 @@
 # CoinTracker
-Cryptocurrency portfolio die je coins bijhoudt, alsook de prijzen en totaal bedrag.
+Cryptocurrency portfolio die je coins bijhoudt, alsook de prijzen en totale waarde.
 
 https://cointracker-26919.web.app
 
