@@ -1,7 +1,7 @@
 # CoinTracker
 Cryptocurrency portfolio die je coins bijhoudt, alsook de prijzen en totaal bedrag.
 
-Run de API, nadien de applicatie.
+https://cointracker-26919.web.app
 
 ## Development server
 
