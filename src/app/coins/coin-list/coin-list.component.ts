@@ -1,16 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 
-import { Observable, Subject } from 'rxjs';
 import { AddCoinComponent } from '../add-coin/add-coin.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { CoinsService } from '../services/coin.data.service';
-import { NotificationService } from '../services/notification.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { async } from 'rxjs/internal/scheduler/async';
-import { take, first, delay, tap } from 'rxjs/operators';
-import { MatPaginator } from '@angular/material/paginator';
 
 export interface PeriodicElement {
   symbol: string;
@@ -71,15 +66,11 @@ export class CoinListComponent implements OnInit {
   constructor(
     public _coinService: CoinsService,
     private dialog: MatDialog,
-    private notificationService: NotificationService,
     private router: Router
   ) {
     this._coinService.currentValuta.subscribe(
       (valuta) => (this.valuta = valuta)
     );
-    
-
-    
   }
 
   price: any;
@@ -121,13 +112,6 @@ export class CoinListComponent implements OnInit {
       total = amount * price;
       eindTotal += total;
     }
-
-    //
-    //     ((this.geefCoinPrice("BTC", this.prices) -
-    //     this.geefOldCoinPrice("BTC", this.prices)) /
-    //     this.geefOldCoinPrice("BTC", this.prices) )*
-    //   100
-    // )
 
     return eindTotal;
   }
@@ -216,10 +200,8 @@ export class CoinListComponent implements OnInit {
       oldPrice: 0,
       changeBool: 1,
     };
-    
 
     this._coinService.dailyChange(coinSymbol).subscribe((val: any) => {
-      
       coin.oldPrice = val.Data['Data'][0].open;
     });
 
@@ -262,7 +244,6 @@ export class CoinListComponent implements OnInit {
   }
 
   onEdit(coinSymbol) {
-    
     this._coinService.changeCoinSymbol(coinSymbol);
     this.router.navigateByUrl('edit-coin');
   }
