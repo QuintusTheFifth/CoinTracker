@@ -14,6 +14,27 @@ h2 {
   text-align:center;
 }
 
+.infoButton{
+  position:absolute;
+    right: 20px;
+    list-style:none
+}
+
+
+.mat-header-cell {
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mat-cell {
+  text-align: center;
+  justify-content:center;
+}
+
+.inline{
+  flex-direction: row;
+}
+
 /* .card-header{
   text-align:center;
 } */

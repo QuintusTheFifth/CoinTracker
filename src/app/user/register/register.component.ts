@@ -70,7 +70,8 @@ export class RegisterComponent implements OnInit {
       email: [
         '',
         [Validators.required, Validators.email],
-        serverSideValidateUsername(this.authService.checkUserNameAvailability),
+        serverSideValidateUsername(this.authService.checkUserNameAvailability)
+        ,
       ],
       passwordGroup: this.fb.group(
         {
@@ -114,6 +115,7 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
+    
     this.authService
       .register(
         this.user.value.firstname,
@@ -128,14 +130,14 @@ export class RegisterComponent implements OnInit {
               this.router.navigateByUrl(this.authService.redirectUrl);
               this.authService.redirectUrl = undefined;
             } else {
-              this.router.navigate(['/coin-list']);
+              this.router.navigate(['coin-list']);
             }
           } else {
             this.errorMessage = `Could not login`;
           }
         },
         (err: HttpErrorResponse) => {
-          console.log(err);
+          
           if (err.error instanceof Error) {
             this.errorMessage = `Error while trying to login user ${this.user.value.email}: ${err.error.message}`;
           } else {

@@ -3,6 +3,32 @@ table {
   width: 100%;
 }
 
+
+.positive {
+  color: green;
+}
+
+.negative {
+  color: red;
+}
+
+.valuta{
+  position:relative;
+  left: 520px;
+}
+
+
+.mat-column-graph {
+   /* flex: 0 0 20% !important;
+  width: 10% !important;
+  height:50% !important; */
+  flex: 0 0 12% !important;
+}
+
+th.mat-sort-header-sorted {
+  color: black;
+}
+
   .pulsating-circle {
     display:inline-block;
     position: relative;
