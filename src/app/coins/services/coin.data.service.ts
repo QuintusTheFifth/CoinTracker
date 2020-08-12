@@ -13,14 +13,90 @@ import { map } from 'rxjs/operators';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { CoinListComponent } from '../coin-list/coin-list.component';
 import { environment } from 'src/environments/environment';
+import { AuthenticationService } from 'src/app/user/authentication.service';
+
+interface validCoin {
+  icon: string;
+  symbol: string;
+  name: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class CoinsService {
+  transactionsList;
+  setCoins(allCoins: Coin[]) {
+    this.transactionsList = allCoins;
+  }
+
+  getTransactionsList() {
+    return this.transactionsList.filter((c) => c._name == this.coinsymbol);
+  }
+  getCoinPrice(coinName) {
+    
+    return this._http
+      .get(
+        `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${coinName}&tsyms=${this.valuta}`
+      )
+      .pipe(map((result) => result));
+  }
+
+  dailyChange(coinName) {
+    return this._http
+      .get(
+        `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${coinName}&tsym=${this.valuta}&limit=1`
+      )
+      .pipe(map((result) => result));
+  }
+  changeValuta(valuta) {
+    this.valutaSource.next(valuta);
+  }
+  bigData(coinName, period) {
+    return this._http
+      .get(
+        `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${coinName}&tsym=${this.valuta}&limit=${period}`
+      )
+      .pipe(map((result) => result));
+  }
+  weekData(coinName) {
+    return this._http
+      .get(
+        `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${coinName}&tsym=${this.valuta}&limit=7`
+      )
+      .pipe(map((result) => result));
+  }
+  coinSymbol: any;
+
+  addCoinsToList() {
+    this.getCoinSymbols().subscribe((c) => this.coins.push(c));
+    
+  }
+
+  coins: validCoin[] = [];
+  period: number;
+  valuta: string;
+
+  getValidCoins() {
+    return this.coins;
+  }
+
+  private coinsymbolSource = new BehaviorSubject<string>('');
+  currentCoinSymbol = this.coinsymbolSource.asObservable();
+
+  private bigChartSource = new BehaviorSubject<boolean>(false);
+  currentBigChart = this.bigChartSource.asObservable();
+
+  private periodSource = new BehaviorSubject<number>(2000);
+  currentPeriod = this.periodSource.asObservable();
+
+  private valutaSource = new BehaviorSubject<string>('EUR');
+  currentValuta = this.valutaSource.asObservable();
 
   populateForm(coin) {
     this.form.setValue({
+      id:coin.id,
+      $key: null,
       coinName: coin._name,
       amount: coin._amount,
       priceBought: coin._priceBought,
@@ -31,44 +107,106 @@ export class CoinsService {
   private _coinsIndividu$ = new BehaviorSubject<Coin[]>([]);
   private _coins: Coin[];
 
-  constructor(private _http: HttpClient) {
+  bigChart: boolean;
+  coinsymbol: string;
+
+  constructor(private _http: HttpClient, private auth: AuthenticationService) {
     this.coinsIndividu$.subscribe((coins: Coin[]) => {
       this._coins = coins;
       this._coinsIndividu$.next(this._coins);
     });
+    this.valutaSource.subscribe((valuta) => (this.valuta = valuta));
+    this.periodSource.subscribe((period) => (this.period = period));
+    this.bigChartSource.subscribe((bigChart) => (this.bigChart = bigChart));
+    this.currentCoinSymbol.subscribe(
+      (coinsymbol) => (this.coinsymbol = coinsymbol)
+    );
   }
 
   get coinsIndividu$(): Observable<Coin[]> {
+    
     return this._http.get(`${environment.apiUrl}/coins/`).pipe(
       // delay(2000),
       catchError(this.handleError),
-      //tap(console.log),
       map((list: any[]): Coin[] => list.map(Coin.fromJSON))
     );
+  }
+
+  deleteTransaction(coin) {
+    
+    return this._http
+      .delete(`${environment.apiUrl}/Coins/?id=${coin._id}`)
+    // .subscribe(() => {
+    //   this._reloadRecipes$.next(true);
+    // });
+  }
+
+  deleteCoins(coin) {
+    return this._http
+      .delete(`${environment.apiUrl}/coins/${coin.symbol}`)
+      .subscribe(() => {
+        this._coins = this._coins.filter((c) => c.id != coin.id);
+        this._coinsIndividu$.next(this._coins);
+      });
   }
 
   get allCoins$(): Observable<Coin[]> {
     return this._coinsIndividu$;
   }
 
+  changePeriod(period: number) {
+    this.periodSource.next(period);
+    this.period = period;
+  }
+
+  changeBigChart(bigChart: boolean) {
+    this.bigChartSource.next(bigChart);
+  }
+
+  updateCoin(coin: Coin) {
+    
+    return this._http
+    .put(`${environment.apiUrl}/coins/${coin.id}`,coin.toJSON())
+    .pipe(catchError(this.handleError), map(Coin.fromJSON))
+    .pipe(
+      // temporary fix, while we use the behaviorsubject as a cache stream
+      catchError((err) => {
+        return throwError(err);
+      }),
+      tap((c: Coin) => {
+        
+      })
+    );
+  }
+
+  name:string;
+
+  callCustomerName(){
+    return this._http
+      .get(`${environment.apiUrl}/Customer/`)
+      .pipe(map((result) => (this.name = result['firstName'])));
+  }
+
   addNewCoin(coin: Coin) {
-    console.log(coin);
-   return this._http
-   .post(`${environment.apiUrl}/coins/`, coin.toJSON())
-   .pipe(catchError(this.handleError), map(Coin.fromJSON))
-   .pipe(
-    // temporary fix, while we use the behaviorsubject as a cache stream
-    catchError((err) => {
-      return throwError(err);
-    }),
-    tap((c: Coin) => {
-      console.log(c);
-    })
-  );
-   
+    
+    
+    return this._http
+      .post(`${environment.apiUrl}/coins/`, coin.toJSON())
+      .pipe(catchError(this.handleError), map(Coin.fromJSON))
+      .pipe(
+        // temporary fix, while we use the behaviorsubject as a cache stream
+        catchError((err) => {
+          return throwError(err);
+        }),
+        tap((c: Coin) => {
+          
+        })
+      );
   }
 
   form: FormGroup = new FormGroup({
+    id: new FormControl(),
+    $key: new FormControl(null),
     coinName: new FormControl('', [
       Validators.required,
       Validators.minLength(2),
@@ -80,14 +218,36 @@ export class CoinsService {
   });
 
   initializeFormGroup() {
-    console.log(this.getCoinSymbols());
+    let today = new Date().toISOString().slice(0, 10);
+
+    
     this.form.setValue({
-      coinName: 'BTC',
+      id:null,
+      $key: null,
+      coinName: this.currentCoinSymbol,
       amount: 1,
-      priceBought: 1,
-      exchange: '',
-      date: '',
+      priceBought: '',
+      exchange: 'Binance',
+      date: today,
     });
+  }
+  setSymbolInit(symbol) {
+    this.coinSymbol = symbol;
+    let today = new Date().toISOString().slice(0, 10);
+
+    this.form.setValue({
+      id:null,
+      $key: 1,
+      coinName: symbol,
+      amount: 1,
+      priceBought: '',
+      exchange: '',
+      date: today,
+    });
+  }
+
+  changeCoinSymbol(coinsymbol: string) {
+    this.coinsymbolSource.next(coinsymbol);
   }
 
   result: any;
@@ -103,17 +263,7 @@ export class CoinsService {
   getCoinSymbols() {
     return this._http
       .get('https://api.coincap.io/v2/assets')
-      .pipe(map((result) => Object.values(result)[0]))
-  }
-
-  deleteCoin(coin: Coin) {
-    return this._http
-      .delete(`${environment.apiUrl}/coins/${coin.id}`)
-      .pipe(tap(console.log), catchError(this.handleError))
-      .subscribe(() => {
-        this._coins = this._coins.filter((c) => c.id != coin.id);
-        this._coinsIndividu$.next(this._coins);
-      });
+      .pipe(map((result) => Object.values(result)[0]));
   }
 
   private handleError(err: HttpErrorResponse): Observable<never> {

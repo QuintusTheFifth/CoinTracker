@@ -1,3 +1,5 @@
+import { AuthenticationService } from '../user/authentication.service';
+
 /*Defines the coin entity */
 export interface CoinJson {
   id:number;
@@ -10,18 +12,22 @@ export interface CoinJson {
 
 export class Coin{
 
-  private _id:number;
   public currentPrice:number;
+  private auth: AuthenticationService;
 
-  constructor(public _name: string,
+  constructor(
+    public _id:number,
+    public _name: string,
      public _amount: number,
      public _priceBought:number,
      public _dateBought= new Date(),
-     public _exchange:string) {
+     public _exchange:string,
+    ) {
    }
 
   static fromJSON(json: CoinJson): Coin{
     const coin = new Coin(
+      json.id,
       json.name,
       json.amount,
       json.priceBought,

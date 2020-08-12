@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit {
           }
         },
         (err: HttpErrorResponse) => {
-          console.log(err);
+          
           if (err.error instanceof Error) {
             this.errorMessage = `Error while trying to login user ${this.user.value.username}: ${err.error.message}`;
           } else {

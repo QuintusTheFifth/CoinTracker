@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+
 import { AppComponent } from './app.component';
 import { RouterModule, Routes } from '@angular/router';
 import { CoinListComponent } from './coins/coin-list/coin-list.component';
@@ -19,21 +20,47 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { httpInterceptorProviders } from './interceptors';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSortModule } from '@angular/material/sort';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { AppRoutingModule } from './app-routing.module';
+import { RegisterComponent } from './user/register/register.component';
+import { LoginComponent } from './user/login/login.component';
 
 
-const appRoutes: Routes=[
-  { path: 'coin-list', component: CoinListComponent },
-  { path: '', redirectTo: 'coin-list', pathMatch: 'full' },
-  { path: '**', component: PageNotFoundComponent },
-];
+
+// const appRoutes: Routes=[
+//   { path: 'coin-list', component: CoinListComponent },
+//   { path: 'register', component: RegisterComponent },
+//   { path: 'login', component: LoginComponent },
+//   { path: '', redirectTo: 'coin-list', pathMatch: 'full' },
+//   { path: '**', component: PageNotFoundComponent },
+// ];
 
 @NgModule({
   declarations: [AppComponent, PageNotFoundComponent, MainNavComponent],
   imports: [
+    RouterModule,
+    MatIconModule,
+    AppRoutingModule,
+    FormsModule,
+    MatSidenavModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatButtonToggleModule,
     BrowserModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(appRoutes),
+    //RouterModule.forRoot(appRoutes),
+    MatDialogModule,
+    MatSortModule,
+    CoinModule,
+    LayoutModule,
+    BrowserModule,
+    HttpClientModule,
+    BrowserAnimationsModule,
+    RouterModule,
     CoinModule,
     UserModule,
     LayoutModule,

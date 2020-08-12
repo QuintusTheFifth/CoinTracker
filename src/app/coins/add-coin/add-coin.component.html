@@ -1,40 +1,88 @@
 <form [formGroup]="coinService.form" class="normal-form" (submit)="onSubmit()">
   <mat-grid-list cols="1" rowHeight="350px">
     <div class="controls-container">
-      <div class="col-md-4">
-      </div>
+      <div *ngIf="!coinSymbol; else elseBlock">
       <mat-form-field class="example-full-width">
-        <input 
-        formControlName="coinName"
-        type="text"
-               placeholder="Coin"
-               aria-label="coin name"
-               matInput
-               required #spy
-               [formControl]="myControl"
-               [matAutocomplete]="auto"
-               data-cy="filterInput"
-              >
-        <mat-autocomplete  #auto="matAutocomplete" isOpen="false">
-          <mat-option *ngFor="let option of filteredOptions | async" placeholder="Coin" [value]="option">
-            {{option}}
+        <input
+          type="text"
+          ng
+          Model
+          required
+          ngModel
+          minLength="2"
+          placeholder="Coin"
+          aria-label="coin name"
+          matInput
+          required
+          #spy
+          [formControl]="coinName"
+          [matAutocomplete]="auto"
+          [value]="coinSymbol"
+        />
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option
+            *ngFor="let coin of filteredCoins | async"
+            [value]="coin.symbol"
+          >
+            <img
+              class="example-option-img"
+              aria-hidden
+              [src]="getImage(coin)"
+              height="25"
+            />
+            <span>{{ coin.symbol }}</span> |
+            <small>Name: {{ coin.name }}</small>
           </mat-option>
         </mat-autocomplete>
+        <mat-error *ngIf="!checkCoinSymbol()">
+          Insert valid coin
+        </mat-error>
       </mat-form-field>
+    </div>
       <!-- <mat-form-field>
         <input formControlName="coinName" type="text" matInput placeholder="Coin" aria-label="coin name"
         required #spy>
       </mat-form-field> -->
+      <ng-template #elseBlock>
       <mat-form-field>
-        <input formControlName="amount" type="number" matInput placeholder="Amount" aria-label="amount"
-        required #spy>
-        <mat-error>More than 0 units required</mat-error>
+        <input
+        placeholder="Coin Symbol"
+        matInput
+        disabled
+        value="{{ coinSymbol }}"
+        aria-label="coin name"
+        #spy
+        />
+        <!-- <mat-error>More than 0 units required</mat-error> -->
+      </mat-form-field>
+    </ng-template>
+
+    <mat-form-field>
+      <input
+        formControlName="amount"
+        type="number"
+        min="0"
+        matInput
+        placeholder="Amount"
+        aria-label="amount"
+        required
+        #spy
+      />
+      <mat-error>More than 0 units required</mat-error>
+    </mat-form-field>
+
+      <mat-form-field>
+        <input
+          formControlName="priceBought"
+          type="number"
+          min="0"
+          matInput
+          placeholder="Price Bought"
+          aria-label="price bought"
+        />
       </mat-form-field>
       <mat-form-field>
-        <input formControlName="priceBought" type="number" matInput placeholder="Price Bought" aria-label="price bought">
-      </mat-form-field>
-      <mat-form-field>
-        <input formControlName="date" type="date" matInput placeholder="Date">
+        <input formControlName="date" type="date" matInput placeholder="Date" />
       </mat-form-field>
       <mat-form-field>
         <mat-select formControlName="exchange" placeholder="Exchange">
@@ -42,12 +90,21 @@
           <mat-option value="Binance">Binance</mat-option>
           <mat-option value="UpBit">UpBit</mat-option>
           <mat-option value="Bittrex">Bittrex</mat-option>
+          <mat-option value="eToroX">eToroX</mat-option>
         </mat-select>
       </mat-form-field>
       <div class="button-row">
-        <button mat-raised-button color="primary" type="submit" [disabled]="!coinService.form.valid">
-          Save</button>
-        <button mat-raised-button color="warn" (click)="onClear()">Clear</button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!coinService.form.valid"
+        >
+          Save
+        </button>
+        <button mat-raised-button color="warn" (click)="onClose()">
+          Close
+        </button>
       </div>
     </div>
   </mat-grid-list>

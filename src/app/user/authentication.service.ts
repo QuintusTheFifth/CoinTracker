@@ -18,7 +18,7 @@ function parseJwt(token) {
 })
 export class AuthenticationService {
   private readonly _tokenKey = 'currentUser';
-  private _user$: BehaviorSubject<string>;
+  public _user$: BehaviorSubject<string>;
   public redirectUrl: string = null;
 
   constructor(private http: HttpClient) {

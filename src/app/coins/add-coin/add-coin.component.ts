@@ -20,6 +20,7 @@ import {
   catchError,
 } from 'rxjs/operators';
 import { NotificationService } from '../services/notification.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-add-coin',
@@ -29,22 +30,12 @@ import { NotificationService } from '../services/notification.service';
 export class AddCoinComponent implements OnInit {
   coinSubmit: Coin;
 
-  myControl = new FormControl();
-  options: string[] = [
-    'BTC',
-    'XRP',
-    'USDT',
-    'BCH',
-    'TRX',
-    'LTC',
-    'BNB',
-    'XLM',
-    'ETH',
-  ];
-  filteredOptions: Observable<string[]>;
+  coinName = new FormControl();
 
   public filterCoinName: string;
   public filterCoin$ = new Subject<string>();
+
+  filteredCoins: Observable<Coin[]>;
 
   PageTitle: string = 'Add a holding';
   public coin: FormGroup;
@@ -53,56 +44,81 @@ export class AddCoinComponent implements OnInit {
 
   public confirmationMessage: string = '';
 
+  public coinSymbol;
+
   constructor(
     public coinService: CoinsService,
     public dialogRef: MatDialogRef<AddCoinComponent>,
-    private fb: FormBuilder,  private notificationService: NotificationService
+    private fb: FormBuilder,
+    private notificationService: NotificationService,
+    private router: Router
   ) {
-    this.filterCoin$
-      .pipe(
-        distinctUntilChanged(),
-        map((val) => val.toLowerCase())
-      )
-      .subscribe((val) => (this.filterCoinName = val));
+    this.coinService.addCoinsToList();
+    this.coins = this.coinService.getValidCoins();
+    
 
-    this.coin = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-    });
+    this.filteredCoins = this.coinName.valueChanges.pipe(
+      this.coinSymbol ? startWith(this.coinSymbol) : startWith(),
+      map((coin) => (coin ? this._filterCoins(coin) : this.coins.slice()))
+    );
   }
 
-  coins: Coin[];
+  private _filterCoins(value: string): Coin[] {
+    const filterValue = value.toLowerCase();
+    return this.coins[0].filter(
+      (coin) => coin.symbol.toLowerCase().indexOf(filterValue) === 0
+    );
+  }
+
+  coins;
 
   coinSymbols: any[] = [];
 
   ngOnInit(): void {
-    this.filteredOptions = this.myControl.valueChanges.pipe(
-      startWith(''),
-      map((value) => this._filter(value))
-    );
-  }
-  private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
-
-    return this.options.filter(
-      (option) => option.toLowerCase().indexOf(filterValue) === 0
+    this.coinService.currentCoinSymbol.subscribe(
+      (coinsymbol) => (this.coinSymbol = coinsymbol)
     );
   }
 
   getCoinSymbols() {
     this.coinService.getCoinSymbols().subscribe((res) => {
       Object.keys(res).forEach((key) => {
-        console.log(res[key].symbol);
+        
         this.coinSymbols.push(res[key].symbol);
       });
     });
   }
 
   onSubmit() {
-    if (this.coinService.form.valid) {
+    
+    
+    if (this.coinService.form.value.$key == 1) {
+      
+      
+      this.coinService.addNewCoin(
+        new Coin(
+          this.coinService.form.value.id,
+          this.coinSymbol,
+          this.coinService.form.value.amount,
+          this.coinService.form.value.priceBought,
+          this.coinService.form.value.date,
+          this.coinService.form.value.exchange
+        )
+      );
+
+      this.coinService.form.reset();
+      this.coinService.initializeFormGroup();
+      this.notificationService.success(':: Added successfully');
+      this.onClose();
+      return;
+    }
+    if (this.coinService.form.valid && this.checkCoinSymbol()) {
+      if (this.coinService.form.get('$key').value == null) 
       this.coinService
         .addNewCoin(
           new Coin(
-            this.coinService.form.value.coinName,
+            this.coinService.form.value.id,
+            this.coinName.value,
             this.coinService.form.value.amount,
             this.coinService.form.value.priceBought,
             this.coinService.form.value.date,
@@ -111,20 +127,56 @@ export class AddCoinComponent implements OnInit {
         )
         .pipe(
           catchError((err) => {
+            
             this.errorMessage = err;
             return EMPTY;
           })
         )
         .subscribe((c: Coin) => {
-          this.confirmationMessage = `a recipe for ${c._name} was successfully added`;
+          this.confirmationMessage = `a coin for ${c._name} was successfully added`;
         });
-      this.coinService.form.reset();
-      this.coinService.initializeFormGroup();
-      this.notificationService.success(':: Added successfully');
-      window.location.reload();
+    } else {
+      
+      this.coinService.updateCoin(
+        new Coin(
+          this.coinService.form.value.id,
+          this.coinService.form.value.coinName,
+          this.coinService.form.value.amount,
+          this.coinService.form.value.priceBought,
+          this.coinService.form.value.date,
+          this.coinService.form.value.exchange
+        )
+      );
       this.onClose();
-
+      return;
     }
+
+    this.coinService.form.reset();
+    this.coinService.initializeFormGroup();
+    this.notificationService.success(':: Added successfully');
+    // this.router
+    //   .navigateByUrl('edit-coin', { skipLocationChange: true })
+    //   .then(() => {
+    //     this.router.navigate(['coin-list']);
+    //   });
+    location.reload();
+    this.onClose();
+  }
+
+  getImage(coin) {
+    if (`assets/svg/icon/${coin.symbol.toLowerCase()}.svg`)
+      return `assets/svg/icon/${coin.symbol.toLowerCase()}.svg`;
+  }
+
+  checkCoinSymbol() {
+    var good = false;
+    for (var coin of this.coins[0]) {
+      if (coin.symbol == this.coinName.value) {
+        good = true;
+        break;
+      }
+    }
+    return good;
   }
 
   onClear() {
@@ -133,7 +185,6 @@ export class AddCoinComponent implements OnInit {
 
   onClose() {
     this.coinService.form.reset();
-    this.coinService.initializeFormGroup();
     this.dialogRef.close();
   }
 }
