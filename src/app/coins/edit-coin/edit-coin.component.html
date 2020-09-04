@@ -1,13 +1,21 @@
 <div class="content">
-  <br>
+  <br />
   <div class="search-div">
     <button mat-raised-button [routerLink]="['/coin-list']" data-cy="">
       <mat-icon>undo</mat-icon>Back
     </button>
   </div>
-  <h1 class="md-display-4">{{ message }} - Overview</h1>
-  <mat-button-toggle-group class="times" #group="matButtonToggleGroup"
-   (change)="changePeriod(group.value)" value = "group.value" name="fontStyle" aria-label="Font Style">
+  <h1 class="md-display-4">
+    {{ message }} price: {{ price | currency: valuta:"symbol":"1.2-2" }}
+  </h1>
+  <mat-button-toggle-group
+    class="times"
+    #group="matButtonToggleGroup"
+    (change)="changePeriod(group.value)"
+    value="group.value"
+    name="fontStyle"
+    aria-label="Font Style"
+  >
     <mat-button-toggle value="90">3m</mat-button-toggle>
     <mat-button-toggle value="270">9m</mat-button-toggle>
     <mat-button-toggle value="365">1y</mat-button-toggle>
@@ -24,13 +32,13 @@
     </button>
     &nbsp; &nbsp;
   </div>
-  
+
   <table
     mat-table
     [dataSource]="transactionsList"
     data-cy="coinCard"
     class="mat-elevation-z8"
-    style="margin-bottom:70px;"
+    style="margin-bottom: 70px"
   >
     <!--- Note that these columns can be defined in any order.
         The actual rendered columns are set as a property on the row definition" -->
@@ -45,7 +53,7 @@
         <span
           ><img
             src="assets/svg/icon/{{ element._name.toLowerCase() }}.svg"
-            style="width: 30px; height: 30px;"
+            style="width: 30px; height: 30px"
           />&nbsp; &nbsp;</span
         >
         <b>{{ element._name }}</b>

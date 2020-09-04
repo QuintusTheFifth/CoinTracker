@@ -1,10 +1,4 @@
-<!-- <nav class='navbar navbar-expand-lg navbar-dark bg-dark'>
-    <ul class='nav nav-pills'>
-      <li><a class='navbar-brand'[routerLink]="['/coin-list']">{{pageTitle}}</a></li>
-      <li><a class='nav-link' [routerLink]="['/login']">login</a></li>
-      <li><a class='nav-link'[routerLink]="['/register']">register</a></li>
-    </ul>
-  </nav> -->
+
   <mat-sidenav-container>
     <mat-sidenav mode="push" position="end" [(opened)]="opened">
       <h1>API's used</h1>
@@ -13,7 +7,6 @@
         <li>https://api.coincap.io</li>
       </ul>
   <br><br><br><br><br><br>
-      <!-- <p class="footer">Made with love.</p> -->
     </mat-sidenav>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <a class="navbar-brand" [routerLink]="['/coin-list']">
@@ -26,16 +19,8 @@
         >{{ pageTitle }}</a
       >
       <ul class="navbar-nav">
-        <!-- <li><a class='nav-link' [routerLink]="['login']">login</a></li> -->
-        
         <div *ngIf="auth._user$ | async as user; else login">
-          <!-- <li class="nav-item">
-            <p class="displayName">
-              Keep HODLing,
-              {{ user.displayName.split(" ").slice(0, 1).join(" ") }}!
-            </p>
-          </li> -->
-          <!-- class="" style="position: absolute; top: 0; left: 15.5em;" -->
+     
           <li>
             <a href="javascript:;" class="nav-link" (click)="auth.logout()" [routerLink]="['login']"
               >Sign Out</a
@@ -43,7 +28,6 @@
           </li>
         </div>
         <ng-template #login>
-          <!-- class="" style="position: absolute; top: 0; left: 15.5em;" -->
           <li>
             <a href="javascript:;" class="nav-link" [routerLink]="['login']"
               >Login</a
@@ -56,30 +40,9 @@
         <a href="javascript:;" (click)="opened = !opened">
           <mat-icon>info</mat-icon>
         </a>
-        <!-- <a [routerLink]="['info']">
-          <mat-icon>info</mat-icon>
-          </a> -->
       </li>
     </nav>
     <div class="container">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-container>
-  
-  <!-- <app-main-nav>
-    <router-outlet></router-outlet>
-  </app-main-nav> -->
-  
-<!-- <nav class='navbar navbar-expand navbar-light bg-light'>
-    <ul class='nav nav-pills'>
-      <li><a class='navbar-brand'[routerLink]="['/coin-list']">{{pageTitle}}</a></li>
-      <li><a class='nav-link' [routerLink]="['/login']">login</a></li>
-      <li><a class='nav-link'[routerLink]="['/register']">register</a></li>
-    </ul>
-  </nav>
-  <div class='container'>
-  <router-outlet></router-outlet>
-  </div> -->
- <!-- <app-main-nav>
-  <router-outlet></router-outlet>
-</app-main-nav> -->

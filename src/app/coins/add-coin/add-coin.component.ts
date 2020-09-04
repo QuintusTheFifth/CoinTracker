@@ -55,7 +55,6 @@ export class AddCoinComponent implements OnInit {
   ) {
     this.coinService.addCoinsToList();
     this.coins = this.coinService.getValidCoins();
-    
 
     this.filteredCoins = this.coinName.valueChanges.pipe(
       this.coinSymbol ? startWith(this.coinSymbol) : startWith(),
@@ -83,60 +82,53 @@ export class AddCoinComponent implements OnInit {
   getCoinSymbols() {
     this.coinService.getCoinSymbols().subscribe((res) => {
       Object.keys(res).forEach((key) => {
-        
         this.coinSymbols.push(res[key].symbol);
       });
     });
   }
 
   onSubmit() {
-    
-    
     if (this.coinService.form.value.$key == 1) {
-      
-      
       this.coinService.addNewCoin(
         new Coin(
           this.coinService.form.value.id,
-          this.coinSymbol,
+          this.coinService.form.value.coinName,
           this.coinService.form.value.amount,
           this.coinService.form.value.priceBought,
           this.coinService.form.value.date,
           this.coinService.form.value.exchange
         )
       );
-
-      this.coinService.form.reset();
-      this.coinService.initializeFormGroup();
+      // this.coinService.form.reset();
+      // this.coinService.initializeFormGroup();
       this.notificationService.success(':: Added successfully');
       this.onClose();
       return;
     }
     if (this.coinService.form.valid && this.checkCoinSymbol()) {
-      if (this.coinService.form.get('$key').value == null) 
-      this.coinService
-        .addNewCoin(
-          new Coin(
-            this.coinService.form.value.id,
-            this.coinName.value,
-            this.coinService.form.value.amount,
-            this.coinService.form.value.priceBought,
-            this.coinService.form.value.date,
-            this.coinService.form.value.exchange
+      if (this.coinService.form.get('$key').value == null) {
+        this.coinService
+          .addNewCoin(
+            new Coin(
+              this.coinService.form.value.id,
+              this.coinName.value,
+              this.coinService.form.value.amount,
+              this.coinService.form.value.priceBought,
+              this.coinService.form.value.date,
+              this.coinService.form.value.exchange
+            )
           )
-        )
-        .pipe(
-          catchError((err) => {
-            
-            this.errorMessage = err;
-            return EMPTY;
-          })
-        )
-        .subscribe((c: Coin) => {
-          this.confirmationMessage = `a coin for ${c._name} was successfully added`;
-        });
+          .pipe(
+            catchError((err) => {
+              this.errorMessage = err;
+              return EMPTY;
+            })
+          )
+          .subscribe((c: Coin) => {
+            this.confirmationMessage = `a coin for ${c._name} was successfully added`;
+          });
+      }
     } else {
-      
       this.coinService.updateCoin(
         new Coin(
           this.coinService.form.value.id,
@@ -170,13 +162,15 @@ export class AddCoinComponent implements OnInit {
 
   checkCoinSymbol() {
     var good = false;
-    for (var coin of this.coins[0]) {
-      if (coin.symbol == this.coinName.value) {
-        good = true;
-        break;
+    try {
+      for (var coin of this.coins[0]) {
+        if (coin.symbol == this.coinName.value) {
+          good = true;
+          break;
+        }
       }
-    }
-    return good;
+      return good;
+    } catch (Error) {}
   }
 
   onClear() {

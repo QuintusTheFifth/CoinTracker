@@ -1,19 +1,15 @@
 import { Injectable } from '@angular/core';
 import { throwError, Observable, BehaviorSubject } from 'rxjs';
 import { Coin } from '../coin';
-import { catchError, tap, delay, switchMap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import {
-  HttpClientModule,
   HttpClient,
   HttpErrorResponse,
-  HttpParams,
 } from '@angular/common/http';
 import * as _ from 'lodash';
 import { map } from 'rxjs/operators';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { CoinListComponent } from '../coin-list/coin-list.component';
 import { environment } from 'src/environments/environment';
-import { AuthenticationService } from 'src/app/user/authentication.service';
 
 interface validCoin {
   icon: string;
@@ -34,7 +30,6 @@ export class CoinsService {
     return this.transactionsList.filter((c) => c._name == this.coinsymbol);
   }
   getCoinPrice(coinName) {
-    
     return this._http
       .get(
         `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${coinName}&tsyms=${this.valuta}`
@@ -70,7 +65,6 @@ export class CoinsService {
 
   addCoinsToList() {
     this.getCoinSymbols().subscribe((c) => this.coins.push(c));
-    
   }
 
   coins: validCoin[] = [];
@@ -95,7 +89,7 @@ export class CoinsService {
 
   populateForm(coin) {
     this.form.setValue({
-      id:coin.id,
+      id: coin.id,
       $key: null,
       coinName: coin._name,
       amount: coin._amount,
@@ -110,7 +104,7 @@ export class CoinsService {
   bigChart: boolean;
   coinsymbol: string;
 
-  constructor(private _http: HttpClient, private auth: AuthenticationService) {
+  constructor(private _http: HttpClient) {
     this.coinsIndividu$.subscribe((coins: Coin[]) => {
       this._coins = coins;
       this._coinsIndividu$.next(this._coins);
@@ -124,7 +118,6 @@ export class CoinsService {
   }
 
   get coinsIndividu$(): Observable<Coin[]> {
-    
     return this._http.get(`${environment.apiUrl}/coins/`).pipe(
       // delay(2000),
       catchError(this.handleError),
@@ -133,12 +126,8 @@ export class CoinsService {
   }
 
   deleteTransaction(coin) {
-    
-    return this._http
-      .delete(`${environment.apiUrl}/Coins/?id=${coin._id}`)
-    // .subscribe(() => {
-    //   this._reloadRecipes$.next(true);
-    // });
+    console.log(coin)
+    return this._http.delete(`${environment.apiUrl}/coins/?id=${coin.id}`)
   }
 
   deleteCoins(coin) {
@@ -164,32 +153,29 @@ export class CoinsService {
   }
 
   updateCoin(coin: Coin) {
-    
+    console.log(coin)
+    console.log(coin.toJSON())
     return this._http
-    .put(`${environment.apiUrl}/coins/${coin.id}`,coin.toJSON())
-    .pipe(catchError(this.handleError), map(Coin.fromJSON))
-    .pipe(
-      // temporary fix, while we use the behaviorsubject as a cache stream
-      catchError((err) => {
-        return throwError(err);
-      }),
-      tap((c: Coin) => {
-        
-      })
-    );
+      .put(`${environment.apiUrl}/coins/${coin.id}`, coin.toJSON())
+      .pipe(catchError(this.handleError), map(Coin.fromJSON))
+      .pipe(
+        // temporary fix, while we use the behaviorsubject as a cache stream
+        catchError((err) => {
+          return throwError(err);
+        }),
+        tap(() => {})
+      );
   }
 
-  name:string;
+  name: string;
 
-  callCustomerName(){
+  callCustomerName() {
     return this._http
       .get(`${environment.apiUrl}/Customer/`)
       .pipe(map((result) => (this.name = result['firstName'])));
   }
 
   addNewCoin(coin: Coin) {
-    
-    
     return this._http
       .post(`${environment.apiUrl}/coins/`, coin.toJSON())
       .pipe(catchError(this.handleError), map(Coin.fromJSON))
@@ -198,9 +184,7 @@ export class CoinsService {
         catchError((err) => {
           return throwError(err);
         }),
-        tap((c: Coin) => {
-          
-        })
+        tap(() => {})
       );
   }
 
@@ -220,9 +204,8 @@ export class CoinsService {
   initializeFormGroup() {
     let today = new Date().toISOString().slice(0, 10);
 
-    
     this.form.setValue({
-      id:null,
+      id: null,
       $key: null,
       coinName: this.currentCoinSymbol,
       amount: 1,
@@ -236,7 +219,7 @@ export class CoinsService {
     let today = new Date().toISOString().slice(0, 10);
 
     this.form.setValue({
-      id:null,
+      id: null,
       $key: 1,
       coinName: symbol,
       amount: 1,
