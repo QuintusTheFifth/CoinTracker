@@ -1,24 +1,34 @@
-<!-- <h1 class="md-display-4">Track your crypto holdings!</h1> -->
 <div class="search-div">
   <button mat-raised-button (click)="onCreate()" data-cy="add">
     <mat-icon>add</mat-icon>Add a coin
   </button>
   <div *ngIf="allCoins.length == 0">
-    <img draggable="false" src="assets/add.png" style="position: relative; left: 60px; top:10px;height:30%;width:30%" />
+    <img
+      draggable="false"
+      src="assets/add.png"
+      style="position: relative; left: 60px; top: 10px; height: 30%; width: 30%"
+    />
   </div>
   <span *ngIf="allCoins.length > 0">
     <h1
       class="md-display-4"
-      style="display: inline-block; position: relative; left: 250px;"
+      style="display: inline-block; position: relative; left: 250px"
     >
       Portfolio Balance:
       {{ berekenEindTotaal(allCoins) | currency: valuta:"symbol":"1.2-2" }}
     </h1>
-    <mat-button-toggle-group class="valuta" #group="matButtonToggleGroup"
-   (change)="changeValuta(group.value)" value = "group.value" name="fontStyle" aria-label="Font Style" style="background:grey">
-    <mat-button-toggle value="EUR">EUR</mat-button-toggle>
-    <mat-button-toggle value="USD">USD</mat-button-toggle>
-  </mat-button-toggle-group>
+    <mat-button-toggle-group
+      class="valuta"
+      #group="matButtonToggleGroup"
+      (change)="changeValuta(group.value)"
+      value="group.value"
+      name="fontStyle"
+      aria-label="Font Style"
+      style="background: grey"
+    >
+      <mat-button-toggle value="EUR">EUR</mat-button-toggle>
+      <mat-button-toggle value="USD">USD</mat-button-toggle>
+    </mat-button-toggle-group>
   </span>
 </div>
 <div *ngIf="allCoins; else loadingOrError">
@@ -38,12 +48,12 @@
           <a
             [routerLink]=""
             (click)="onEdit(element.symbol)"
-            style="color: black; text-decoration: none;"
+            style="color: black; text-decoration: none"
           >
             <span
               ><img
                 src="assets/svg/icon/{{ element.symbol.toLowerCase() }}.svg"
-                style="width: 30px; height: 30px;"
+                style="width: 30px; height: 30px"
               />&nbsp; &nbsp;</span
             >
             <b>{{ element.symbol }}</b>
@@ -96,7 +106,7 @@
         >
         <mat-cell *matCellDef="let element" (click)="onEdit(element.symbol)">
           {{
-            element.amount * geefCoinPrice(element.symbol, this.prices)
+            element.amount * geefCoinPrice(element.symbol, prices)
               | currency: valuta:"symbol":"1.2-2"
           }}
 
@@ -118,18 +128,11 @@
           *matCellDef="let element"
           (click)="onEdit(element.symbol)"
           [ngClass]="{
-            positive: getChange(element.symbol, this.prices) === true,
-            negative: getChange(element.symbol, this.prices) === false
+            positive: getChange(element.symbol, prices) > 0,
+            negative: getChange(element.symbol, prices) < 0
           }"
         >
-          {{
-            (
-              ((geefCoinPrice(element.symbol, this.prices) -
-                geefOldCoinPrice(element.symbol, this.prices)) /
-                geefOldCoinPrice(element.symbol, this.prices)) *
-              100
-            ).toFixed(2)
-          }}%
+          {{ getChange(element.symbol, prices).toFixed(2) }}%
         </mat-cell>
       </ng-container>
 
@@ -142,7 +145,7 @@
           <mat-cell
             *matCellDef="let element"
             (click)="onEdit(element.symbol)"
-            style="padding-bottom: 1em; padding-top: 1em;"
+            style="padding-bottom: 1em; padding-top: 1em"
           >
             {{ changeCoinSymbol(element.symbol) }}
             <app-coin-graph> </app-coin-graph>

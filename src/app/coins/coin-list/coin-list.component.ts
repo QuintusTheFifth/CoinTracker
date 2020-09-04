@@ -87,6 +87,8 @@ export class CoinListComponent implements OnInit {
 
     this._coinService.changeCoinSymbol('');
     this._coinService.changeBigChart(false);
+
+    
   }
 
   valuta;
@@ -148,12 +150,8 @@ export class CoinListComponent implements OnInit {
 
       for (var coin of this.allCoins) {
         this.geefPrijs(coin.symbol);
-      }
-
-      for (var coin of this.allCoins)
         coin.price = this.geefCoinPrice(coin.symbol, this.prices);
-
-      //this.berekenEindTotaal(this.allCoins)
+      }
     });
   }
 
@@ -199,6 +197,7 @@ export class CoinListComponent implements OnInit {
       name: '',
       oldPrice: 0,
       changeBool: 1,
+      percent:0
     };
 
     this._coinService.dailyChange(coinSymbol).subscribe((val: any) => {
@@ -208,6 +207,8 @@ export class CoinListComponent implements OnInit {
     this._coinService.getCoinPrice(coinSymbol).subscribe((val: any) => {
       coin.name = coinSymbol;
       coin.price = val[coinSymbol][this.valuta];
+      coin.percent=((coin.price-coin.oldPrice)/coin.oldPrice)*100;
+
       if (coin.price - coin.oldPrice < 0) {
         coin.changeBool = -1;
       }
@@ -223,15 +224,8 @@ export class CoinListComponent implements OnInit {
   }
 
   getChange(name, array) {
-    var bool = false;
-    for (var coin of array) {
-      if (coin.name == name) {
-        if (coin.changeBool == 1) {
-          return (bool = true);
-        }
-      }
-    }
-    return bool;
+    var result = array.find((obj) => obj.name == name)
+    return result.percent
   }
 
   onCreate() {
@@ -251,7 +245,6 @@ export class CoinListComponent implements OnInit {
   onDelete(coin) {
     if (confirm('Are you sure you want to delete this coin?')) {
       this._coinService.deleteCoins(coin);
-      location.reload();
       // this.router
       // .navigateByUrl('edit-coin', { skipLocationChange: true })
       // .then(() => {

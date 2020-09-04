@@ -5,7 +5,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatInputModule, MatInput } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatOptionModule } from '@angular/material/core';
@@ -17,11 +17,32 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { MatTableModule } from '@angular/material/table';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
   declarations: [],
   imports: [
     CommonModule,
+    MatTooltipModule,
+    MatPaginatorModule,
+    MatDialogModule,
+    MatInputModule,
+    MatSidenavModule,
+    MatPaginatorModule,
+    MatGridListModule,
+    MatChipsModule,
+    MatTableModule,
+    MatAutocompleteModule,
+    MatButtonModule,
+    MatSnackBarModule,
+    MatButtonToggleModule,
+    MatSortModule,
     FlexLayoutModule,
     MatListModule,
     MatCardModule,
@@ -42,6 +63,17 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatSnackBarModule
   ],
   exports: [
+    MatGridListModule,
+    MatButtonToggleModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MatPaginatorModule,
+    MatInputModule,
+    MatGridListModule,
+    MatChipsModule,
+    MatTableModule,
+    MatAutocompleteModule,
+    MatSnackBarModule,
     FlexLayoutModule,
     MatListModule,
     MatCardModule,

@@ -38,6 +38,8 @@ export class EditCoinComponent implements OnInit {
 
   message: string;
   bigChart: boolean;
+  price:number;
+  valuta:string;
 
   ngOnInit(): void {
     this.getTransactions();
@@ -47,6 +49,13 @@ export class EditCoinComponent implements OnInit {
     this._coinService.currentBigChart.subscribe(
       (bigChart) => (this.bigChart = bigChart)
     );
+    this._coinService.currentValuta.subscribe(
+      (valuta)=>this.valuta=valuta
+    )
+      this._coinService.getCoinPrice(this.message).subscribe(
+        (price)=>this.price=price[this.message][this.valuta]
+      );
+    
     //
   }
 
@@ -57,37 +66,23 @@ export class EditCoinComponent implements OnInit {
       .then(() => {
         this.router.navigate(['edit-coin']);
       });
-    
   }
 
   transactionsList;
 
   getTransactions() {
-    this.transactionsList = this._coinService.getTransactionsList();
-    
-
-    // this._coinService.getCoinsPayload().subscribe((transactions) => {
-    //   (this.transactionsList = transactions.map((c) => {
-    //     const coin = {
-    //       symbol: c.payload.val().symbol,
-    //       amount: c.payload.val().amount,
-    //       date: c.payload.val().date ? c.payload.val().date : 'n/a',
-    //       exchange: c.payload.val().exchange ? c.payload.val().exchange : 'n/a',
-    //       priceBought: c.payload.val().priceBought
-    //         ? c.payload.val().priceBought
-    //         : 'n/a',
-    //       key: c.payload.key,
-    //     };
-    //     if (c.payload.val().symbol === this.message) {
-    //       //
-    //       return coin;
-    //     }
-    //   })),
-    //     (this.transactionsList = this.transactionsList.filter(function (c) {
-    //       return c != null;
-    //     }));
-    //   //
-    // });
+    this.transactionsList = this._coinService.getTransactionsList().map((c)=>{
+      console.log(c)
+    const coin={
+      id:c._id,
+      _dateBought: c._dateBought.getFullYear()?'n/a':c._dateBought,
+     _exchange:c._exchange?c._exchange:'n/a',
+     _name:c._name,
+     _amount:c._amount,
+     _priceBought:c._priceBought?c._priceBought:'n/a',
+    }
+    return coin;
+    });
   }
 
   onEdit(coin) {
