@@ -3,7 +3,7 @@ Cryptocurrency portfolio
 
 https://cointracker-26919.web.app
 
-![alt text](https://user-images.githubusercontent.com/39531282/91370227-0b00a800-e80e-11ea-9e61-d2ed75c8c443.png)
+![alt text](https://user-images.githubusercontent.com/39531282/93033529-ea6e8580-f636-11ea-97a4-ec8dc5a5fe20.png)
 
 ![alt text](https://user-images.githubusercontent.com/39531282/92998066-fd3e6880-f517-11ea-9bcf-5504ccfaafa1.png)
 
