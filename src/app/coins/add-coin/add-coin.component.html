@@ -1,0 +1,111 @@
+<form
+  [formGroup]="coinService.form"
+  class="example-form"
+  (ngSubmit)="onSubmit()"
+>
+  <input type="hidden" formControlName="$key" />
+  <mat-grid-list cols="1" rowHeight="350px">
+    <div class="controls-container">
+      <!-- Als coinsymbol leeg is, doe toevoeging met autocomplete field -->
+      <div *ngIf="!message; else elseBlock">
+        <mat-form-field class="example-full-width">
+          <input
+            type="text"
+            ng
+            Model
+            required
+            ngModel
+            minLength="2"
+            matInput
+            placeholder="Coin"
+            aria-label="coin name"
+            [matAutocomplete]="auto"
+            [formControl]="coinName"
+            [value]="coinsymbol"
+          />
+          <!-- </ng-template> -->
+
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option
+              *ngFor="let coin of filteredCoins | async"
+              [value]="coin.symbol"
+            >
+              <img
+                class="example-option-img"
+                aria-hidden
+                [src]="getImage(coin)"
+                height="25"
+              />
+              <span>{{ coin.symbol }}</span> |
+              <small>Name: {{ coin.name }}</small>
+            </mat-option>
+          </mat-autocomplete>
+          <mat-error *ngIf="!checkCoinSymbol(coinName.value)">
+            Insert valid coin
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <ng-template #elseBlock>
+        <mat-form-field>
+          <input
+            placeholder="Coin Symbol"
+            matInput
+            disabled
+            value="{{ message }}"
+            aria-label="coin name"
+            #spy
+          />
+        </mat-form-field>
+      </ng-template>
+
+      <mat-form-field>
+        <input
+          formControlName="amount"
+          type="number"
+          min="0"
+          matInput
+          placeholder="Amount"
+          aria-label="amount"
+          required
+          #spy
+        />
+        <mat-error>More than 0 units required</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <input
+          formControlName="priceBought"
+          type="number"
+          min="0"
+          matInput
+          placeholder="Price Bought"
+          aria-label="price bought"
+        />
+      </mat-form-field>
+      <mat-form-field>
+        <input formControlName="date" type="date" matInput placeholder="Date" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-select formControlName="exchange" placeholder="Exchange">
+          <mat-option>None</mat-option>
+          <mat-option value="Binance">Binance</mat-option>
+          <mat-option value="UpBit">UpBit</mat-option>
+          <mat-option value="Bittrex">Bittrex</mat-option>
+          <mat-option value="eToroX">eToroX</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="button-row">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!coinService.form.valid"
+        >
+          Save
+        </button>
+        <button mat-raised-button color="warn" (click)="Close()">Close</button>
+      </div>
+    </div>
+  </mat-grid-list>
+</form>
+<!-- ❌formgroup{{ service.form.value|json}}
+ -->

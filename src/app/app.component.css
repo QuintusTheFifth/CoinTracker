@@ -1,0 +1,40 @@
+.nav-link {
+  position:relative;
+  text-align: left;
+  font-size: large;
+  text-align:right;
+}
+.navbar-brand{
+  text-align:center;
+}
+.displayName{
+  color:white;
+  position: absolute;
+  right: 0;
+  top:18px;
+  margin-right:80px;
+}
+
+mat-sidenav-container{
+  height:100%;
+}
+
+mat-sidenav,mat-sidenav-content{
+  padding:16px;
+}
+
+mat-sidenav{
+  background-color: rgba(0, 0, 0, 0.7)!important;
+  color:white;
+  width:300px;
+}
+
+h1{
+  margin-top:20px;
+  margin-left:10px;
+}
+
+.footer{
+  position:absolute;
+  bottom:0;
+}
