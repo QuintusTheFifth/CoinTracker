@@ -1,0 +1,107 @@
+<div class="content">
+  <br>
+  <h1 class="md-display-4">
+    <span
+    ><img
+      src="assets/svg/icon/{{ message.toLowerCase() }}.svg"
+      style="width: 30px; height: 30px; margin-right:-15px;margin-bottom:5px;"
+    />&nbsp; &nbsp;</span>
+    {{ message }} price: {{ price | currency: valuta:"symbol":"1.2-2" }}
+  </h1>  
+  <mat-button-toggle-group class="times" #group="matButtonToggleGroup" style="margin-left:55px;"
+   (change)="changePeriod(group.value)" value = "group.value" name="fontStyle" aria-label="Font Style">
+    <mat-button-toggle value="90">3m</mat-button-toggle>
+    <mat-button-toggle value="270">9m</mat-button-toggle>
+    <mat-button-toggle value="365">1y</mat-button-toggle>
+    <mat-button-toggle value="2000">ALL</mat-button-toggle>
+  </mat-button-toggle-group>
+  <button mat-raised-button [routerLink]="['/coin-list']" data-cy="" style="display:inline-block; position:relative;left:670px;">
+    <mat-icon>undo</mat-icon>Back
+  </button>
+  {{ _coinService.changeBigChart(true) }}
+  {{ _coinService.setCoinSymbol(message) }}
+  <app-coin-graph></app-coin-graph>
+  <br />
+
+  <div class="search-div">
+    <button mat-raised-button (click)="onCreate()" data-cy="add">
+      <mat-icon>add</mat-icon>Add a transaction
+    </button>
+    &nbsp; &nbsp;
+  </div>
+  <table
+    mat-table
+    [dataSource]="transactionsList"
+    data-cy="coinCard"
+    class="mat-elevation-z8"
+    style="margin-bottom:70px;"
+  >
+    <!--- Note that these columns can be defined in any order.
+        The actual rendered columns are set as a property on the row definition" -->
+
+    {{
+      transactionsList
+    }}
+    <!-- Symbol Column -->
+    <ng-container matColumnDef="symbol">
+      <th mat-header-cell *matHeaderCellDef>Symbol</th>
+      <td mat-cell *matCellDef="let element" (click)="onEdit(element)">
+        <span
+          ><img
+            src="assets/svg/icon/{{ element.symbol.toLowerCase() }}.svg"
+            style="width: 30px; height: 30px;"
+          />&nbsp; &nbsp;</span
+        >
+        <b>{{ element.symbol }}</b>
+      </td>
+    </ng-container>
+
+    <!-- Date Column -->
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let element" (click)="onEdit(element)">
+        {{ element.date }}
+      </td>
+    </ng-container>
+
+    <!-- Exchange Column -->
+    <ng-container matColumnDef="exchange">
+      <th mat-header-cell *matHeaderCellDef>Exchange</th>
+      <td mat-cell *matCellDef="let element" (click)="onEdit(element)">
+        {{ element.exchange }}
+      </td>
+    </ng-container>
+
+    <!-- Amount Column -->
+    <ng-container matColumnDef="amount">
+      <th mat-header-cell *matHeaderCellDef>Amount</th>
+      <td mat-cell *matCellDef="let element" (click)="onEdit(element)">
+        {{ element.amount }}
+      </td>
+    </ng-container>
+
+    <!-- Price Bought Column -->
+    <ng-container matColumnDef="price bought">
+      <th mat-header-cell *matHeaderCellDef>Bought At</th>
+      <td mat-cell *matCellDef="let element" (click)="onEdit(element)">
+        {{ element.priceBought }}
+      </td>
+    </ng-container>
+
+    <!-- Buttons -->
+    <ng-container matColumnDef="buttons">
+      <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        <button mat-icon-button (click)="onEdit(row)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="onDelete(row)">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</div>
