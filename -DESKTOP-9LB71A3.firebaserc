@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "cointracker-26919"
+  },
+  "targets": {
+    "cointracker-26919": {
+      "hosting": {
+        "coinTracker": [
+          "cointracker-26919"
+        ]
+      }
+    }
+  }
+}
