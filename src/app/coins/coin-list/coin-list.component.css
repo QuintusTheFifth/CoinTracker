@@ -80,7 +80,7 @@ th.mat-sort-header-sorted {
   }
 }
 
-@keyframes pulse-ring { margin-left: auto !important;
+@keyframes pulse-ring {
 
   0% {
     -webkit-transform: scale(0.33);
