@@ -1,6 +1,5 @@
 # CoinTracker
 Cryptocurrency portfolio
-
 https://cointracker-26919.web.app
 
 Front-end: Angular <br />
