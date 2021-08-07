@@ -3,7 +3,7 @@ Cryptocurrency portfolio
 
 https://cointracker-26919.web.app
 
-Front-end: Angular
+Front-end: Angular <br />
 Back-end: Firebase
 
 TODOs:
