@@ -3,6 +3,9 @@ Cryptocurrency portfolio
 
 https://cointracker-26919.web.app
 
+Front-end: Angular
+Back-end: Firebase
+
 TODOs:
 
 - [ ] Center content
@@ -13,7 +16,7 @@ TODOs:
 - [ ] Adjust layout "details" page
 - [ ] Change favicon
 - [ ] Add loading animation graph
-- [ ] Make decentralised? (IPFS/Ethereum/Chainlink(prices))
+- [ ] Make decentralised (IPFS/Ethereum/Chainlink(prices))
 - [ ] Add delight to the experience when all tasks are complete :tada:
 
 <br />
