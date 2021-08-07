@@ -15,7 +15,7 @@ TODOs:
 - [ ] Adjust layout "details" page
 - [ ] Change favicon
 - [ ] Add loading animation graph
-- [ ] Make decentralised (IPFS/Ethereum/Chainlink(prices))
+- [ ] Make decentralised :earth_africa: (IPFS/Ethereum/Chainlink(prices))
 - [ ] Add delight to the experience when all tasks are complete :tada:
 
 <br />
