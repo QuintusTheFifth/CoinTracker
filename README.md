@@ -8,6 +8,7 @@ TODOs:
 - [ ] Center content
 - [ ] Responsive design
 - [ ] Use Async (column price change)
+- [ ] Add paginator
 - [ ] Change coins API (coins + images)
 - [ ] Adjust layout "details" page
 - [ ] Change favicon
