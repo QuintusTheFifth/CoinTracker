@@ -14,8 +14,8 @@ TODOs:
 - [ ] Add loading animation graph
 - [ ] Add delight to the experience when all tasks are complete :tada:
 
-
-
+<br />
+<br />
 
 ![alt text](https://user-images.githubusercontent.com/39531282/93033529-ea6e8580-f636-11ea-97a4-ec8dc5a5fe20.png)
 
