@@ -12,8 +12,7 @@ TODOs:
 - [ ] Adjust layout "details" page
 - [ ] Change favicon
 - [ ] Add loading animation graph
-- [ ] Use Chainlink for prices?
-- [ ] Make decentralised? (IPFS/Ethereum)
+- [ ] Make decentralised? (IPFS/Ethereum/Chainlink(prices))
 - [ ] Add delight to the experience when all tasks are complete :tada:
 
 <br />
