@@ -13,8 +13,10 @@ TODOs:
 - [ ] Change coins API (coins + images)
 - [ ] Adjust layout "details" page
 - [ ] Change favicon
+- [ ] Add login with wallet
+- [ ] Add search for exchanges
 - [ ] Add loading animation graph
-- [ ] Make decentralised :earth_africa: (IPFS/Ethereum/Chainlink(prices))
+- [ ] Make decentralised :earth_africa: (IPFS/Ethereum/Chainlink/Tellor(prices))
 - [ ] Add delight to the experience when all tasks are complete :tada:
 
 <br />
