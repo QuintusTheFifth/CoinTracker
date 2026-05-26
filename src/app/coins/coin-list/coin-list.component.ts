@@ -46,25 +46,7 @@ export class CoinListComponent implements OnInit {
 
   message: string;
 
-  getTotal() {
-    var total = 0;
-    this.total.forEach((p) => {
-      if (!isNaN(p)) {
-        //
-        total += p;
-      }
-    });
-    //
-    return total;
-  }
 
-  total = [];
-  addToTotal(amount, price) {
-    var totalPrice = amount * price;
-    //
-    this.total.push(totalPrice);
-    //
-  }
 
   allCoins: any[];
 

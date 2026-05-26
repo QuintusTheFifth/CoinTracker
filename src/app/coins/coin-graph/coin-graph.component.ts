@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { CoinsService } from '../services/coin.data.service';
 import { Chart } from 'chart.js';
 
@@ -11,6 +11,8 @@ export class CoinGraphComponent implements OnInit {
   chart = [];
   overviewChart = [];
   loading: boolean = true;
+
+  @Input() coinSymbol: string;
 
   constructor(private _coinService: CoinsService) {}
 
@@ -50,7 +52,7 @@ export class CoinGraphComponent implements OnInit {
 
   getWeekData() {
     this.chart = [];
-    var coinName = this._coinService.getCoinSymbol();
+    var coinName = this.coinSymbol;
 
     this.coinName = coinName;
     if (!coinName) { this.loading = false; return; }
@@ -121,7 +123,7 @@ export class CoinGraphComponent implements OnInit {
 
   getBigData() {
     this.overviewChart = [];
-    var coinName = this._coinService.getCoinSymbol();
+    var coinName = this.coinSymbol;
     this.coinName = coinName;
     if (!coinName) { this.loading = false; return; }
     this._coinService.bigData(coinName, this.period).subscribe((res) => {

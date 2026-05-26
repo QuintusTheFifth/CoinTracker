@@ -108,12 +108,7 @@
               | currency: valuta:"symbol":"1.2-2"
           }}
 
-          {{
-            addToTotal(
-              element.amount,
-              element.price
-            )
-          }}
+
         </mat-cell>
       </ng-container>
 
@@ -144,9 +139,7 @@
             (click)="onEdit(element.symbol)"
             style="padding-bottom: 1em; padding-top: 1em"
           >
-            {{ _coinService.setCoinSymbol(element.symbol) }}
-            <app-coin-graph> </app-coin-graph>
-            {{ _coinService.setCoinSymbol("") }}
+            <app-coin-graph [coinSymbol]="element.symbol"> </app-coin-graph>
           </mat-cell>
         </div>
       </ng-container>
