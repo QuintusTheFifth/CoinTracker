@@ -23,8 +23,7 @@
       </button>
     </div>
   </div>
-  {{ _coinService.changeBigChart(true) }}
-  {{ _coinService.setCoinSymbol(message) }}
+
   <app-coin-graph></app-coin-graph>
   <br />
 
@@ -50,9 +49,7 @@
       <!--- Note that these columns can be defined in any order.
           The actual rendered columns are set as a property on the row definition" -->
 
-      {{
-        transactionsList
-      }}
+
       <!-- Symbol Column -->
       <ng-container matColumnDef="symbol">
         <th mat-header-cell *matHeaderCellDef>Symbol</th>

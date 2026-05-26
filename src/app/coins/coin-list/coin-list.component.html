@@ -122,13 +122,15 @@
         <mat-header-cell *matHeaderCellDef>
           <strong>Price Change (24h)</strong>
         </mat-header-cell>
-        <mat-cell
-          *matCellDef="let element"
-          (click)="onEdit(element.symbol)"
-          [ngClass]="getPriceChangeClass(element.symbol)"
-        >
-          {{ getPriceChange(element.symbol) }} %
-        </mat-cell>
+        <ng-container *ngIf="priceChange$ | async as changes">
+          <mat-cell
+            *matCellDef="let element"
+            (click)="onEdit(element.symbol)"
+            [ngClass]="{'positive': changes[element.symbol] > 0, 'negative': changes[element.symbol] < 0}"
+          >
+            {{ changes[element.symbol] || '0.00' }} %
+          </mat-cell>
+        </ng-container>
       </ng-container>
 
       <!-- Graph Column -->

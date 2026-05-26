@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { CoinsService } from '../services/coin.data.service';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { NotificationService } from '../services/notification.service';
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
   templateUrl: './edit-coin.component.html',
   styleUrls: ['./edit-coin.component.css'],
 })
-export class EditCoinComponent implements OnInit {
+export class EditCoinComponent implements OnInit, AfterViewInit {
   constructor(
     public _coinService: CoinsService,
     private notificationService: NotificationService,
@@ -78,6 +78,11 @@ export class EditCoinComponent implements OnInit {
 
     this.getTransactions();
     //
+  }
+
+  ngAfterViewInit() {
+    this._coinService.changeBigChart(true);
+    this._coinService.setCoinSymbol(this.message);
   }
 
   async changePeriod(number){

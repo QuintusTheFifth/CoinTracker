@@ -45,7 +45,6 @@ export class CoinListComponent implements OnInit {
   priceChange$ = new BehaviorSubject<Record<string, string>>({});
 
   message: string;
-  change: true;
 
   getTotal() {
     var total = 0;
@@ -72,6 +71,7 @@ export class CoinListComponent implements OnInit {
   dataSource = new MatTableDataSource(this.allCoins);
 
   private confettiFired = false;
+  private pricesLoadedCount = 0;
 
   constructor(
     public _coinService: CoinsService,
@@ -153,6 +153,7 @@ export class CoinListComponent implements OnInit {
         this.geefPrijs(coin);
         this.geefImage(coin);
       }
+      this.pricesLoadedCount = 0;
     });
   }
 
@@ -198,6 +199,14 @@ export class CoinListComponent implements OnInit {
         ...this.priceChange$.value,
         [coin.symbol]: percent
       });
+      this.pricesLoadedCount++;
+      if (
+        !this.confettiFired &&
+        this.pricesLoadedCount >= this.allCoins.length &&
+        this.allCoins.every(c => c.price && c.price > 0)
+      ) {
+        setTimeout(() => this.triggerConfetti(), 500);
+      }
     });
   }
 
@@ -205,21 +214,6 @@ export class CoinListComponent implements OnInit {
     this._coinService.getCoinImageUrl(coin.symbol).subscribe((url) => {
       coin.image_url = url;
     });
-  }
-
-  /** Get price change percentage for a coin symbol (Angular 9 safe) */
-  getPriceChange(symbol: string): string {
-    const changes = this.priceChange$.getValue();
-    return changes[symbol] || '0.00';
-  }
-
-  /** Get CSS class for price change (Angular 9 safe) */
-  getPriceChangeClass(symbol: string): any {
-    const val = parseFloat(this.getPriceChange(symbol));
-    return {
-      positive: val > 0,
-      negative: val < 0
-    };
   }
 
   /** Trigger a simple canvas confetti burst for delight 🎉 */
@@ -283,18 +277,6 @@ export class CoinListComponent implements OnInit {
       }
     };
     animate();
-  }
-
-  /** Fire confetti once prices are loaded */
-  ngAfterViewChecked() {
-    if (
-      !this.confettiFired &&
-      this.allCoins &&
-      this.allCoins.length > 0 &&
-      this.allCoins.every(c => c.price && c.price > 0)
-    ) {
-      setTimeout(() => this.triggerConfetti(), 500);
-    }
   }
 
   onCreate() {
