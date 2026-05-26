@@ -1,60 +1,76 @@
-<!-- <nav class='navbar navbar-expand-lg navbar-dark bg-dark'>
-    <ul class='nav nav-pills'>
-      <li><a class='navbar-brand'[routerLink]="['/coin-list']">{{pageTitle}}</a></li>
-      <li><a class='nav-link' [routerLink]="['/login']">login</a></li>
-      <li><a class='nav-link'[routerLink]="['/register']">register</a></li>
-    </ul>
-  </nav> -->
 <mat-sidenav-container>
   <mat-sidenav mode="push" position="end" [(opened)]="opened">
-    <h1>API's used</h1>
-
-    <ul>
-      <li>https://min-api.cryptocompare.com</li>
-      <li>https://api.coincap.io</li>
+    <button class="sidenav-close-btn" (click)="opened = false">
+      <mat-icon>close</mat-icon>
+    </button>
+    <div class="sidenav-header">
+      <mat-icon class="sidenav-icon">api</mat-icon>
+      <h1>Data Sources</h1>
+    </div>
+    <ul class="sidenav-list">
+      <li>
+        <span class="api-badge live">LIVE</span>
+        <a href="https://www.coingecko.com/en/api" target="_blank" rel="noopener">CoinGecko API</a>
+      </li>
     </ul>
-<br><br><br><br><br><br>
-    <!-- <p class="footer">Made with love.</p> -->
+    <p class="sidenav-footer-text">Real-time cryptocurrency data powered by CoinGecko.</p>
   </mat-sidenav>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+  <nav class="navbar navbar-expand-lg crypto-nav" [class.nav-scrolled]="navScrolled">
     <a class="navbar-brand" [routerLink]="['/coin-list']">
-      <span
+      <span class="brand-icon"
         ><img
           draggable="false"
           src="assets/svg/white/btc.svg"
-          style="width: 30px; height: 30px;"
-        />&nbsp; &nbsp;</span
-      >{{ pageTitle }}</a
-    >
-    <ul class="navbar-nav ms-auto">
-      <div *ngIf="auth.user$ | async as user; else login" class="nav-user-area">
+        />&nbsp;&nbsp;</span
+      >
+      <span class="brand-text">{{ pageTitle }}</span>
+      <span class="brand-tagline">Crypto Portfolio Tracker</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <p class="displayName">
-            Keep HODLing,
-            {{ user.displayName.split(" ").slice(0, 1).join(" ") }}!
-          </p>
+          <a class="nav-link portfolio-link" [routerLink]="['/coin-list']" routerLinkActive="active-link">Portfolio</a>
         </li>
-        <li class="nav-item">
-          <a href="javascript:;" class="nav-link" (click)="auth.signOut()"
-            >Sign Out</a
-          >
-        </li>
-      </div>
-      <ng-template #login>
-        <li class="nav-item">
-          <a href="javascript:;" class="nav-link" (click)="auth.googleSignin()"
-            >Sign in</a
-          >
-        </li>
-      </ng-template>
-    </ul>
-    <li class="infoButton">
-      <a href="javascript:;" (click)="opened = !opened">
-        <mat-icon>info</mat-icon>
-      </a>
-    </li>
+        <div *ngIf="auth.user$ | async as user; else login" class="nav-user-area">
+          <li class="nav-item">
+            <p class="displayName">
+              Keep HODLing,
+              {{ user.displayName.split(" ").slice(0, 1).join(" ") }}!
+            </p>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:;" class="nav-link sign-out-link" (click)="auth.signOut()"
+              >Sign Out</a
+            >
+          </li>
+        </div>
+        <ng-template #login>
+          <li class="nav-item">
+            <a href="javascript:;" class="nav-link sign-in-link" (click)="auth.googleSignin()"
+              >Sign in</a
+            >
+          </li>
+        </ng-template>
+      </ul>
+    </div>
+
+    <button class="info-button" (click)="opened = !opened" matTooltip="Data sources &amp; info">
+      <mat-icon>settings</mat-icon>
+    </button>
   </nav>
-  <div class="container">
-    <router-outlet></router-outlet>
+
+  <div class="content-wrapper">
+    <div class="container fade-in">
+      <router-outlet></router-outlet>
+    </div>
+    <footer class="app-footer">
+      <span class="footer-text">Made with <span class="footer-heart">❤️</span> &bull; CoinTracker</span>
+    </footer>
   </div>
 </mat-sidenav-container>

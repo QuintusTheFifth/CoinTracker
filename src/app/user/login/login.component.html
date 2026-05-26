@@ -1,24 +1,28 @@
 <div class="login-container">
-  <img draggable="false" src="assets/SignIn.png" class="login-img" />
+  <div class="login-img-container">
+    <img draggable="false" src="assets/SignIn.png" class="login-img" />
+  </div>
 
-  <div class="login-buttons">
-    <button mat-raised-button color="primary" class="google-btn" (click)="onGoogleLogin()">
-      <mat-icon>mail_outline</mat-icon> Sign in with Google
-    </button>
+  <div class="login-card">
+    <div class="login-buttons">
+      <button mat-raised-button color="primary" class="google-btn" (click)="onGoogleLogin()">
+        <mat-icon>mail_outline</mat-icon> Sign in with Google
+      </button>
 
-    <button mat-raised-button class="wallet-btn" (click)="onWalletLogin()" [disabled]="walletLoggingIn">
-      <span *ngIf="!walletLoggingIn">
-        <img src="assets/eth-diamond.svg" alt="ETH" class="eth-icon" onerror="this.style.display='none'" />
-        Connect Wallet
-      </span>
-      <span *ngIf="walletLoggingIn">
-        <mat-spinner diameter="20" style="display:inline-block;margin-right:8px"></mat-spinner>
-        Connecting...
-      </span>
-    </button>
+      <button mat-raised-button class="wallet-btn" (click)="onWalletLogin()" [disabled]="walletLoggingIn">
+        <span *ngIf="!walletLoggingIn">
+          <img src="assets/eth-diamond.svg" alt="ETH" class="eth-icon" onerror="this.style.display='none'" />
+          Connect Wallet
+        </span>
+        <span *ngIf="walletLoggingIn">
+          <mat-spinner diameter="20" style="display:inline-block;margin-right:8px"></mat-spinner>
+          Connecting...
+        </span>
+      </button>
 
-    <div *ngIf="errorMessage" class="error-msg">
-      {{ errorMessage }}
+      <div *ngIf="errorMessage" class="error-msg">
+        {{ errorMessage }}
+      </div>
     </div>
   </div>
 </div>

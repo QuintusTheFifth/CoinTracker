@@ -2,6 +2,21 @@ import { Component, OnInit, Input } from '@angular/core';
 import { CoinsService } from '../services/coin.data.service';
 import { Chart } from 'chart.js';
 
+// Dark theme chart area background plugin
+const darkBackgroundPlugin = {
+  id: 'darkBackground',
+  beforeDraw: function(chart) {
+    const ctx = chart.ctx;
+    const chartArea = chart.chartArea;
+    if (!chartArea) return;
+    ctx.save();
+    ctx.fillStyle = 'rgba(28, 35, 51, 0.9)';
+    ctx.fillRect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+    ctx.restore();
+  }
+};
+Chart.pluginService.register(darkBackgroundPlugin);
+
 @Component({
   selector: 'app-coin-graph',
   templateUrl: './coin-graph.component.html',
@@ -107,11 +122,23 @@ export class CoinGraphComponent implements OnInit {
             xAxes: [
               {
                 display: false,
+                gridLines: {
+                  color: '#30363d',
+                },
+                ticks: {
+                  fontColor: '#8b949e',
+                },
               },
             ],
             yAxes: [
               {
                 display: false,
+                gridLines: {
+                  color: '#30363d',
+                },
+                ticks: {
+                  fontColor: '#8b949e',
+                },
               },
             ],
           },
@@ -183,11 +210,23 @@ export class CoinGraphComponent implements OnInit {
                 time: {
                   unit: 'month',
                 },
+                gridLines: {
+                  color: '#30363d',
+                },
+                ticks: {
+                  fontColor: '#8b949e',
+                },
               },
             ],
             yAxes: [
               {
                 display: true,
+                gridLines: {
+                  color: '#30363d',
+                },
+                ticks: {
+                  fontColor: '#8b949e',
+                },
               },
             ],
           },

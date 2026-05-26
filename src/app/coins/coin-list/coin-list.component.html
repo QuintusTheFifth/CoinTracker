@@ -1,178 +1,240 @@
 <div class="contentTable">
-<div class="search-div">
-  <button mat-raised-button (click)="onCreate()" data-cy="add">
-    <mat-icon>add</mat-icon>Add a coin
-  </button>
-  <div *ngIf="allCoins.length == 0">
-    <img
-      draggable="false"
-      src="assets/add.png"
-      class="empty-state-img"
-    />
+  <!--
+    =====================
+    SEARCH / ADD SECTION
+    =====================
+  -->
+  <div class="search-div">
+    <!-- Empty state (shown when no coins) -->
+    <div *ngIf="allCoins.length == 0" class="empty-state">
+      <img
+        draggable="false"
+        src="assets/add.png"
+        class="empty-state-img"
+        alt="No coins yet"
+      />
+      <h2 class="empty-state-title">Your portfolio is empty</h2>
+      <p class="empty-state-subtitle">
+        Start tracking your cryptocurrency investments.
+        Add your first coin to get started!
+      </p>
+      <button class="add-coin-btn" (click)="onCreate()" data-cy="add">
+        <mat-icon>add</mat-icon> Add a coin
+      </button>
+    </div>
+
+    <!-- Portfolio Summary Header (shown when coins exist) -->
+    <span *ngIf="allCoins.length > 0" class="portfolio-header">
+      <div class="portfolio-header-left">
+        <h1 class="portfolio-balance">
+          <span class="accent">{{ berekenEindTotaal(allCoins) | currency: valuta:"symbol":"1.2-2" }}</span>
+        </h1>
+        <div class="portfolio-meta">
+          <div class="portfolio-meta-item">
+            <span>Portfolio Value</span>
+            <span class="portfolio-meta-value">{{ valuta }}</span>
+          </div>
+          <div class="portfolio-meta-item">
+            <span>Coins</span>
+            <span class="portfolio-meta-value">{{ allCoins.length }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="portfolio-header-right">
+        <mat-button-toggle-group
+          class="valuta"
+          #group="matButtonToggleGroup"
+          (change)="changeValuta(group.value)"
+          value="group.value"
+          name="fontStyle"
+          aria-label="Font Style"
+        >
+          <mat-button-toggle value="EUR">EUR</mat-button-toggle>
+          <mat-button-toggle value="USD">USD</mat-button-toggle>
+        </mat-button-toggle-group>
+        <button class="add-coin-btn" (click)="onCreate()" data-cy="add">
+          <mat-icon>add</mat-icon> Add a coin
+        </button>
+      </div>
+    </span>
   </div>
-  <span *ngIf="allCoins.length > 0" class="portfolio-header">
-    <h1 class="md-display-4 portfolio-balance">
-      Portfolio Balance:
-      {{ berekenEindTotaal(allCoins) | currency: valuta:"symbol":"1.2-2" }}
-    </h1>
-    <mat-button-toggle-group
-      class="valuta"
-      #group="matButtonToggleGroup"
-      (change)="changeValuta(group.value)"
-      value="group.value"
-      name="fontStyle"
-      aria-label="Font Style"
-      style="background: grey"
-    >
-      <mat-button-toggle value="EUR">EUR</mat-button-toggle>
-      <mat-button-toggle value="USD">USD</mat-button-toggle>
-    </mat-button-toggle-group>
-  </span>
-</div>
-<div *ngIf="allCoins; else loadingOrError">
-  <div *ngIf="allCoins.length > 0">
-    <mat-table
-      [dataSource]="dataSource"
-      matSort
-      data-cy="coinCard"
-      class="mat-elevation-z8 coin-table"
-    >
-      <!-- Symbol Column -->
-      <ng-container matColumnDef="symbol">
-        <mat-header-cell *matHeaderCellDef>
-          <strong>Symbol</strong>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let element" (click)="onEdit(element.symbol)">
-          <a
-            [routerLink]=""
-            (click)="onEdit(element.symbol)"
-            style="color: black; text-decoration: none"
-          >
-            <span
-              ><img
-                src="{{ element.image_url }}"
-                style="width: 30px; height: 30px"
-                onerror="this.style.display='none'"
-              />&nbsp; &nbsp;</span
+
+  <!--
+    =====================
+    COIN TABLE
+    =====================
+  -->
+  <div *ngIf="allCoins; else loadingOrError">
+    <div *ngIf="allCoins.length > 0">
+      <mat-table
+        [dataSource]="dataSource"
+        matSort
+        data-cy="coinCard"
+        class="mat-elevation-z8 coin-table"
+      >
+        <!-- Symbol Column -->
+        <ng-container matColumnDef="symbol">
+          <mat-header-cell *matHeaderCellDef>
+            <strong>Symbol</strong>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let element; let i = index" (click)="onEdit(element.symbol)"
+            [style.animation-delay]="i * 0.04 + 's'">
+            <a
+              [routerLink]=""
+              (click)="onEdit(element.symbol)"
+              style="text-decoration: none"
             >
-            <b>{{ element.symbol }}</b>
-          </a>
-        </mat-cell>
-      </ng-container>
-
-      <!-- Price Column -->
-      <ng-container matColumnDef="price">
-        <mat-header-cell
-          *matHeaderCellDef
-          class="inline"
-          matTooltip="current price from coingecko.com"
-          matTooltipPosition="above"
-        >
-          <strong>Price </strong> <span class="pulsating-circle"></span>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let element" (click)="onEdit(element.symbol)">
-
-          {{ element.price | currency: valuta:"symbol":"1.2-2"}}
-         
-        </mat-cell>
-      </ng-container>
-
-      <!-- Amount Column -->
-      <ng-container matColumnDef="amount">
-        <mat-header-cell *matHeaderCellDef>
-          <strong>Amount Bought</strong></mat-header-cell
-        >
-        <mat-cell *matCellDef="let element" (click)="onEdit(element.symbol)">
-          {{ element.amount }}
-        </mat-cell>
-      </ng-container>
-
-      <!-- Transactions Column -->
-      <ng-container matColumnDef="transactions">
-        <mat-header-cell *matHeaderCellDef>
-          <strong>Transactions</strong>
-        </mat-header-cell>
-        <mat-cell *matCellDef="let element" (click)="onEdit(element.symbol)">
-          {{ element.transactions }}
-        </mat-cell>
-      </ng-container>
-
-      <!-- Total Column -->
-      <ng-container matColumnDef="total">
-        <mat-header-cell *matHeaderCellDef
-          ><strong> Total </strong></mat-header-cell
-        >
-        <mat-cell *matCellDef="let element" (click)="onEdit(element.symbol)">
-          {{
-            element.amount * element.price
-              | currency: valuta:"symbol":"1.2-2"
-          }}
-
-
-        </mat-cell>
-      </ng-container>
-
-      <!-- Change Column -->
-      <ng-container matColumnDef="change">
-        <mat-header-cell *matHeaderCellDef>
-          <strong>Price Change (24h)</strong>
-        </mat-header-cell>
-        <ng-container *ngIf="priceChange$ | async as changes">
-          <mat-cell
-            *matCellDef="let element"
-            (click)="onEdit(element.symbol)"
-            [ngClass]="{'positive': changes[element.symbol] > 0, 'negative': changes[element.symbol] < 0}"
-          >
-            {{ changes[element.symbol] || '0.00' }} %
+              <span class="symbol-cell">
+                <img
+                  src="{{ element.image_url }}"
+                  onerror="this.style.display='none'"
+                  alt="{{ element.symbol }}"
+                />
+                <b class="symbol-name">{{ element.symbol }}</b>
+              </span>
+            </a>
           </mat-cell>
         </ng-container>
-      </ng-container>
 
-      <!-- Graph Column -->
-      <ng-container matColumnDef="graph">
-        <mat-header-cell *matHeaderCellDef>
-          <strong>Price Graph (7d)</strong>
-        </mat-header-cell>
-        <div class="chart-container">
-          <mat-cell
-            *matCellDef="let element"
-            (click)="onEdit(element.symbol)"
-            style="padding-bottom: 1em; padding-top: 1em"
+        <!-- Price Column -->
+        <ng-container matColumnDef="price">
+          <mat-header-cell
+            *matHeaderCellDef
+            class="inline"
+            matTooltip="current price from coingecko.com"
+            matTooltipPosition="above"
           >
-            <app-coin-graph [coinSymbol]="element.symbol"> </app-coin-graph>
+            <strong>Price </strong> <span class="pulsating-circle"></span>
+          </mat-header-cell>
+          <mat-cell
+            *matCellDef="let element; let i = index"
+            (click)="onEdit(element.symbol)"
+            [style.animation-delay]="i * 0.04 + 's'"
+            class="price-cell">
+            {{ element.price | currency: valuta:"symbol":"1.2-2"}}
           </mat-cell>
-        </div>
-      </ng-container>
+        </ng-container>
 
-      <!-- Buttons -->
-      <ng-container matColumnDef="buttons">
-        <mat-header-cell *matHeaderCellDef> </mat-header-cell>
-        <mat-cell *matCellDef="let row">
-          <button mat-icon-button (click)="onEdit(row.symbol)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" (click)="onDelete(row)">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
-        </mat-cell>
-      </ng-container>
+        <!-- Amount Column -->
+        <ng-container matColumnDef="amount">
+          <mat-header-cell *matHeaderCellDef
+            ><strong>Amount Bought</strong></mat-header-cell
+          >
+          <mat-cell
+            *matCellDef="let element; let i = index"
+            (click)="onEdit(element.symbol)"
+            [style.animation-delay]="i * 0.04 + 's'">
+            {{ element.amount }}
+          </mat-cell>
+        </ng-container>
 
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
-    </mat-table>
-    <mat-paginator
-      [pageSizeOptions]="[5, 10, 25, 100]"
-      showFirstLastButtons
-    ></mat-paginator>
+        <!-- Transactions Column -->
+        <ng-container matColumnDef="transactions">
+          <mat-header-cell *matHeaderCellDef>
+            <strong>Transactions</strong>
+          </mat-header-cell>
+          <mat-cell
+            *matCellDef="let element; let i = index"
+            (click)="onEdit(element.symbol)"
+            [style.animation-delay]="i * 0.04 + 's'">
+            {{ element.transactions }}
+          </mat-cell>
+        </ng-container>
+
+        <!-- Total Column -->
+        <ng-container matColumnDef="total">
+          <mat-header-cell *matHeaderCellDef
+            ><strong> Total </strong></mat-header-cell
+          >
+          <mat-cell
+            *matCellDef="let element; let i = index"
+            (click)="onEdit(element.symbol)"
+            [style.animation-delay]="i * 0.04 + 's'"
+            class="price-cell">
+            {{
+              element.amount * element.price
+                | currency: valuta:"symbol":"1.2-2"
+            }}
+          </mat-cell>
+        </ng-container>
+
+        <!-- Change Column -->
+        <ng-container matColumnDef="change">
+          <mat-header-cell *matHeaderCellDef>
+            <strong>Price Change (24h)</strong>
+          </mat-header-cell>
+          <ng-container *ngIf="priceChange$ | async as changes">
+            <mat-cell
+              *matCellDef="let element; let i = index"
+              (click)="onEdit(element.symbol)"
+              [style.animation-delay]="i * 0.04 + 's'"
+              [ngClass]="{
+                'positive': changes[element.symbol] > 0,
+                'negative': changes[element.symbol] < 0
+              }"
+              class="price-change"
+            >
+              {{ changes[element.symbol] || '0.00' }} %
+            </mat-cell>
+          </ng-container>
+        </ng-container>
+
+        <!-- Graph Column -->
+        <ng-container matColumnDef="graph">
+          <mat-header-cell *matHeaderCellDef>
+            <strong>Price Graph (7d)</strong>
+          </mat-header-cell>
+          <mat-cell
+              *matCellDef="let element; let i = index"
+              (click)="onEdit(element.symbol)"
+              style="padding-bottom: 1em; padding-top: 1em"
+              [style.animation-delay]="i * 0.04 + 's'"
+              class="chart-container">
+              <app-coin-graph [coinSymbol]="element.symbol"> </app-coin-graph>
+            </mat-cell>
+        </ng-container>
+
+        <!-- Buttons -->
+        <ng-container matColumnDef="buttons">
+          <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+          <mat-cell *matCellDef="let row; let i = index"
+            [style.animation-delay]="i * 0.04 + 's'">
+            <button mat-icon-button (click)="onEdit(row.symbol)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="onDelete(row)">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Header & Rows -->
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+      </mat-table>
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 25, 100]"
+        showFirstLastButtons
+      ></mat-paginator>
+
+      <!-- Mobile FAB (visible only on small screens) -->
+      <button class="add-coin-fab" (click)="onCreate()" data-cy="add-mobile">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
   </div>
 </div>
-</div>
+
+<!-- Loading / Error States -->
 <ng-template #loadingOrError>
-  <mat-card class="error" *ngIf="errorMessage; else loading" data-cy="appError">
+  <mat-card class="error-card" *ngIf="errorMessage; else loading" data-cy="appError">
     Error loading the coin list: {{ errorMessage }}. <br />
     Please try again later.
   </mat-card>
   <ng-template #loading>
-    <mat-spinner></mat-spinner>
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <span class="loading-text">Loading your portfolio...</span>
+    </div>
   </ng-template>
 </ng-template>

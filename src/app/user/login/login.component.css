@@ -9,36 +9,70 @@
   min-height: 60vh;
 }
 
+.login-img-container {
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
 .login-img {
   max-width: 100%;
   height: auto;
-  margin-bottom: 2rem;
+  display: block;
+}
+
+/* Glassmorphism card */
+.login-card {
+  background: rgba(28, 35, 51, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2rem 2rem 1.5rem;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 .login-buttons {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  max-width: 340px;
 }
 
 .google-btn, .wallet-btn {
   width: 100% !important;
-  padding: 8px 16px !important;
+  padding: 10px 16px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 8px;
+  border-radius: 12px !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
 }
 
 .wallet-btn {
-  background-color: #f0f0f0 !important;
-  color: #333 !important;
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--accent) !important;
+  box-shadow: 0 2px 12px rgba(247, 147, 26, 0.15) !important;
+  transition: all 0.25s ease !important;
 }
 
 .wallet-btn:hover {
-  background-color: #e0e0e0 !important;
+  background-color: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 20px rgba(247, 147, 26, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+.wallet-btn[disabled] {
+  opacity: 0.6 !important;
+  border-color: var(--border) !important;
+  box-shadow: none !important;
 }
 
 .eth-icon {
@@ -48,10 +82,12 @@
 }
 
 .error-msg {
-  color: #e53935;
+  color: var(--red);
   text-align: center;
   font-size: 13px;
-  padding: 8px;
-  background: #ffebee;
-  border-radius: 4px;
+  padding: 10px 14px;
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.25);
+  border-radius: 10px;
+  margin-top: 4px;
 }

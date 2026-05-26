@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { AuthService } from 'src/app/authentication/auth.service';
 
 @Component({
@@ -12,5 +12,10 @@ export class AppComponent {
   constructor(public auth: AuthService) {}
 
   opened = false;
+  navScrolled = false;
 
+  @HostListener('window:scroll', [])
+  onWindowScroll(): void {
+    this.navScrolled = window.scrollY > 20;
+  }
 }

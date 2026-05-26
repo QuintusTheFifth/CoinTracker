@@ -1,59 +1,280 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~bootstrap/dist/css/bootstrap.min.css";
 @import "~font-awesome/css/font-awesome.min.css";
-@import "~@angular/material/prebuilt-themes/indigo-pink.css";
 
-.content {
-  max-width: 1000px;
-  margin: auto;
+/* ===========================
+   🌙 DARK CRYPTO THEME
+   Custom dark theme overrides
+   replacing indigo-pink
+   =========================== */
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #1c2333;
+  --accent: #f7931a;
+  --accent-hover: #ffa940;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --green: #3fb950;
+  --red: #f85149;
+  --border: #30363d;
 }
 
-h2 {
-  padding-top: 20px;
-  text-align:center;
+/* --- Body & Global --- */
+html, body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
-.infoButton{
-  list-style:none;
-  display: flex;
-  align-items: center;
+/* --- Selection color --- */
+::selection {
+  background-color: var(--accent);
+  color: #fff;
 }
 
+/* --- Scrollbar (dark theme) --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* --- Global transitions --- */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ===========================
+   MATERIAL OVERRIDES
+   =========================== */
+
+/* --- mat-table --- */
+.mat-table {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  min-width: auto;
+}
+
+/* --- mat-header-row --- */
+.mat-header-row {
+  background: var(--bg-secondary) !important;
+}
+
+/* --- mat-header-cell --- */
 .mat-header-cell {
   flex-direction: column;
   justify-content: center;
+  color: var(--accent) !important;
+  font-weight: 600;
+  border-bottom-color: var(--border) !important;
 }
 
+/* --- mat-sort-header-arrow --- */
+.mat-sort-header-arrow {
+  color: var(--accent) !important;
+}
+
+/* --- mat-cell --- */
 .mat-cell {
   text-align: center;
-  justify-content:center;
+  justify-content: center;
+  color: var(--text-primary) !important;
+  background: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border) !important;
 }
 
-.inline{
-  flex-direction: row;
+/* --- mat-row hover --- */
+.mat-row:hover {
+  background: rgba(247, 147, 26, 0.08) !important;
 }
 
-/* .card-header{
-  text-align:center;
-} */
-.btn-primary{
-  width:10em;
+/* --- mat-paginator --- */
+.mat-paginator {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
-div.card-header {
- font-size: large;
+.mat-paginator .mat-paginator-range-label,
+.mat-paginator .mat-paginator-page-size-label {
+  color: var(--text-secondary) !important;
+}
+.mat-paginator .mat-icon-button {
+  color: var(--text-primary) !important;
+}
+.mat-paginator .mat-icon-button[disabled] {
+  color: var(--text-secondary) !important;
+}
+
+/* --- mat-form-field --- */
+.mat-form-field {
+  color: var(--text-primary) !important;
+}
+.mat-form-field-label {
+  color: var(--text-secondary) !important;
+}
+.mat-form-field-underline {
+  background-color: var(--border) !important;
+}
+.mat-form-field-ripple {
+  background-color: var(--accent) !important;
+}
+.mat-form-field.mat-focused .mat-form-field-label {
+  color: var(--accent) !important;
+}
+.mat-input-element {
+  color: var(--text-primary) !important;
+  caret-color: var(--accent) !important;
+}
+.mat-select-value {
+  color: var(--text-primary) !important;
+}
+.mat-select-arrow {
+  color: var(--text-secondary) !important;
+}
+.mat-select-panel {
+  background: var(--bg-card) !important;
+}
+.mat-option {
+  color: var(--text-primary) !important;
+  background: var(--bg-card) !important;
+}
+.mat-option:hover,
+.mat-option.mat-active {
+  background: var(--bg-secondary) !important;
+}
+
+/* --- mat-dialog-container --- */
+.mat-dialog-container {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* --- mat-button-toggle-group --- */
+.mat-button-toggle-group {
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+  background: var(--bg-secondary) !important;
+}
+
+/* --- mat-button-toggle --- */
+.mat-button-toggle {
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+.mat-button-toggle:hover {
+  background: var(--bg-card) !important;
+}
+.mat-button-toggle-checked {
+  background: var(--accent) !important;
+  color: #fff !important;
+}
+.mat-button-toggle-checked:hover {
+  background: var(--accent-hover) !important;
+}
+
+/* --- mat-raised-button (primary) --- */
+.mat-raised-button.mat-primary {
+  background-color: var(--accent) !important;
+  color: #fff !important;
+}
+.mat-raised-button.mat-primary:hover {
+  background-color: var(--accent-hover) !important;
+}
+.mat-raised-button.mat-primary[disabled] {
+  background-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* --- mat-spinner --- */
+.mat-spinner circle,
+.mat-progress-spinner circle {
+  stroke: var(--accent) !important;
+}
+
+/* --- mat-snack-bar (notification) --- */
+snack-bar-container.success {
+  background-color: var(--green) !important;
+  color: #fff !important;
+}
+snack-bar-container.warn {
+  background-color: #f99157 !important;
+  color: #fff !important;
+}
+snack-bar-container.notification simple-snack-bar {
+  font-size: 18px !important;
+  font-weight: bold;
+}
+
+/* ===========================
+   NAVBAR
+   =========================== */
+.navbar-dark.bg-dark {
+  background: linear-gradient(135deg, #0d1117 0%, #1c2333 50%, #0d1117 100%) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.navbar-dark .navbar-brand,
+.navbar-dark .nav-link {
+  color: var(--text-primary) !important;
+}
+.navbar-dark .nav-link:hover {
+  color: var(--accent) !important;
+}
+
+/* ===========================
+   POSITIVE / NEGATIVE
+   =========================== */
+.positive {
+  color: var(--green) !important;
+}
+.negative {
+  color: var(--red) !important;
+}
+
+/* ===========================
+   CARDS & CONTAINERS
+   =========================== */
+.content {
+  max-width: 1000px;
+  margin: auto;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 div.card {
-  margin-top: 10px
+  margin-top: 10px;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
-.table {
-  margin-top: 10px
+div.card-header {
+  font-size: large;
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 12px 12px 0 0 !important;
 }
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-div.container{
+div.container {
   margin: 0px 20px;
 }
 
@@ -69,96 +290,37 @@ div.container{
   }
 }
 
-.fill-remaining-space {
-  /* This fills the remaining space, by using flexbox. 
-     Every toolbar row uses a flexbox row layout. */
-  flex: 1 1 auto;
-}
-
-form.normal-form{
+/* ===========================
+   SEARCH DIV / FILTER
+   =========================== */
+.search-div {
   margin: 10px;
 }
-
-.controls-container{
-  width: 100%;
-  padding: 5%;    
+.search-form-field {
+  width: 60%;
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  color: var(--text-primary) !important;
 }
-
-.controls-container > * {
-  width: 100%;
-  }
-
-  .add-bottom-padding{
-      padding-bottom: 10px;
-  }
-  /* radio group */
-mat-radio-group mat-radio-button{
-  margin-left: 5px;
-}
-
-.button-row button{
-  margin: 5px;
-}
-
-/* notification */
-snack-bar-container.success {
-  background-color: #5cb85c;
-  color : #fff;
-}
-
-snack-bar-container.warn {
-  background-color: #f99157;
-  color : #fff;
-}
-
-
-snack-bar-container.notification simple-snack-bar{
-  font-size: 18px !important;
-  font-weight: bold;
-}
-
-
-.hide{
+.search-form-field div.mat-form-field-underline {
   display: none;
 }
-
-/* mat-table */
-mat-footer-row mat-footer-cell{
-  justify-content: center;
-  font-style: italic;
+.search-form-field div.mat-form-field-infix {
+  border-top: 0px;
 }
-
-/* filter controls */
-.search-div{
-  margin: 10px;
-    }
-    .search-form-field{
-        width: 60%;
-        margin-left: 10px;
-        padding: 5px 10px;
-        background-color: #f5f5f5;
-        border-radius: 5px;
-        }
-        .search-form-field div.mat-form-field-underline {
-            display: none;
-        }
-        .search-form-field div.mat-form-field-infix{
-            border-top: 0px;
-        }
-        .search-form-field div.mat-form-field-wrapper{
-          padding-bottom: 0px;
-      }
-      .search-form-field div.mat-form-field-suffix button{
-          height: 32px;
-          width: 32px;
-      }
-
-      /* for dialog pop-up */
-.btn-dialog-close{
-  width: 45px;
-  min-width: 0px !important;
-  height: 40px;
-  padding: 0px !important;
+.search-form-field div.mat-form-field-wrapper {
+  padding-bottom: 0px;
+}
+.search-form-field div.mat-form-field-suffix button {
+  height: 32px;
+  width: 32px;
+  color: var(--text-secondary) !important;
+}
+.search-form-field input::placeholder {
+  color: var(--text-secondary);
 }
 
 /* Responsive search field */
@@ -168,7 +330,79 @@ mat-footer-row mat-footer-cell{
   }
 }
 
-/* Make Angular Material tables horizontal-scroll on mobile */
-.mat-table {
-  min-width: auto;
+/* ===========================
+   EXISTING STYLES (preserved)
+   =========================== */
+
+h2 {
+  padding-top: 20px;
+  text-align: center;
+}
+
+.infoButton {
+  list-style: none;
+  display: flex;
+  align-items: center;
+}
+
+.inline {
+  flex-direction: row;
+}
+
+.btn-primary {
+  width: 10em;
+}
+
+.table {
+  margin-top: 10px;
+}
+
+.fill-remaining-space {
+  /* This fills the remaining space, by using flexbox.
+     Every toolbar row uses a flexbox row layout. */
+  flex: 1 1 auto;
+}
+
+form.normal-form {
+  margin: 10px;
+}
+
+.controls-container {
+  width: 100%;
+  padding: 5%;
+}
+
+.controls-container > * {
+  width: 100%;
+}
+
+.add-bottom-padding {
+  padding-bottom: 10px;
+}
+
+/* radio group */
+mat-radio-group mat-radio-button {
+  margin-left: 5px;
+}
+
+.button-row button {
+  margin: 5px;
+}
+
+.hide {
+  display: none;
+}
+
+/* mat-table */
+mat-footer-row mat-footer-cell {
+  justify-content: center;
+  font-style: italic;
+}
+
+/* for dialog pop-up */
+.btn-dialog-close {
+  width: 45px;
+  min-width: 0px !important;
+  height: 40px;
+  padding: 0px !important;
 }
