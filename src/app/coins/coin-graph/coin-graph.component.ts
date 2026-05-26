@@ -118,6 +118,9 @@ export class CoinGraphComponent implements OnInit {
         },
       });
       this.loading = false;
+    },
+    (error) => {
+      this.loading = false;
     });
   }
 
@@ -190,6 +193,9 @@ export class CoinGraphComponent implements OnInit {
           },
         },
       });
+      this.loading = false;
+    },
+    (error) => {
       this.loading = false;
     });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Pipe, PipeTransform } from '@angular/core';
 import { AddCoinComponent } from '../add-coin/add-coin.component';
@@ -23,7 +23,7 @@ export interface PeriodicElement {
   styleUrls: ['./coin-list.component.css'],
   selector: 'coin-list',
 })
-export class CoinListComponent implements OnInit {
+export class CoinListComponent implements OnInit, OnDestroy {
   pageTitle: string = 'CoinTracker';
   imageWidth = 10;
   imageMargin = 2;
@@ -40,7 +40,7 @@ export class CoinListComponent implements OnInit {
     'buttons',
   ];
   @ViewChild(MatSort, { static: true }) sort: MatSort;
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
 
   priceChange$ = new BehaviorSubject<Record<string, string>>({});
 
@@ -54,6 +54,7 @@ export class CoinListComponent implements OnInit {
 
   private confettiFired = false;
   private pricesLoadedCount = 0;
+  private confettiRAFId: number;
 
   constructor(
     public _coinService: CoinsService,
@@ -71,7 +72,6 @@ export class CoinListComponent implements OnInit {
   ngOnInit(): void {
     this.geefCoins();
     this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
     this._coinService.currentMessage.subscribe(
       (message) => (this.message = message)
     );
@@ -130,6 +130,7 @@ export class CoinListComponent implements OnInit {
 
       this.allCoins.sort((a, b) => a.symbol.localeCompare(b.symbol));
       this.dataSource.data = this.allCoins;
+      this.dataSource.paginator = this.paginator;
 
       for (var coin of this.allCoins) {
         this.geefPrijs(coin);
@@ -253,12 +254,18 @@ export class CoinListComponent implements OnInit {
         ctx.restore();
       }
       if (alive && frame < maxFrames) {
-        requestAnimationFrame(animate);
+        this.confettiRAFId = requestAnimationFrame(animate);
       } else {
         canvas.remove();
       }
     };
     animate();
+  }
+
+  ngOnDestroy(): void {
+    if (this.confettiRAFId) {
+      cancelAnimationFrame(this.confettiRAFId);
+    }
   }
 
   onCreate() {

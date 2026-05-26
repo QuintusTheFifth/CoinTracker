@@ -5,12 +5,10 @@
 
 <div *ngIf="!loading">
   <div *ngIf="!bigChart" class="mini-graph">
-    <canvas id="{{ coinName }}"> {{ chart }} | async </canvas>
+    <canvas id="{{ coinName }}"></canvas>
   </div>
 
   <div *ngIf="bigChart" class="big-graph">
-    <canvas id="{{ coinName }}">
-      {{ overviewChart }}
-    </canvas>
+    <canvas id="{{ coinName }}"></canvas>
   </div>
 </div>
