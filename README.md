@@ -33,11 +33,9 @@
 *MetaMask wallet authentication with glassmorphism card design*
 
 ### Portfolio Dashboard
-![Portfolio dashboard with coin list](screenshots/login.png)
+![Portfolio dashboard with crypto portfolio table](screenshots/portfolio.png)
 
-*Live portfolio balance, price charts, and transaction management*
-
-> 📷 *More screenshots coming after Firebase deploy — the app needs to be running with real Firebase data for screenshots of the coin list, detail page, and graphs.*
+*Live portfolio balance, price charts, and transaction management. View your BTC, ETH holdings with real-time prices and 24h changes.*
 
 ## 🛠️ Tech Stack
 
