@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow all reads/writes for development
+    // Restrict to authenticated users when launching publicly
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

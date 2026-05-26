@@ -1,6 +1,5 @@
 import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { CoinsService } from '../services/coin.data.service';
-import { AngularFireDatabase } from 'angularfire2/database';
 import { NotificationService } from '../services/notification.service';
 import { AddCoinComponent } from '../add-coin/add-coin.component';
 import {
@@ -96,26 +95,25 @@ export class EditCoinComponent implements OnInit, AfterViewInit {
 
   getTransactions() {
     this._coinService.getCoinsPayload().subscribe((transactions) => {
-      (this.transactionsList = transactions.map((c) => {
+      (this.transactionsList = transactions.map((c: any) => {
+        const data = c.payload.doc.data();
         const coin = {
-          symbol: c.payload.val().symbol,
-          amount: c.payload.val().amount,
-          date: c.payload.val().date ? c.payload.val().date : 'n/a',
-          exchange: c.payload.val().exchange ? c.payload.val().exchange : 'n/a',
-          priceBought: c.payload.val().priceBought
-            ? c.payload.val().priceBought
+          symbol: data.symbol,
+          amount: data.amount,
+          date: data.date ? data.date : 'n/a',
+          exchange: data.exchange ? data.exchange : 'n/a',
+          priceBought: data.priceBought
+            ? data.priceBought
             : 'n/a',
-          key: c.payload.key,
+          key: c.payload.doc.id,
         };
-        if (c.payload.val().symbol === this.message) {
-          //
+        if (data.symbol === this.message) {
           return coin;
         }
       })),
         (this.transactionsList = this.transactionsList.filter(function (c) {
           return c != null;
         }));
-      //
     });
   }
 

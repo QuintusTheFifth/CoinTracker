@@ -4,7 +4,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import * as _ from 'lodash';
 import { map, catchError } from 'rxjs/operators';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { AngularFireList, AngularFireDatabase } from 'angularfire2/database';
+import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { AuthService } from 'src/app/authentication/auth.service';
 
 export interface Coin {
@@ -58,9 +58,7 @@ export class CoinsService {
   }
 
   updateCoin(coin) {
-    //
-
-    this.FirecoinList.update(coin.$key, {
+    this.coinCollection.doc(coin.$key).update({
       amount: coin.amount,
       date: coin.date,
       exchange: coin.exchange,
@@ -83,8 +81,6 @@ export class CoinsService {
   }
 
   populateForm(coin) {
-    //
-
     this.form.setValue({
       $key: coin.key,
       coinName: this.message,
@@ -97,7 +93,7 @@ export class CoinsService {
 
   constructor(
     private _http: HttpClient,
-    private firebase: AngularFireDatabase,
+    private afs: AngularFirestore,
     public auth: AuthService
   ) {
     this.currentMessage.subscribe((message) => (this.message = message));
@@ -106,7 +102,11 @@ export class CoinsService {
     this.valutaSource.subscribe((valuta) => (this.valuta = valuta));
   }
 
-  FirecoinList: AngularFireList<any>;
+  /** Get reference to the user's coins subcollection in Firestore */
+  private get coinCollection(): AngularFirestoreCollection<any> {
+    const uid = this.auth.getUID();
+    return this.afs.collection(`users/${uid}/coins`);
+  }
 
   form: FormGroup = new FormGroup({
     $key: new FormControl(null),
@@ -142,8 +142,6 @@ export class CoinsService {
       exchange: '',
       date: today,
     });
-
-    //
   }
 
   result: any;
@@ -281,15 +279,14 @@ export class CoinsService {
   }
 
   deleteCoin(coin) {
-    const ref = this.firebase.database.ref(`${this.auth.getUID()}`);
-    ref.once('value').then((snapshot) => {
-      const user = snapshot.val();
-      for (var coin_key in user) {
-        const symbol = user[coin_key].symbol;
-        if (symbol == coin.symbol) {
-          ref.child(coin_key).remove();
+    // Get the user's coin collection and delete all coins matching this symbol
+    this.coinCollection.ref.get().then((snapshot) => {
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.symbol === coin.symbol) {
+          doc.ref.delete();
         }
-      }
+      });
     });
   }
 
@@ -302,25 +299,19 @@ export class CoinsService {
   }
 
   deleteTransaction(key) {
-    const ref = this.firebase.database.ref(`${this.auth.getUID()}`);
-    ref.once('value').then(() => {
-      ref.child(key).remove();
-    });
+    this.coinCollection.doc(key).delete();
   }
 
   getCoins() {
-    //
-    this.FirecoinList = this.firebase.list(`${this.auth.getUID()}`);
-    return this.FirecoinList.valueChanges();
+    return this.coinCollection.valueChanges();
   }
 
   getCoinsPayload() {
-    this.FirecoinList = this.firebase.list(`${this.auth.getUID()}`);
-    return this.FirecoinList.snapshotChanges();
+    return this.coinCollection.snapshotChanges();
   }
 
   insertCoin(coin, name) {
-    this.FirecoinList.push({
+    this.coinCollection.add({
       symbol: name,
       amount: coin.amount,
       priceBought: coin.priceBought,

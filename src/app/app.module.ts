@@ -17,7 +17,6 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { AngularFireModule } from 'angularfire2';
-import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 
@@ -38,7 +37,6 @@ import { MaterialModule } from './material/material.module';
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireAuthModule,
-    AngularFireDatabaseModule,
     MaterialModule,
     AppRoutingModule,
     FormsModule,
