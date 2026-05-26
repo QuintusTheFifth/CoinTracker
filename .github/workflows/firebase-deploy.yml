@@ -1,63 +1,8 @@
-name: Build
-
-on:
-  push:
-    branches:
-      - master
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js 16
-        uses: actions/setup-node@v4
-        with:
-          node-version: '16'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps --no-audit --no-fund
-
-      - name: Build Angular app
-        run: npx ng build --prod
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/coinTracker/
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: prod
-
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        continue-on-error: true
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: cointracker-26919
-
       - name: Deploy Firestore rules
         run: |
           npm install -g firebase-tools
-          firebase deploy --only firestore:rules --non-interactive
+          # Enable Firestore API via curl using the auth token
+          curl -X POST "https://serviceusage.googleapis.com/v1/projects/cointracker-26919/services/firestore.googleapis.com:enable" \
+            -H "Authorization: Bearer $(gcloud auth print-access-token)" || true
+          firebase deploy --only firestore:rules --non-interactive --project cointracker-26919
         continue-on-error: true
