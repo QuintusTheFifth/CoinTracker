@@ -6,7 +6,7 @@
   -->
   <div class="search-div">
     <!-- Empty state (shown when no coins) -->
-    <div *ngIf="allCoins.length == 0" class="empty-state">
+    <div *ngIf="allCoins?.length == 0" class="empty-state">
       <img
         draggable="false"
         src="assets/add.png"
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Portfolio Summary Header (shown when coins exist) -->
-    <span *ngIf="allCoins.length > 0" class="portfolio-header">
+    <span *ngIf="allCoins?.length > 0" class="portfolio-header">
       <div class="portfolio-header-left">
         <h1 class="portfolio-balance">
           <span class="accent">{{ berekenEindTotaal(allCoins) | currency: valuta:"symbol":"1.2-2" }}</span>
@@ -36,7 +36,7 @@
           </div>
           <div class="portfolio-meta-item">
             <span>Coins</span>
-            <span class="portfolio-meta-value">{{ allCoins.length }}</span>
+            <span class="portfolio-meta-value">{{ allCoins?.length || 0 }}</span>
           </div>
         </div>
       </div>
@@ -65,7 +65,7 @@
     =====================
   -->
   <div *ngIf="allCoins; else loadingOrError">
-    <div *ngIf="allCoins.length > 0">
+    <div *ngIf="allCoins?.length > 0">
       <mat-table
         [dataSource]="dataSource"
         matSort
