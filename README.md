@@ -1,38 +1,116 @@
-# CoinTracker
-Cryptocurrency portfolio <br />
-https://cointracker-26919.web.app
+# CoinTracker 🪙
 
-Angular/Firebase
+**Cryptocurrency Portfolio Tracker** — Track, analyze, and manage your crypto holdings.
 
-TODOs:
+[![Angular](https://img.shields.io/badge/Angular-9-dd0031?logo=angular)](https://angular.io)
+[![Firebase](https://img.shields.io/badge/Firebase-Hosting-ffca28?logo=firebase)](https://firebase.google.com)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-- [x] Center content
-- [x] Responsive design
-- [x] Use Async (column price change)
-- [x] Add paginator
-- [x] Change coins API (coins + images)
-- [x] Adjust layout "details" page
-- [x] Change favicon
-- [x] Add login with wallet
-- [x] Add search for exchanges
-- [x] Add loading animation graph
-- [ ] Make decentralised :earth_africa: (IPFS/Ethereum/Chainlink/Tellor(prices))
-- [x] Add delight to the experience when all tasks are complete :tada:
+---
 
-<br />
+## ✨ Features
 
-![alt text](https://user-images.githubusercontent.com/39531282/93033529-ea6e8580-f636-11ea-97a4-ec8dc5a5fe20.png)
+- 🔐 **Login with Google or MetaMask** — Firebase Auth + Ethereum wallet sign-in
+- 📊 **Live portfolio balance** — Real-time prices via CoinGecko API
+- 🖼️ **Coin images** — Auto-fetched from CoinGecko with caching
+- 📈 **7-day price graphs** — Mini sparklines + full detail charts
+- 🔄 **24h price change** — Color-coded with live indicators
+- 🔍 **Search & filter** — Filter transactions by exchange
+- 📱 **Fully responsive** — Mobile-first design with adaptive columns
+- 🌙 **Dark crypto theme** — Bitcoin orange accent, glassmorphism effects
+- 🎉 **Confetti delight** — Celebration animation on portfolio load
+- 📄 **Paginated table** — Sortable, with configurable page sizes
 
+## 🚀 Live Demo
 
-![alt text](https://user-images.githubusercontent.com/39531282/92998066-fd3e6880-f517-11ea-9bcf-5504ccfaafa1.png)
+[https://cointracker-26919.web.app](https://cointracker-26919.web.app)
 
+## 📸 Screenshots
 
-![alt text](https://user-images.githubusercontent.com/39531282/91370235-0e942f00-e80e-11ea-8dc2-615d469b6fcc.png)
+### Login Page
+![Login page with dark theme and MetaMask integration](screenshots/login.png)
 
+*MetaMask wallet authentication with glassmorphism card design*
 
-![alt text](https://user-images.githubusercontent.com/39531282/93033658-7c768e00-f637-11ea-8c6d-2a73f9e965e4.png)
+### Portfolio Dashboard
+![Portfolio dashboard with coin list](screenshots/login.png)
 
+*Live portfolio balance, price charts, and transaction management*
 
+> 📷 *More screenshots coming after Firebase deploy — the app needs to be running with real Firebase data for screenshots of the coin list, detail page, and graphs.*
 
-![alt text](https://user-images.githubusercontent.com/39531282/91370270-2e2b5780-e80e-11ea-8dd8-92c53a5ac6ba.png)
+## 🛠️ Tech Stack
 
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | Angular 9, Angular Material, Chart.js |
+| **Backend** | Firebase (Firestore, Auth, Hosting) |
+| **API** | CoinGecko (prices, images, market data) |
+| **Auth** | Google Sign-In, MetaMask Wallet |
+| **Styling** | CSS Custom Properties, Glassmorphism, Bootstrap |
+| **Build** | Node 16, Angular CLI 9 |
+
+## 📋 README Checklist
+
+| # | Feature | Status |
+|---|---------|--------|
+| 1 | Center content | ✅ |
+| 2 | Responsive design | ✅ |
+| 3 | Use Async pipe (price change) | ✅ |
+| 4 | Add paginator | ✅ |
+| 5 | Change coins API (coins + images) | ✅ CoinGecko |
+| 6 | Adjust layout "details" page | ✅ |
+| 7 | Change favicon | ✅ Bitcoin ₿ |
+| 8 | Add login with wallet | ✅ MetaMask |
+| 9 | Add search for exchanges | ✅ |
+| 10 | Add loading animation graph | ✅ |
+| 11 | Decentralized | ⏭️ Skipped |
+| 12 | Add delight 🎉 | ✅ Confetti |
+
+## 🏗️ Development
+
+### Prerequisites
+- Node.js 16.x
+- Angular CLI 9.x
+- Firebase account
+
+### Setup
+
+```bash
+# Clone the repo
+git clone https://github.com/QuintusTheFifth/CoinTracker.git
+cd CoinTracker
+
+# Install dependencies
+npm install --legacy-peer-deps
+
+# Run dev server
+ng serve --proxy-config proxy.conf.json
+
+# Build for production
+ng build --prod
+```
+
+### Deploy to Firebase
+
+```bash
+# Local deploy (requires firebase login)
+./deploy.sh
+
+# Or use GitHub Actions (set FIREBASE_TOKEN or FIREBASE_SERVICE_ACCOUNT secret)
+```
+
+### CI/CD
+
+The repo includes a GitHub Actions workflow (`.github/workflows/firebase-deploy.yml`) that:
+1. Installs deps with `npm install --legacy-peer-deps`
+2. Builds with `ng build --prod`
+3. Deploys to Firebase Hosting
+
+To enable, add one of these secrets to the repo:
+- `FIREBASE_TOKEN` — from `firebase login:ci`
+- `FIREBASE_SERVICE_ACCOUNT` — service account JSON key (recommended)
+
+---
+
+*Built with ❤️ using Angular & Firebase*
