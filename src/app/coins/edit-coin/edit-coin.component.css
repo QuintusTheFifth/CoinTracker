@@ -22,4 +22,53 @@ table {
     position:relative;
     margin-bottom:20px;
   }
-  
+
+  .coin-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .header-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: 1rem;
+  }
+
+  .table-responsive-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  @media (max-width: 768px) {
+    .coin-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .header-controls {
+      margin-left: 0;
+      width: 100%;
+    }
+    .times {
+      margin-bottom: 0;
+    }
+    .tx-table .mat-column-exchange {
+      display: none;
+    }
+    .tx-table .mat-column-price-bought,
+    .tx-table .mat-column-bought {
+      display: none;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .tx-table .mat-column-date {
+      display: none;
+    }
+    .tx-table .mat-column-buttons {
+      display: none;
+    }
+  }

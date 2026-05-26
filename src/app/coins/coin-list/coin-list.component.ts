@@ -185,8 +185,9 @@ export class CoinListComponent implements OnInit {
     this._coinService.initializeFormGroup();
     const dialogConfig = new MatDialogConfig();
     dialogConfig.autoFocus = true;
-    dialogConfig.maxWidth = '30%';
-    dialogConfig.height = '45%';
+    dialogConfig.maxWidth = '90vw';
+    dialogConfig.width = window.innerWidth < 600 ? '90vw' : '400px';
+    dialogConfig.maxHeight = '90vh';
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
 

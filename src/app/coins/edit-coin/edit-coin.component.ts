@@ -100,8 +100,9 @@ export class EditCoinComponent implements OnInit {
     this._coinService.populateForm(coin);
     const dialogConfig = new MatDialogConfig();
     dialogConfig.autoFocus = true;
-    dialogConfig.maxWidth = '30%';
-    dialogConfig.height = '45%';
+    dialogConfig.maxWidth = '90vw';
+    dialogConfig.width = window.innerWidth < 600 ? '90vw' : '400px';
+    dialogConfig.maxHeight = '90vh';
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
 
@@ -116,8 +117,9 @@ export class EditCoinComponent implements OnInit {
     //
     const dialogConfig = new MatDialogConfig();
     dialogConfig.autoFocus = true;
-    dialogConfig.maxWidth = '30%';
-    dialogConfig.height = '45%';
+    dialogConfig.maxWidth = '90vw';
+    dialogConfig.width = window.innerWidth < 600 ? '90vw' : '400px';
+    dialogConfig.maxHeight = '90vh';
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
 }

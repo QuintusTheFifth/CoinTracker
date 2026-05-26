@@ -1,18 +1,48 @@
 .nav-link {
-  position:relative;
-  text-align: left;
+  text-align: right;
   font-size: large;
-  text-align:right;
 }
-.navbar-brand{
-  text-align:center;
+.navbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  min-height: 56px;
 }
-.displayName{
-  color:white;
-  position: absolute;
-  right: 0;
-  top:18px;
-  margin-right:80px;
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  margin-right: auto;
+  white-space: nowrap;
+}
+.navbar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.5rem;
+}
+.nav-user-area {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.displayName {
+  color: white;
+  margin: 0;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+.navbar .nav-link {
+  padding: 0.25rem 0.5rem;
+  color: rgba(255,255,255,.5);
+  text-decoration: none;
+}
+.navbar .nav-link:hover {
+  color: rgba(255,255,255,.75);
 }
 
 mat-sidenav-container{

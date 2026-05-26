@@ -1,4 +1,3 @@
-<!-- <h1 class="md-display-4">Track your crypto holdings!</h1> -->
 <div class="contentTable">
 <div class="search-div">
   <button mat-raised-button (click)="onCreate()" data-cy="add">
@@ -8,14 +7,11 @@
     <img
       draggable="false"
       src="assets/add.png"
-      style="position: relative; left: 60px; top: 10px; height: 30%; width: 30%"
+      class="empty-state-img"
     />
   </div>
-  <span *ngIf="allCoins.length > 0">
-    <h1
-      class="md-display-4"
-      style="display: inline-block; position: relative; left: 300px"
-    >
+  <span *ngIf="allCoins.length > 0" class="portfolio-header">
+    <h1 class="md-display-4 portfolio-balance">
       Portfolio Balance:
       {{ berekenEindTotaal(allCoins) | currency: valuta:"symbol":"1.2-2" }}
     </h1>
@@ -39,7 +35,7 @@
       [dataSource]="allCoins"
       matSort
       data-cy="coinCard"
-      class="mat-elevation-z8"
+      class="mat-elevation-z8 coin-table"
     >
       <!-- Symbol Column -->
       <ng-container matColumnDef="symbol">

@@ -1,8 +1,8 @@
-<div class="graph" *ngIf="!bigChart" style="position: relative; width: 5.5vw;">
+<div *ngIf="!bigChart" class="mini-graph">
   <canvas id="{{ coinName }}"> {{ chart }} | async </canvas>
 </div>
 
-<div class="big" *ngIf="bigChart">
+<div *ngIf="bigChart" class="big-graph">
   <canvas id="{{ coinName }}">
     {{ overviewChart }}
   </canvas>

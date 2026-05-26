@@ -1,0 +1,21 @@
+.mini-graph {
+  width: 110px;
+  max-width: 80px;
+}
+
+.big-graph {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.big-graph canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+@media (max-width: 600px) {
+  .mini-graph {
+    width: 60px;
+  }
+}
