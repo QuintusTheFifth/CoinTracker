@@ -35,7 +35,10 @@ export class AddCoinComponent implements OnInit {
 
   public confirmationMessage: string = '';
 
-  public coinsymbol = this.coinService.getCoinSymbol();
+  public  coinsymbol = this.coinService.getCoinSymbol();
+
+  exchanges: string[] = ['Binance', 'UpBit', 'Bittrex', 'eToroX'];
+  filteredExchanges: Observable<string[]>;
 
   constructor(
     public coinService: CoinsService,
@@ -70,6 +73,17 @@ export class AddCoinComponent implements OnInit {
 
     this.coins = this.coinService.getValidCoins();
 
+    this.filteredExchanges = this.coinService.form.get('exchange').valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterExchanges(value ? value : ''))
+    );
+  }
+
+  private _filterExchanges(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.exchanges.filter(exchange =>
+      exchange.toLowerCase().includes(filterValue)
+    );
   }
 
   getCoinSymbols() {
@@ -139,8 +153,9 @@ export class AddCoinComponent implements OnInit {
   }
 
   getImage(coin) {
-    if (`assets/svg/icon/${coin.symbol.toLowerCase()}.svg`)
-      return `assets/svg/icon/${coin.symbol.toLowerCase()}.svg`;
+    // Use CoinGecko image if cached, otherwise return a placeholder
+    const cached = this.coinService.coinImageCache[coin.symbol.toLowerCase()];
+    return cached || 'assets/add.png';
   }
 
   onClose() {

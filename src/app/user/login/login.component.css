@@ -1,13 +1,57 @@
 .login-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 2rem;
   width: 100%;
   box-sizing: border-box;
+  min-height: 60vh;
 }
 
 .login-img {
   max-width: 100%;
   height: auto;
+  margin-bottom: 2rem;
+}
+
+.login-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.google-btn, .wallet-btn {
+  width: 100% !important;
+  padding: 8px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px;
+}
+
+.wallet-btn {
+  background-color: #f0f0f0 !important;
+  color: #333 !important;
+}
+
+.wallet-btn:hover {
+  background-color: #e0e0e0 !important;
+}
+
+.eth-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+.error-msg {
+  color: #e53935;
+  text-align: center;
+  font-size: 13px;
+  padding: 8px;
+  background: #ffebee;
+  border-radius: 4px;
 }

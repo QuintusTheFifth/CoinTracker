@@ -85,13 +85,19 @@
         <input formControlName="date" type="date" matInput placeholder="Date" />
       </mat-form-field>
       <mat-form-field>
-        <mat-select formControlName="exchange" placeholder="Exchange">
-          <mat-option>None</mat-option>
-          <mat-option value="Binance">Binance</mat-option>
-          <mat-option value="UpBit">UpBit</mat-option>
-          <mat-option value="Bittrex">Bittrex</mat-option>
-          <mat-option value="eToroX">eToroX</mat-option>
-        </mat-select>
+        <input
+          type="text"
+          matInput
+          placeholder="Exchange"
+          aria-label="Exchange"
+          formControlName="exchange"
+          [matAutocomplete]="autoExchange"
+        />
+        <mat-autocomplete #autoExchange="matAutocomplete">
+          <mat-option *ngFor="let exchange of filteredExchanges | async" [value]="exchange">
+            {{ exchange }}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
       <div class="button-row">
         <button

@@ -4,8 +4,9 @@
     <h1 class="md-display-4">
       <span
       ><img
-        src="assets/svg/icon/{{ message.toLowerCase() }}.svg"
+        src="{{ _coinService.coinImageCache[message.toLowerCase()] || 'assets/add.png' }}"
         style="width: 30px; height: 30px; margin-right:-15px;margin-bottom:5px;"
+        onerror="this.src='assets/add.png'"
       />&nbsp; &nbsp;</span>
       {{ message }} price: {{ price | currency: valuta:"symbol":"1.2-2" }}
     </h1>
@@ -32,11 +33,16 @@
       <mat-icon>add</mat-icon>Add a transaction
     </button>
     &nbsp; &nbsp;
+    <mat-form-field class="exchange-filter-input" appearance="outline">
+      <mat-label>Filter by exchange</mat-label>
+      <input matInput [(ngModel)]="exchangeFilter" placeholder="Exchange name" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
   </div>
   <div class="table-responsive-wrapper">
     <table
       mat-table
-      [dataSource]="transactionsList"
+      [dataSource]="filteredTransactionsList"
       data-cy="coinCard"
       class="mat-elevation-z8 tx-table"
       style="margin-bottom:70px;"

@@ -10,14 +10,14 @@ TODOs:
 - [x] Responsive design
 - [x] Use Async (column price change)
 - [x] Add paginator
-- [ ] Change coins API (coins + images)
+- [x] Change coins API (coins + images)
 - [x] Adjust layout "details" page
 - [x] Change favicon
-- [ ] Add login with wallet
-- [ ] Add search for exchanges
-- [ ] Add loading animation graph
+- [x] Add login with wallet
+- [x] Add search for exchanges
+- [x] Add loading animation graph
 - [ ] Make decentralised :earth_africa: (IPFS/Ethereum/Chainlink/Tellor(prices))
-- [ ] Add delight to the experience when all tasks are complete :tada:
+- [x] Add delight to the experience when all tasks are complete :tada:
 
 <br />
 

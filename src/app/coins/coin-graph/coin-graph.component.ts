@@ -10,6 +10,7 @@ import { Chart } from 'chart.js';
 export class CoinGraphComponent implements OnInit {
   chart = [];
   overviewChart = [];
+  loading: boolean = true;
 
   constructor(private _coinService: CoinsService) {}
 
@@ -52,20 +53,22 @@ export class CoinGraphComponent implements OnInit {
     var coinName = this._coinService.getCoinSymbol();
 
     this.coinName = coinName;
+    if (!coinName) { this.loading = false; return; }
     this._coinService.weekData(coinName).subscribe((res) => {
       let allDates = [];
       let data = [];
-      for (let i = 0; i <= 7; i++) {
-        if (res['Data'].Data[i].high != 0) {
-          data.push(res['Data'].Data[i].high);
-          allDates.push(res['Data'].Data[i].time);
+      const prices = res['prices'] || [];
+      for (let i = 0; i < prices.length; i++) {
+        if (prices[i][1] != 0) {
+          data.push(prices[i][1]);
+          allDates.push(prices[i][0]);
         }
       }
 
       let coinDates = [];
 
       allDates.forEach((res) => {
-        let jsDate = new Date(res * 1000);
+        let jsDate = new Date(res);
         coinDates.push(
           jsDate.toLocaleTimeString('en', {
             year: 'numeric',
@@ -112,6 +115,7 @@ export class CoinGraphComponent implements OnInit {
           },
         },
       });
+      this.loading = false;
     });
   }
 
@@ -119,20 +123,22 @@ export class CoinGraphComponent implements OnInit {
     this.overviewChart = [];
     var coinName = this._coinService.getCoinSymbol();
     this.coinName = coinName;
+    if (!coinName) { this.loading = false; return; }
     this._coinService.bigData(coinName, this.period).subscribe((res) => {
       let allDates = [];
       let data = [];
-      for (let i = 0; i <= this.period; i++) {
-        if (res['Data'].Data[i].high != 0) {
-          data.push(res['Data'].Data[i].high);
-          allDates.push(res['Data'].Data[i].time);
+      const prices = res['prices'] || [];
+      for (let i = 0; i < prices.length; i++) {
+        if (prices[i][1] != 0) {
+          data.push(prices[i][1]);
+          allDates.push(prices[i][0]);
         }
       }
 
       let coinDates = [];
 
       allDates.forEach((res) => {
-        let jsDate = new Date(res * 1000);
+        let jsDate = new Date(res);
         coinDates.push(
           jsDate.toLocaleDateString('en', {
             year: 'numeric',
@@ -182,6 +188,7 @@ export class CoinGraphComponent implements OnInit {
           },
         },
       });
+      this.loading = false;
     });
   }
 }

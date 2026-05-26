@@ -71,6 +71,8 @@ export class CoinListComponent implements OnInit {
 
   dataSource = new MatTableDataSource(this.allCoins);
 
+  private confettiFired = false;
+
   constructor(
     public _coinService: CoinsService,
     private dialog: MatDialog,
@@ -129,6 +131,7 @@ export class CoinListComponent implements OnInit {
             //$key: c.key
             price: 0,
             transactions: 0,
+            image_url: '',
           };
           //
           coin.amount = 0;
@@ -148,6 +151,7 @@ export class CoinListComponent implements OnInit {
 
       for (var coin of this.allCoins) {
         this.geefPrijs(coin);
+        this.geefImage(coin);
       }
     });
   }
@@ -178,21 +182,121 @@ export class CoinListComponent implements OnInit {
   geefPrijs(coin) {
     forkJoin({
       oldPrice: this._coinService.dailyChange(coin.symbol).pipe(
-        map((val: any) => val.Data.Data[0].open)
+        map((val: any) => val.prices[0][1])
       ),
       price: this._coinService.getCoinPrice(coin.symbol).pipe(
-        map((val: any) => val[coin.symbol][this.valuta])
+        map((val: any) => {
+          const coinId = this._coinService.coinIdMap[coin.symbol.toLowerCase()];
+          return val[coinId][this.valuta.toLowerCase()];
+        })
       )
     }).subscribe(({ oldPrice, price }) => {
       coin.price = price;
       coin.oldPrice = oldPrice;
-      const percent = (((price - oldPrice) / oldPrice) * 100).toFixed(2);
+      const percent = price && oldPrice ? (((price - oldPrice) / oldPrice) * 100).toFixed(2) : '0.00';
       this.priceChange$.next({
         ...this.priceChange$.value,
         [coin.symbol]: percent
       });
     });
   }
+
+  geefImage(coin) {
+    this._coinService.getCoinImageUrl(coin.symbol).subscribe((url) => {
+      coin.image_url = url;
+    });
+  }
+
+  /** Get price change percentage for a coin symbol (Angular 9 safe) */
+  getPriceChange(symbol: string): string {
+    const changes = this.priceChange$.getValue();
+    return changes[symbol] || '0.00';
+  }
+
+  /** Get CSS class for price change (Angular 9 safe) */
+  getPriceChangeClass(symbol: string): any {
+    const val = parseFloat(this.getPriceChange(symbol));
+    return {
+      positive: val > 0,
+      negative: val < 0
+    };
+  }
+
+  /** Trigger a simple canvas confetti burst for delight 🎉 */
+  triggerConfetti() {
+    if (this.confettiFired) return;
+    this.confettiFired = true;
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces: any[] = [];
+    const colors = ['#f44336','#e91e63','#9c27b0','#3f51b5','#03a9f4','#009688','#8bc34a','#ffeb3b','#ff9800','#ff5722'];
+
+    for (let i = 0; i < 150; i++) {
+      pieces.push({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * 200,
+        w: 6 + Math.random() * 6,
+        h: 4 + Math.random() * 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 6,
+        vy: 2 + Math.random() * 4,
+        rot: Math.random() * 360,
+        rv: (Math.random() - 0.5) * 10,
+      });
+    }
+
+    let frame = 0;
+    const maxFrames = 120;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frame++;
+      let alive = false;
+      for (const p of pieces) {
+        if (p.y > canvas.height + 50) continue;
+        alive = true;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.1;
+        p.rot += p.rv;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rot * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (alive && frame < maxFrames) {
+        requestAnimationFrame(animate);
+      } else {
+        canvas.remove();
+      }
+    };
+    animate();
+  }
+
+  /** Fire confetti once prices are loaded */
+  ngAfterViewChecked() {
+    if (
+      !this.confettiFired &&
+      this.allCoins &&
+      this.allCoins.length > 0 &&
+      this.allCoins.every(c => c.price && c.price > 0)
+    ) {
+      setTimeout(() => this.triggerConfetti(), 500);
+    }
+  }
+
   onCreate() {
     this._coinService.initializeFormGroup();
     const dialogConfig = new MatDialogConfig();

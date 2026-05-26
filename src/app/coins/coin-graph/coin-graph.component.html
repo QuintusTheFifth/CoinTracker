@@ -1,9 +1,16 @@
-<div *ngIf="!bigChart" class="mini-graph">
-  <canvas id="{{ coinName }}"> {{ chart }} | async </canvas>
+<div *ngIf="loading" class="loading-container">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading chart data...</p>
 </div>
 
-<div *ngIf="bigChart" class="big-graph">
-  <canvas id="{{ coinName }}">
-    {{ overviewChart }}
-  </canvas>
+<div *ngIf="!loading">
+  <div *ngIf="!bigChart" class="mini-graph">
+    <canvas id="{{ coinName }}"> {{ chart }} | async </canvas>
+  </div>
+
+  <div *ngIf="bigChart" class="big-graph">
+    <canvas id="{{ coinName }}">
+      {{ overviewChart }}
+    </canvas>
+  </div>
 </div>

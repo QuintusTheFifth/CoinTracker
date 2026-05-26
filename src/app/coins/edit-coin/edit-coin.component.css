@@ -43,6 +43,19 @@ table {
     overflow-x: auto;
   }
 
+  .search-div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 16px;
+  }
+
+  .exchange-filter-input {
+    width: 250px;
+    max-width: 100%;
+  }
+
   @media (max-width: 768px) {
     .coin-header {
       flex-direction: column;

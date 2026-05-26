@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { throwError, Observable, BehaviorSubject } from 'rxjs';
+import { throwError, Observable, BehaviorSubject, of } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import * as _ from 'lodash';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AngularFireList, AngularFireDatabase } from 'angularfire2/database';
 import { AuthService } from 'src/app/authentication/auth.service';
@@ -32,6 +32,13 @@ export class CoinsService {
 
   private valutaSource = new BehaviorSubject<string>('EUR');
   currentValuta = this.valutaSource.asObservable();
+
+  // CoinGecko coin ID map: symbol.toLowerCase() -> coin_id
+  coinIdMap: Record<string, string> = {};
+  coinIdMapSubject = new BehaviorSubject<Record<string, string>>({});
+
+  // CoinGecko image cache: symbol.toLowerCase() -> image_url
+  coinImageCache: Record<string, string> = {};
 
   changeMessage(message: string) {
     this.messageSource.next(message);
@@ -151,45 +158,126 @@ export class CoinsService {
     return this.coinSymbol;
   }
 
-  getCoinPrice(coinName) {
+  /** Resolve a coin symbol to its CoinGecko coin ID using the coinIdMap */
+  private resolveCoinId(coinSymbol: string): string {
+    return this.coinIdMap[coinSymbol.toLowerCase()];
+  }
+
+  /** Get current price from CoinGecko /simple/price using coin IDs */
+  getCoinPrice(coinSymbol: string) {
+    const coinId = this.resolveCoinId(coinSymbol);
+    if (!coinId) {
+      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+    }
     return this._http
       .get(
-        `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${coinName}&tsyms=${this.valuta}`
+        `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=${this.valuta.toLowerCase()}`
       )
       .pipe(map((result) => result));
   }
 
-  weekData(coinName) {
+  /** Get 7-day market chart data for the mini graph */
+  weekData(coinSymbol: string) {
+    const coinId = this.resolveCoinId(coinSymbol);
+    if (!coinId) {
+      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+    }
     return this._http
       .get(
-        `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${coinName}&tsym=${this.valuta}&limit=7`
+        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${this.valuta.toLowerCase()}&days=7`
       )
       .pipe(map((result) => result));
   }
 
-  bigData(coinName, period) {
+  /** Get extended period market chart data for the big graph */
+  bigData(coinSymbol: string, period: number) {
+    const coinId = this.resolveCoinId(coinSymbol);
+    if (!coinId) {
+      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+    }
     return this._http
       .get(
-        `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${coinName}&tsym=${this.valuta}&limit=${period}`
+        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${this.valuta.toLowerCase()}&days=${period}`
       )
       .pipe(map((result) => result));
   }
 
   counter = 0;
   addCoinsToList() {
-    this.getCoinSymbols().subscribe((c) => this.coins.push(c));
-  }
-
-  addIcons() {
-    this.coins.forEach((c) => {
-      c.icon = `assets/svg/icon/${c.symbol.toLowerCase()}`;
+    this.getCoinSymbols().subscribe((coinsArr: any[]) => {
+      this.coins = coinsArr.map((c: any) => ({
+        icon: '',
+        symbol: c.symbol,
+        name: c.name,
+      }));
     });
   }
 
-  getCoinSymbols() {
+  /** Fetch coin images from CoinGecko and cache them */
+  addIcons() {
+    this.coins.forEach((c) => {
+      if (!c.icon && this.coinImageCache[c.symbol.toLowerCase()]) {
+        c.icon = this.coinImageCache[c.symbol.toLowerCase()];
+      } else if (!c.icon) {
+        this.getCoinImageUrl(c.symbol).subscribe((url) => {
+          c.icon = url;
+          this.coinImageCache[c.symbol.toLowerCase()] = url;
+        });
+      }
+    });
+  }
+
+  /** Fetch coin list from CoinGecko /coins/list and build coinIdMap */
+  getCoinSymbols(): Observable<any[]> {
     return this._http
-      .get('https://api.coincap.io/v2/assets')
-      .pipe(map((result) => Object.values(result)[0]));
+      .get('https://api.coingecko.com/api/v3/coins/list')
+      .pipe(
+        map((result: any[]) => {
+          const map: Record<string, string> = {};
+          result.forEach((coin) => {
+            map[coin.symbol.toLowerCase()] = coin.id;
+          });
+          this.coinIdMap = map;
+          this.coinIdMapSubject.next({ ...map });
+          return result;
+        })
+      );
+  }
+
+  /** Fetch 2 days of market_chart data to calculate 24h price change */
+  dailyChange(coinSymbol: string) {
+    const coinId = this.resolveCoinId(coinSymbol);
+    if (!coinId) {
+      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+    }
+    return this._http
+      .get(
+        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${this.valuta.toLowerCase()}&days=2`
+      )
+      .pipe(map((result) => result));
+  }
+
+  /** Get coin image URL from CoinGecko */
+  getCoinImageUrl(coinSymbol: string): Observable<string> {
+    const coinId = this.resolveCoinId(coinSymbol);
+    if (!coinId) {
+      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+    }
+    if (this.coinImageCache[coinSymbol.toLowerCase()]) {
+      return of(this.coinImageCache[coinSymbol.toLowerCase()]);
+    }
+    return this._http
+      .get(
+        `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false`
+      )
+      .pipe(
+        map((result: any) => {
+          const url = result.image?.small || result.image?.large || '';
+          this.coinImageCache[coinSymbol.toLowerCase()] = url;
+          return url;
+        }),
+        catchError(() => of(''))
+      );
   }
 
   deleteCoin(coin) {
@@ -239,14 +327,6 @@ export class CoinsService {
       date: coin.date,
       exchange: coin.exchange,
     });
-  }
-
-  dailyChange(coinName) {
-    return this._http
-      .get(
-        `https://min-api.cryptocompare.com/data/v2/histoday?fsym=${coinName}&tsym=${this.valuta}&limit=1`
-      )
-      .pipe(map((result) => result));
   }
 
   key = 'e1d125c0-d5ed-4165-85eb-ddc177c4f134';

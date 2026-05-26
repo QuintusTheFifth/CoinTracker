@@ -12,12 +12,33 @@ import { AuthService } from 'src/app/authentication/auth.service';
 export class LoginComponent implements OnInit {
   public user: FormGroup;
   public errorMessage: string = '';
+  public walletLoggingIn: boolean = false;
 
   constructor(
-   public auth:AuthService
+   public auth: AuthService
   ) {}
 
   ngOnInit() {
-   
+  }
+
+  async onWalletLogin() {
+    this.walletLoggingIn = true;
+    this.errorMessage = '';
+    try {
+      await this.auth.walletLogin();
+    } catch (err) {
+      this.errorMessage = err.message || 'Failed to connect wallet.';
+      console.error('Wallet login error:', err);
+    } finally {
+      this.walletLoggingIn = false;
+    }
+  }
+
+  async onGoogleLogin() {
+    try {
+      await this.auth.googleSignin();
+    } catch (err) {
+      this.errorMessage = err.message || 'Google sign-in failed.';
+    }
   }
 }

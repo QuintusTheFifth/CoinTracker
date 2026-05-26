@@ -40,6 +40,17 @@ export class EditCoinComponent implements OnInit {
   bigChart:boolean;
   price:number;
   valuta:string;
+  exchangeFilter: string = '';
+
+  get filteredTransactionsList(): any[] {
+    if (!this.exchangeFilter || this.exchangeFilter.trim() === '') {
+      return this.transactionsList;
+    }
+    const filter = this.exchangeFilter.trim().toLowerCase();
+    return this.transactionsList.filter(tx =>
+      tx.exchange && tx.exchange.toLowerCase().includes(filter)
+    );
+  }
 
   ngOnInit(): void {
     this._coinService.currentMessage.subscribe(
@@ -52,9 +63,18 @@ export class EditCoinComponent implements OnInit {
     this._coinService.currentValuta.subscribe(
       (valuta)=>this.valuta=valuta
     )
+    if (this.message) {
+      const coinId = this._coinService.coinIdMap[this.message.toLowerCase()];
       this._coinService.getCoinPrice(this.message).subscribe(
-        (price)=>this.price=price[this.message][this.valuta]
+        (price: any) => {
+          if (coinId && price[coinId]) {
+            this.price = price[coinId][this.valuta.toLowerCase()];
+          }
+        }
       );
+      // Pre-fetch coin image for the header
+      this._coinService.getCoinImageUrl(this.message).subscribe();
+    }
 
     this.getTransactions();
     //
