@@ -6,13 +6,13 @@ Angular/Firebase
 
 TODOs:
 
-- [ ] Center content
-- [ ] Responsive design
-- [ ] Use Async (column price change)
-- [ ] Add paginator
+- [x] Center content
+- [x] Responsive design
+- [x] Use Async (column price change)
+- [x] Add paginator
 - [ ] Change coins API (coins + images)
-- [ ] Adjust layout "details" page
-- [ ] Change favicon
+- [x] Adjust layout "details" page
+- [x] Change favicon
 - [ ] Add login with wallet
 - [ ] Add search for exchanges
 - [ ] Add loading animation graph

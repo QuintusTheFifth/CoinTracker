@@ -7,6 +7,9 @@ import { CoinsService } from '../services/coin.data.service';
 import { NotificationService } from '../services/notification.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
+import { BehaviorSubject, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { MatPaginator } from '@angular/material/paginator';
 
 export interface PeriodicElement {
   symbol: string;
@@ -37,6 +40,9 @@ export class CoinListComponent implements OnInit {
     'buttons',
   ];
   @ViewChild(MatSort, { static: true }) sort: MatSort;
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+
+  priceChange$ = new BehaviorSubject<Record<string, string>>({});
 
   message: string;
   change: true;
@@ -81,6 +87,7 @@ export class CoinListComponent implements OnInit {
   ngOnInit(): void {
     this.geefCoins();
     this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
     this._coinService.currentMessage.subscribe(
       (message) => (this.message = message)
     );
@@ -137,6 +144,7 @@ export class CoinListComponent implements OnInit {
       );
 
       this.allCoins.sort((a, b) => a.symbol.localeCompare(b.symbol));
+      this.dataSource.data = this.allCoins;
 
       for (var coin of this.allCoins) {
         this.geefPrijs(coin);
@@ -167,18 +175,22 @@ export class CoinListComponent implements OnInit {
   }
 
   value;
-  async geefPrijs(coin) {
-    this._coinService.dailyChange(coin.symbol).subscribe((val: any) => {
-      coin.oldPrice = val.Data.Data[0].open;
-    });
-
-    this._coinService.getCoinPrice(coin.symbol).subscribe((val: any) => {
-      var prijs = val[coin.symbol][this.valuta];
-      coin.price = prijs;
-      coin.percent = (
-        ((coin.price - coin.oldPrice) / coin.oldPrice) *
-        100
-      ).toFixed(2);
+  geefPrijs(coin) {
+    forkJoin({
+      oldPrice: this._coinService.dailyChange(coin.symbol).pipe(
+        map((val: any) => val.Data.Data[0].open)
+      ),
+      price: this._coinService.getCoinPrice(coin.symbol).pipe(
+        map((val: any) => val[coin.symbol][this.valuta])
+      )
+    }).subscribe(({ oldPrice, price }) => {
+      coin.price = price;
+      coin.oldPrice = oldPrice;
+      const percent = (((price - oldPrice) / oldPrice) * 100).toFixed(2);
+      this.priceChange$.next({
+        ...this.priceChange$.value,
+        [coin.symbol]: percent
+      });
     });
   }
   onCreate() {

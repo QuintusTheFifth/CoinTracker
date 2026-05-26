@@ -32,7 +32,7 @@
 <div *ngIf="allCoins; else loadingOrError">
   <div *ngIf="allCoins.length > 0">
     <mat-table
-      [dataSource]="allCoins"
+      [dataSource]="dataSource"
       matSort
       data-cy="coinCard"
       class="mat-elevation-z8 coin-table"
@@ -125,11 +125,11 @@
           *matCellDef="let element"
           (click)="onEdit(element.symbol)"
           [ngClass]="{
-            positive: element.percent > 0,
-            negative: element.percent < 0
+            positive: (priceChange$ | async)?.[element.symbol] > 0,
+            negative: (priceChange$ | async)?.[element.symbol] < 0
           }"
         >
-          {{ element.percent }} %
+          {{ (priceChange$ | async)?.[element.symbol] }} %
         </mat-cell>
       </ng-container>
 
@@ -167,6 +167,10 @@
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
     </mat-table>
+    <mat-paginator
+      [pageSizeOptions]="[5, 10, 25, 100]"
+      showFirstLastButtons
+    ></mat-paginator>
   </div>
 </div>
 </div>
