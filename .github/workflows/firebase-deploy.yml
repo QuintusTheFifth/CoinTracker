@@ -41,7 +41,13 @@ jobs:
           name: dist
           path: prod
 
-      - name: Deploy to Firebase
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+
+      - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         continue-on-error: true
         with:
@@ -49,3 +55,7 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
           projectId: cointracker-26919
+
+      - name: Deploy Firestore rules
+        run: npx firebase deploy --only firestore:rules
+        continue-on-error: true
