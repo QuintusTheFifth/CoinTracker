@@ -1,145 +1,146 @@
 #!/usr/bin/env python3
-"""Deploy Firestore security rules via REST API using a GCP service account JSON key."""
-import json, base64, time, subprocess, sys, urllib.request, urllib.error, os
+"""Deploy Firestore security rules using gcloud CLI."""
+import json, subprocess, sys, os
 
 SA_PATH = "/tmp/gcp-sa.json"
-RULES_PATH = "firestore.rules"
 PROJECT_ID = "cointracker-26919"
+
+def run_cmd(cmd, **kwargs):
+    proc = subprocess.run(cmd, capture_output=True, text=True, **kwargs)
+    return proc
 
 def main():
     if not os.path.exists(SA_PATH):
         print("No service account file found")
         return False
 
-    with open(SA_PATH) as f:
-        sa = json.load(f)
-
-    client_email = sa["client_email"]
-    private_key = sa["private_key"]
-
-    # Build JWT
-    header_b64 = base64.urlsafe_b64encode(
-        json.dumps({"alg": "RS256", "typ": "JWT"}).encode()
-    ).rstrip(b"=").decode()
-
-    now = int(time.time())
-    payload = json.dumps({
-        "iss": client_email, "sub": client_email,
-        "aud": "https://oauth2.googleapis.com/token",
-        "iat": now, "exp": now + 3600,
-        "scope": "https://www.googleapis.com/auth/firebase https://www.googleapis.com/auth/cloud-platform"
-    }).encode()
-
-    payload_b64 = base64.urlsafe_b64encode(payload).rstrip(b"=").decode()
-    signing_input = (header_b64 + "." + payload_b64).encode()
-
-    # Write private key to temp file
-    import tempfile
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".pem", delete=False) as f:
-        f.write(private_key)
-        key_path = f.name
-
-    # Sign with openssl: pass signing data via stdin, key via file
-    proc = subprocess.run(
-        ["openssl", "dgst", "-sha256", "-sign", key_path],
-        input=signing_input, capture_output=True
-    )
-    os.unlink(key_path)
-    if proc.returncode != 0:
-        print(f"openssl signing failed: {proc.stderr.decode()}")
+    # Activate service account
+    result = run_cmd(["gcloud", "auth", "activate-service-account", f"--key-file={SA_PATH}"])
+    if result.returncode != 0:
+        print(f"gcloud auth failed: {result.stderr}")
         return False
+    print("✓ gcloud authenticated")
 
-    sig_b64 = base64.urlsafe_b64encode(proc.stdout).rstrip(b"=").decode()
-    jwt = f"{header_b64}.{payload_b64}.{sig_b64}"
+    # Set project
+    run_cmd(["gcloud", "config", "set", "project", PROJECT_ID])
 
-    # Exchange JWT for access token
-    req = urllib.request.Request(
-        "https://oauth2.googleapis.com/token",
-        data=f"grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion={jwt}".encode(),
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
-    )
-    try:
-        resp = json.loads(urllib.request.urlopen(req).read())
-        access_token = resp["access_token"]
-        print(f"Got access token: {access_token[:20]}...")
-    except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        print(f"Token exchange failed: {e.code} - {body}")
-        return False
-
-    # Read rules file
-    if not os.path.exists(RULES_PATH):
-        print("No firestore.rules file found")
-        return False
-    with open(RULES_PATH) as f:
+    # Try to deploy Firestore rules using gcloud
+    # Read the rules file
+    with open("firestore.rules") as f:
         rules_content = f.read()
 
-    rules_content_escaped = json.dumps(rules_content)
+    # Write the rules to a temp file
+    with open("/tmp/rules.txt", "w") as f:
+        f.write(rules_content)
 
-    # Create ruleset
+    # Use gcloud firestore export or the alpha firestore commands
+    # gcloud alpha firestore has security rules commands
+    result = run_cmd(["gcloud", "--version"])
+    print(f"gcloud version: {result.stdout[:200]}")
+
+    # Try the Firebase CLI approach but with the token from gcloud
+    result = run_cmd(["gcloud", "auth", "print-access-token"])
+    if result.returncode != 0:
+        print(f"Failed to get access token: {result.stderr}")
+        return False
+    
+    token = result.stdout.strip()
+    print(f"✓ Access token: {token[:20]}...")
+
+    # Read rules file
+    with open("firestore.rules") as f:
+        rules_content = f.read()
+
+    # Step 1: Create ruleset
+    import urllib.request, urllib.error
     ruleset_body = json.dumps({
         "source": {
             "files": [{"name": "firestore.rules", "content": rules_content}]
         }
     }).encode()
 
-    ruleset_req = urllib.request.Request(
+    req = urllib.request.Request(
         f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/rulesets",
         data=ruleset_body,
-        headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     )
     try:
-        ruleset_resp = json.loads(urllib.request.urlopen(ruleset_req).read())
-        ruleset_name = ruleset_resp["name"]
-        print(f"Created ruleset: {ruleset_name}")
+        resp = json.loads(urllib.request.urlopen(req).read())
+        ruleset_name = resp["name"]
+        print(f"✓ Created ruleset: {ruleset_name}")
     except urllib.error.HTTPError as e:
         body = e.read().decode()
-        print(f"Ruleset creation failed: {e.code} - {body}")
+        print(f"✗ Ruleset creation failed: {e.code} - {body}")
         return False
 
-    # Try to create the release with POST (first-time deploy)
-    create_url = f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases"
-    create_body = json.dumps({
-        "rulesetName": ruleset_name,
-        "name": f"projects/{PROJECT_ID}/releases/cloud.firestore"
-    }).encode()
-    create_req = urllib.request.Request(
-        f"{create_url}?releaseId=cloud.firestore",
-        data=create_body,
-        headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
-        method="POST"
-    )
+    # Step 2: Create release using a different approach
+    # Try using the Firestore REST API directly with the fields collection
+    # Actually, let's try the Firebase Management API
+    
+    # Try to deploy using the gcloud firebase CLI
+    # First check if firebase CLI is available
+    result = run_cmd(["which", "firebase"])
+    if result.returncode == 0:
+        print("firebase CLI found, trying to deploy...")
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SA_PATH
+        result = run_cmd(["npx", "firebase-tools", "deploy", "--only", "firestore:rules",
+                         "--project", PROJECT_ID, "--non-interactive"],
+                        timeout=30)
+        print(f"firebase deploy: {result.stdout[:500]}")
+        if result.returncode == 0:
+            print("✓ Firestore rules deployed via firebase CLI!")
+            return True
+    
+    # Fallback: try the Firebase Rules API v1beta1
+    print("Trying v1beta1 API...")
     try:
-        create_resp = json.loads(urllib.request.urlopen(create_req).read())
-        print(f"Created release: {create_resp.get('name', '?')}")
-        print("Firestore rules deployed successfully!")
+        body = json.dumps({"rulesetName": ruleset_name}).encode()
+        req = urllib.request.Request(
+            f"https://firebaserules.googleapis.com/v1beta1/projects/{PROJECT_ID}/releases/cloud.firestore",
+            data=body,
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+            method="PATCH"
+        )
+        resp = json.loads(urllib.request.urlopen(req).read())
+        print(f"✓ Release via v1beta1: {resp.get('name', '?')}")
         return True
     except urllib.error.HTTPError as e:
         body = e.read().decode()
-        if "already exists" in body.lower() or e.code == 409:
-            print("Release already exists, updating with PATCH...")
-            # Try PATCH with updateMask
-            patch_url = f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases/cloud.firestore?updateMask=rulesetName"
-            patch_body = json.dumps({"rulesetName": ruleset_name}).encode()
-            patch_req = urllib.request.Request(
-                patch_url,
-                data=patch_body,
-                headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
-                method="PATCH"
-            )
-            try:
-                patch_resp = json.loads(urllib.request.urlopen(patch_req).read())
-                print(f"Updated release: {patch_resp.get('name', '?')}")
-                print("Firestore rules deployed successfully!")
-                return True
-            except urllib.error.HTTPError as e2:
-                body2 = e2.read().decode()
-                print(f"Release update failed: {e2.code} - {body2}")
-                return False
-        else:
-            print(f"Release creation failed: {e.code} - {body}")
-            return False
+        print(f"v1beta1 PATCH failed: {e.code} - {body[:200]}")
+    
+    # Try creating the release via v1 with a field called 'ruleset_name'
+    try:
+        body = json.dumps({"ruleset_name": ruleset_name}).encode()
+        req = urllib.request.Request(
+            f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases",
+            data=body,
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+            method="POST"
+        )
+        resp = json.loads(urllib.request.urlopen(req).read())
+        print(f"✓ Created via v1 snake_case: {resp.get('name', '?')}")
+        return True
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"v1 snake_case POST failed: {e.code} - {body[:200]}")
+    
+    # Try with a different release name (just "firestore" instead of "cloud.firestore")
+    try:
+        body = json.dumps({"rulesetName": ruleset_name}).encode()
+        req = urllib.request.Request(
+            f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases/cloud.firestore",
+            data=body,
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+            method="PUT"
+        )
+        resp = json.loads(urllib.request.urlopen(req).read())
+        print(f"✓ Created via v1 PUT: {resp.get('name', '?')}")
+        return True
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"v1 PUT failed: {e.code} - {body[:200]}")
+    
+    return False
 
 if __name__ == "__main__":
-    success = main()
-    sys.exit(0 if success else 1)
+    sys.exit(0 if main() else 1)
