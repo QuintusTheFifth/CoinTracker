@@ -362,6 +362,38 @@ export class CoinsService {
     return this.coinImageCache[s] || this.staticImages[s] || ('assets/svg/icon/' + s + '.svg');
   }
 
+  /** Fallback price from Coinbase (keyless, EUR/USD pairs) when CoinGecko is unavailable. */
+  private coinbasePrice(symbol: string, vs: string): Observable<number | null> {
+    const product = (symbol || '').toUpperCase() + '-' + (vs || 'EUR').toUpperCase();
+    return this._http
+      .get(`https://api.exchange.coinbase.com/products/${product}/ticker`)
+      .pipe(
+        timeout(6000),
+        map((t: any) => (t && t.price ? parseFloat(t.price) : null)),
+        catchError(() => of(null))
+      );
+  }
+
+  /** Fallback OHLC history from Coinbase (keyless) → real chart data, not synthetic. */
+  private coinbaseCandles(symbol: string, days: number, vs: string): Observable<any> {
+    const product = (symbol || '').toUpperCase() + '-' + (vs || 'EUR').toUpperCase();
+    const gran = days <= 31 ? 21600 : 86400; // 6h for ≤1 month, otherwise daily
+    const end = new Date();
+    const start = new Date(Date.now() - days * 86400000);
+    const url = `https://api.exchange.coinbase.com/products/${product}/candles?granularity=${gran}&start=${start.toISOString()}&end=${end.toISOString()}`;
+    return this._http.get(url).pipe(
+      timeout(8000),
+      map((rows: any[]) => {
+        if (!Array.isArray(rows) || !rows.length) { throw new Error('no candles'); }
+        // Coinbase rows: [time(s), low, high, open, close, volume], newest first.
+        const prices = rows
+          .map((r: any) => [r[0] * 1000, r[4]])
+          .sort((a: any, b: any) => a[0] - b[0]);
+        return { prices };
+      })
+    );
+  }
+
   /** Get current price for one coin (via /coins/markets, which is reliable on the free tier). */
   getCoinPrice(coinSymbol: string) {
     const coinId = this.resolveCoinId(coinSymbol);
@@ -389,10 +421,14 @@ export class CoinsService {
           }
           return wrap(this.staticPrices[sym] !== undefined ? this.staticPrices[sym] : 0);
         }),
-        catchError(() => {
-          const price = this.staticPrices[sym];
-          return of(wrap(price !== undefined ? price : 0));
-        })
+        catchError(() =>
+          // Coinbase fallback, then static.
+          this.coinbasePrice(coinSymbol, vs).pipe(
+            map((p) => wrap(p !== null
+              ? p
+              : (this.staticPrices[sym] !== undefined ? this.staticPrices[sym] : 0)))
+          )
+        )
       );
   }
 
@@ -415,13 +451,18 @@ export class CoinsService {
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${(this.valuta || 'eur').toLowerCase()}&days=7`
       ).pipe(
         timeout(6000),
-        catchError(() => {
-          const price = this.staticPrices[sym];
-          if (price !== undefined) {
-            return of({ prices: this.synthSeries(sym, price, 50, 7 * 86400000, 7) });
-          }
-          return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
-        })
+        catchError(() =>
+          // Coinbase fallback, then deterministic synthetic.
+          this.coinbaseCandles(coinSymbol, 7, this.valuta || 'eur').pipe(
+            catchError(() => {
+              const price = this.staticPrices[sym];
+              if (price !== undefined) {
+                return of({ prices: this.synthSeries(sym, price, 50, 7 * 86400000, 7) });
+              }
+              return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
+            })
+          )
+        )
       );
   }
 
@@ -451,16 +492,22 @@ export class CoinsService {
           if (res && res.prices && res.prices.length) { this.chartCache[key] = res.prices; }
           return res;
         }),
-        catchError(() => {
-          const price = this.staticPrices[sym] !== undefined
-            ? this.staticPrices[sym]
-            : (this.marketData[sym] && this.marketData[sym].price);
-          if (price) {
-            const pts = Math.min(120, Math.max(60, Math.round(days / 3)));
-            return of({ prices: this.synthSeries(sym, price, pts, days * 86400000, days) });
-          }
-          return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
-        })
+        catchError(() =>
+          // Coinbase fallback (real OHLC), then deterministic synthetic.
+          this.coinbaseCandles(coinSymbol, days, vs).pipe(
+            map((res: any) => { if (res && res.prices && res.prices.length) { this.chartCache[key] = res.prices; } return res; }),
+            catchError(() => {
+              const price = this.staticPrices[sym] !== undefined
+                ? this.staticPrices[sym]
+                : (this.marketData[sym] && this.marketData[sym].price);
+              if (price) {
+                const pts = Math.min(120, Math.max(60, Math.round(days / 3)));
+                return of({ prices: this.synthSeries(sym, price, pts, days * 86400000, days) });
+              }
+              return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
+            })
+          )
+        )
       );
   }
 
