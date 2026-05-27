@@ -65,25 +65,32 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
     ).subscribe(
       (message) => (this.message = message)
     );
-    this._coinService.currentBigChart.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(
-      (bigChart) => (this.bigChart = bigChart)
-    );
+    // Period first: its initial emission must not trigger a render before
+    // bigChart is known (avoids a double draw on init).
     this._coinService.currentPeriod.pipe(
       takeUntil(this.destroy$)
     ).subscribe(
       (period) => {
         this.period = period;
         if (this.bigChart) {
-          this.getBigData();
+          this.render();
         }
       }
     );
-    if (!this.bigChart) {
-      this.getWeekData();
-    } else {
+    this._coinService.currentBigChart.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
+      (bigChart) => (this.bigChart = bigChart)
+    );
+    // Initial draw once message / period / bigChart are resolved.
+    this.render();
+  }
+
+  private render(): void {
+    if (this.bigChart) {
       this.getBigData();
+    } else {
+      this.getWeekData();
     }
   }
 

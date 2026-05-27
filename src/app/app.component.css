@@ -57,6 +57,13 @@
 }
 .brand-tagline { display: none; }
 
+/* Keep the collapse from flex-growing so the brand's margin-right:auto can
+   push the nav items to the right (Bootstrap 4 has no .ms-auto). */
+.crypto-nav .navbar-collapse {
+  flex-grow: 0;
+  flex-basis: auto;
+}
+
 /* Nav items */
 .crypto-nav .navbar-nav {
   display: flex;
@@ -64,8 +71,9 @@
   align-items: center;
   list-style: none;
   margin: 0;
+  margin-left: auto;
   padding: 0;
-  gap: var(--s1);
+  gap: var(--s2);
 }
 .crypto-nav .nav-link {
   padding: 0.4rem 0.75rem;

@@ -44,6 +44,7 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
   bigChart:boolean;
   price:number;
   valuta:string;
+  period: number = 90;
   exchangeFilter: string = '';
 
   get holdingsAmount(): number {
@@ -72,6 +73,12 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
       this.message = routeSymbol;
       this._coinService.changeMessage(routeSymbol);
     }
+    // Declare this is the big (detail) chart and reset to the default 3-month
+    // period BEFORE the <app-coin-graph> child initialises, so it renders the
+    // big chart immediately and the toggle (3m) matches the data shown.
+    this._coinService.changeBigChart(true);
+    this._coinService.changePeriod(90);
+    this.period = 90;
     this._coinService.currentMessage.pipe(
       takeUntil(this.destroy$)
     ).subscribe(
@@ -111,13 +118,13 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     setTimeout(() => {
-      this._coinService.changeBigChart(true);
       this._coinService.setCoinSymbol(this.message);
     });
   }
 
-  changePeriod(number){
-    this._coinService.changePeriod(number)
+  changePeriod(value) {
+    this.period = Number(value);
+    this._coinService.changePeriod(this.period);
   }
 
   transactionsList: any[];

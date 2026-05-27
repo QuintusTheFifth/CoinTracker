@@ -20,11 +20,11 @@
     </div>
     <div class="header-controls">
       <mat-button-toggle-group class="times" #group="matButtonToggleGroup"
-       (change)="changePeriod(group.value)" value="90" name="fontStyle" aria-label="Font Style">
-        <mat-button-toggle value="90">3m</mat-button-toggle>
-        <mat-button-toggle value="270">9m</mat-button-toggle>
-        <mat-button-toggle value="365">1y</mat-button-toggle>
-        <mat-button-toggle value="2000">ALL</mat-button-toggle>
+       (change)="changePeriod(group.value)" [value]="period" name="period" aria-label="Chart period">
+        <mat-button-toggle [value]="90">3m</mat-button-toggle>
+        <mat-button-toggle [value]="270">9m</mat-button-toggle>
+        <mat-button-toggle [value]="365">1y</mat-button-toggle>
+        <mat-button-toggle [value]="2000">ALL</mat-button-toggle>
       </mat-button-toggle-group>
       <button class="back-btn" [routerLink]="['/coin-list']" data-cy="">
         <mat-icon>undo</mat-icon>Back

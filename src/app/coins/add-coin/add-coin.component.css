@@ -30,6 +30,13 @@
   transition: background-color 0.14s ease, color 0.14s ease;
 }
 .dialog-close:hover { background: var(--overlay-hover); color: var(--text-primary); }
+.dialog-close:focus { outline: none; }
+.dialog-close:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--overlay-hover);
+  color: var(--text-primary);
+}
 .dialog-close mat-icon { font-size: 18px; width: 18px; height: 18px; line-height: 18px; }
 
 .coin-form {
@@ -38,7 +45,7 @@
   width: 100%;
   background: var(--surface);
   border-radius: var(--radius-lg);
-  padding: var(--s5);
+  padding: var(--s6) var(--s6) var(--s5);
 }
 
 .coin-full-width { width: 100%; }

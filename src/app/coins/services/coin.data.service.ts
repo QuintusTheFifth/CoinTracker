@@ -26,7 +26,7 @@ export class CoinsService {
   private messageSource = new BehaviorSubject<string>('');
   currentMessage = this.messageSource.asObservable();
 
-  private periodSource = new BehaviorSubject<number>(2000);
+  private periodSource = new BehaviorSubject<number>(90);
   currentPeriod = this.periodSource.asObservable();
 
   private valutaSource = new BehaviorSubject<string>(localStorage.getItem('cointracker_valuta') || 'EUR');
@@ -252,6 +252,46 @@ export class CoinsService {
     return this.coinIdMap[coinSymbol.toLowerCase()] || '';
   }
 
+  /** Deterministic PRNG (mulberry32) so fallback charts are stable across refreshes. */
+  private seededRandom(seed: number): () => number {
+    let s = seed | 0;
+    return function () {
+      s = (s + 0x6d2b79f5) | 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  private hashStr(str: string): number {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) { h = (h * 31 + str.charCodeAt(i)) | 0; }
+    return h;
+  }
+
+  /**
+   * Deterministic synthetic price series for the offline fallback. Same symbol +
+   * seed always yields the same shape (no flickering colours on refresh), while a
+   * different `seed` (e.g. the period) produces a distinct curve so timeframe
+   * changes are visible. Ends at the current static price.
+   */
+  private synthSeries(symbol: string, basePrice: number, points: number, spanMs: number, seed: number): number[][] {
+    const rng = this.seededRandom(this.hashStr(symbol) + seed);
+    const startFactor = 0.78 + rng() * 0.44; // 0.78–1.22 of current price
+    const startVal = basePrice * startFactor;
+    const now = Date.now();
+    const out: number[][] = [];
+    for (let i = 0; i < points; i++) {
+      const t = points > 1 ? i / (points - 1) : 1;
+      const trend = startVal * (1 - t) + basePrice * t;       // glide start -> now
+      const noise = (rng() - 0.5) * basePrice * 0.05;          // deterministic wobble
+      const val = Math.max(basePrice * 0.05, trend + noise);
+      out.push([now - (points - i) * (spanMs / points), val]);
+    }
+    out[out.length - 1][1] = basePrice; // anchor the latest point to the current price
+    return out;
+  }
+
   /** Get current price from CoinGecko /simple/price using coin IDs */
   getCoinPrice(coinSymbol: string) {
     const coinId = this.resolveCoinId(coinSymbol);
@@ -293,13 +333,7 @@ export class CoinsService {
         catchError(() => {
           const price = this.staticPrices[sym];
           if (price !== undefined) {
-            const now = Date.now();
-            const points = 50;
-            const prices: number[][] = [];
-            for (let i = 0; i < points; i++) {
-              prices.push([now - (points - i) * (7 * 86400000 / points), price * (0.9 + Math.random() * 0.2)]);
-            }
-            return of({ prices });
+            return of({ prices: this.synthSeries(sym, price, 50, 7 * 86400000, 7) });
           }
           return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
         })
@@ -321,13 +355,8 @@ export class CoinsService {
         catchError(() => {
           const price = this.staticPrices[sym];
           if (price !== undefined) {
-            const now = Date.now();
-            const points = 90;
-            const prices: number[][] = [];
-            for (let i = 0; i < points; i++) {
-              prices.push([now - (points - i) * (period * 86400000 / points), price * (0.85 + Math.random() * 0.3)]);
-            }
-            return of({ prices });
+            const pts = Math.min(120, Math.max(60, Math.round(Number(period) / 3)));
+            return of({ prices: this.synthSeries(sym, price, pts, Number(period) * 86400000, Number(period)) });
           }
           return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
         })

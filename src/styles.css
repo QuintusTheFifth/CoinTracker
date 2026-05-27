@@ -159,6 +159,12 @@ a { color: inherit; }
   outline-offset: 2px;
   border-radius: 4px;
 }
+/* Inputs show focus via their field border, not a second outline ring */
+.mat-input-element:focus,
+.mat-input-element:focus-visible,
+input:focus-visible {
+  outline: none;
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
