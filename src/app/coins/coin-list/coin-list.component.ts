@@ -150,7 +150,6 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
           this.geefPrijs(coin);
           this.geefImage(coin);
         }
-        this.pricesLoadedCount = 0;
       };
 
       if (Object.keys(this._coinService.coinIdMap).length > 0) {
