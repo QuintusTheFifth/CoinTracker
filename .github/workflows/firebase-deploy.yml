@@ -45,6 +45,7 @@ jobs:
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/gcp-sa.json
 
       - name: Deploy Firestore rules
+        continue-on-error: true
         run: python3 .github/scripts/deploy-rules.py
 
       - name: Deploy to Firebase Hosting

@@ -33,11 +33,18 @@ def main():
     payload_b64 = base64.urlsafe_b64encode(payload).rstrip(b"=").decode()
     signing_input = (header_b64 + "." + payload_b64).encode()
 
-    # Sign with openssl
+    # Write private key to temp file
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".pem", delete=False) as f:
+        f.write(private_key)
+        key_path = f.name
+
+    # Sign with openssl: pass signing data via stdin, key via file
     proc = subprocess.run(
-        ["openssl", "dgst", "-sha256", "-sign", "/dev/stdin"],
-        input=private_key.encode(), capture_output=True
+        ["openssl", "dgst", "-sha256", "-sign", key_path],
+        input=signing_input, capture_output=True
     )
+    os.unlink(key_path)
     if proc.returncode != 0:
         print(f"openssl signing failed: {proc.stderr.decode()}")
         return False
