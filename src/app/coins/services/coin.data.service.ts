@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { throwError, Observable, BehaviorSubject, of } from 'rxjs';
+import { throwError, Observable, BehaviorSubject, of, forkJoin } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import * as _ from 'lodash';
 import { map, catchError, timeout } from 'rxjs/operators';
@@ -98,6 +98,10 @@ export class CoinsService {
     // price/chart API calls read this.valuta directly for vs_currency.
     this.valuta = valuta;
     try { localStorage.setItem('cointracker_valuta', valuta); } catch (e) {}
+    // Prices and chart history are currency-specific — drop the caches so the
+    // next fetch returns values in the newly selected currency (not stale ones).
+    this.marketData = {};
+    this.chartCache = {};
     this.valutaSource.next(valuta);
   }
 
@@ -332,7 +336,8 @@ export class CoinsService {
       .pipe(
         timeout(9000),
         map((rows: any[]) => { this.ingestMarkets(rows); return true; }),
-        catchError(() => of(false))
+        // CoinGecko unavailable (CORS / rate-limit) → real prices from Coinbase.
+        catchError(() => this.loadMarketsViaCoinbase(symbols, vs))
       );
   }
 
@@ -372,6 +377,48 @@ export class CoinsService {
         map((t: any) => (t && t.price ? parseFloat(t.price) : null)),
         catchError(() => of(null))
       );
+  }
+
+  /** Fallback price + 24h change from Coinbase /stats (keyless). */
+  private coinbaseStats(symbol: string, vs: string): Observable<{ price: number; change24h: number } | null> {
+    const product = (symbol || '').toUpperCase() + '-' + (vs || 'EUR').toUpperCase();
+    return this._http
+      .get(`https://api.exchange.coinbase.com/products/${product}/stats`)
+      .pipe(
+        timeout(6000),
+        map((s: any) => {
+          if (!s || s.last == null) { return null; }
+          const last = parseFloat(s.last);
+          const open = parseFloat(s.open);
+          const change = open && isFinite(open) ? ((last - open) / open) * 100 : null;
+          return { price: last, change24h: change } as any;
+        }),
+        catchError(() => of(null))
+      );
+  }
+
+  /** Batch-load holdings prices/24h from Coinbase when CoinGecko is unavailable (e.g. CORS/rate-limit). */
+  private loadMarketsViaCoinbase(symbols: string[], vs: string): Observable<boolean> {
+    const uniq = Array.from(new Set((symbols || []).map((s) => (s || '').toLowerCase()))).filter(Boolean);
+    if (!uniq.length) { return of(false); }
+    return forkJoin(uniq.map((sym) => this.coinbaseStats(sym, vs))).pipe(
+      map((results: any[]) => {
+        let any = false;
+        results.forEach((r, i) => {
+          if (r && r.price != null) {
+            any = true;
+            const sym = uniq[i];
+            this.marketData[sym] = {
+              price: r.price,
+              change24h: r.change24h,
+              sparkline: (this.marketData[sym] && this.marketData[sym].sparkline) || [],
+            };
+          }
+        });
+        return any;
+      }),
+      catchError(() => of(false))
+    );
   }
 
   /** Fallback OHLC history from Coinbase (keyless) → real chart data, not synthetic. */

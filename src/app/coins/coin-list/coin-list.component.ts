@@ -313,7 +313,8 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   changeValuta(valuta) {
     this.valuta = valuta;
     this._coinService.changeValuta(valuta);
-    // Re-fetch prices/sparklines in the newly selected currency (one batch call).
+    // Re-fetch prices/sparklines in the newly selected currency (one batch call,
+    // with a Coinbase fallback inside loadMarkets when CoinGecko is unavailable).
     this._coinService.loadMarkets(this.allCoins.map((c) => c.symbol)).pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {
@@ -326,6 +327,9 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
           if (md.change24h !== null && md.change24h !== undefined) {
             changes[coin.symbol] = Number(md.change24h).toFixed(2);
           }
+        } else {
+          // Not covered by either source — fetch this coin individually.
+          this.geefPrijs(coin);
         }
       }
       this.priceChange$.next(changes);

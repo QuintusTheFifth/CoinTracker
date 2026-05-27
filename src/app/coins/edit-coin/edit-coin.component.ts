@@ -47,6 +47,11 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
   period: number = 90;
   exchangeFilter: string = '';
 
+  /** True only for values the currency pipe can format (guards 'n/a', '', null). */
+  isNum(v: any): boolean {
+    return v !== null && v !== undefined && v !== '' && v !== 'n/a' && isFinite(Number(v));
+  }
+
   get holdingsAmount(): number {
     if (!this.transactionsList) { return 0; }
     return this.transactionsList.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
