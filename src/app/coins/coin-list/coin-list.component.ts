@@ -53,10 +53,6 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private destroy$ = new Subject<void>();
 
-  private confettiFired = false;
-  private pricesLoadedCount = 0;
-  private confettiRAFId: number;
-
   constructor(
     public _coinService: CoinsService,
     private dialog: MatDialog,
@@ -214,25 +210,15 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
       map((val: any) => val.prices?.[0]?.[1])
     ).subscribe({
       next: (oldPrice) => {
-        const price = coin.price;
         coin.oldPrice = oldPrice;
+        const price = coin.price;
         const percent = price && oldPrice ? (((price - oldPrice) / oldPrice) * 100).toFixed(2) : '0.00';
         this.priceChange$.next({
           ...this.priceChange$.value,
           [coin.symbol]: percent
         });
-        this.pricesLoadedCount++;
-        if (
-          !this.confettiFired &&
-          this.pricesLoadedCount >= this.allCoins.length &&
-          this.allCoins.every(c => c.price && c.price > 0)
-        ) {
-          setTimeout(() => this.triggerConfetti(), 500);
-        }
       },
-      error: () => {
-        this.pricesLoadedCount++;
-      }
+      error: () => {}
     });
   }
 
@@ -242,75 +228,9 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  /** Trigger a simple canvas confetti burst for delight 🎉 */
-  triggerConfetti() {
-    if (this.confettiFired) return;
-    this.confettiFired = true;
-    const canvas = document.createElement('canvas');
-    canvas.style.position = 'fixed';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100vw';
-    canvas.style.height = '100vh';
-    canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = '9999';
-    document.body.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const pieces: any[] = [];
-    const colors = ['#f44336','#e91e63','#9c27b0','#3f51b5','#03a9f4','#009688','#8bc34a','#ffeb3b','#ff9800','#ff5722'];
-
-    for (let i = 0; i < 150; i++) {
-      pieces.push({
-        x: Math.random() * canvas.width,
-        y: -20 - Math.random() * 200,
-        w: 6 + Math.random() * 6,
-        h: 4 + Math.random() * 4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        vx: (Math.random() - 0.5) * 6,
-        vy: 2 + Math.random() * 4,
-        rot: Math.random() * 360,
-        rv: (Math.random() - 0.5) * 10,
-      });
-    }
-
-    let frame = 0;
-    const maxFrames = 120;
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      frame++;
-      let alive = false;
-      for (const p of pieces) {
-        if (p.y > canvas.height + 50) continue;
-        alive = true;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.1;
-        p.rot += p.rv;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((p.rot * Math.PI) / 180);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-        ctx.restore();
-      }
-      if (alive && frame < maxFrames) {
-        this.confettiRAFId = requestAnimationFrame(animate);
-      } else {
-        canvas.remove();
-      }
-    };
-    animate();
-  }
-
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    if (this.confettiRAFId) {
-      cancelAnimationFrame(this.confettiRAFId);
-    }
   }
 
   onCreate() {
