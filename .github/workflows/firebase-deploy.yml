@@ -41,14 +41,15 @@ jobs:
           name: dist
           path: prod
 
+      - name: Save service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/gcp-sa.json
+
       - name: Deploy Firestore rules
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/gcp-sa.json
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-sa.json
-          npx firebase-tools deploy --only firestore:rules --project cointracker-26919 --non-interactive
+        run: python3 .github/scripts/deploy-rules.py
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
+        continue-on-error: true
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
