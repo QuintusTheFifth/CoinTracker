@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ChangeDetectorRef } from '@angular/core';
 import { CoinsService } from '../services/coin.data.service';
 import { Chart } from 'chart.js';
 import { Subject } from 'rxjs';
@@ -32,7 +32,7 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private _coinService: CoinsService) {}
+  constructor(private _coinService: CoinsService, private cdr: ChangeDetectorRef) {}
 
   message: string;
   bigChart: boolean;
@@ -109,7 +109,10 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
         );
       });
 
-      this.chart = new Chart(coinName, {
+      this.loading = false;
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.chart = new Chart(coinName, {
         type: 'line',
         data: {
           labels: coinDates,
@@ -160,7 +163,7 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
           },
         },
       });
-      this.loading = false;
+      }, 0);
     },
     (error) => {
       this.loading = false;
@@ -199,7 +202,10 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
         );
       });
 
-      this.overviewChart = new Chart(coinName, {
+      this.loading = false;
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.overviewChart = new Chart(coinName, {
         type: 'line',
         data: {
           labels: coinDates,
@@ -253,7 +259,7 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
           },
         },
       });
-      this.loading = false;
+      }, 0);
     },
     (error) => {
       this.loading = false;

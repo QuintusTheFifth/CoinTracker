@@ -7,7 +7,7 @@ import {
   MatDialog,
   MatDialogConfig,
 } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -24,7 +24,8 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
     private notificationService: NotificationService,
     @Optional() public dialogRef: MatDialogRef<AddCoinComponent>,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   coinSymbol: string;
@@ -56,6 +57,12 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Read coin symbol from route param for direct navigation (e.g. /edit-coin/BTC)
+    const routeSymbol = this.route.snapshot.paramMap.get('symbol');
+    if (routeSymbol && !this.message) {
+      this.message = routeSymbol;
+      this._coinService.changeMessage(routeSymbol);
+    }
     this._coinService.currentMessage.pipe(
       takeUntil(this.destroy$)
     ).subscribe(
@@ -79,7 +86,7 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
       ).subscribe(
         (price: any) => {
           if (coinId && price[coinId] && this.valuta) {
-            this.price = price[coinId][this.valuta.toLowerCase()];
+            this.price = price[coinId][(this.valuta || 'eur').toLowerCase()];
           }
         }
       );

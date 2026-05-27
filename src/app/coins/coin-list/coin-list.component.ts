@@ -201,7 +201,7 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
       price: this._coinService.getCoinPrice(coin.symbol).pipe(
         map((val: any) => {
           const coinId = this._coinService.coinIdMap[coin.symbol.toLowerCase()];
-          return val[coinId][this.valuta.toLowerCase()];
+          return val[coinId][(this.valuta || 'eur').toLowerCase()];
         })
       )
     }).subscribe({
