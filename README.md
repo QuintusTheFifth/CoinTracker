@@ -28,24 +28,24 @@
 ## 📸 Screenshots
 
 ### Portfolio Dashboard
-![Portfolio dashboard with crypto table and 7-day graphs](screenshots/portfolio-dashboard.png)
+![Portfolio dashboard with crypto table and 7-day mini-graphs](screenshots/portfolio-dashboard.png)
 
-*Live portfolio with sortable table, CoinGecko prices, 24h change indicators, 7-day sparkline graphs, and paginator*
+*Live portfolio: 4 tracked coins (BTC, ETH, SOL, ADA), real-time prices, 24h change indicators, 7-day sparkline mini-graphs, sortable table with paginator*
 
 ### Add Coin Dialog
 ![Add coin form dialog](screenshots/add-coin.png)
 
-*Add coins with symbol auto-complete, amount, price, date picker, and exchange fields*
+*Add coins with symbol auto-complete, amount, price bought, date picker, and exchange fields*
 
 ### Login Page
 ![Login page with dark glassmorphism card](screenshots/login.png)
 
-*Clean glassmorphism card with Google Sign-In and MetaMask Connect Wallet buttons*
+*Clean dark glassmorphism card with Google Sign-In and MetaMask Connect Wallet*
 
 ### 404 Page
-![404 page with animated floating number](screenshots/404.png)
+![404 page](screenshots/404.png)
 
-*Dark-themed 404 with floating animation and Bitcoin orange accent*
+*Dark 404 page with "Back to Portfolio" navigation*
 
 ## 🛠️ Tech Stack
 
