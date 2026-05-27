@@ -21,8 +21,8 @@ The UI follows a flat, Linear/Vercel‑style design system: layered surfaces wit
 - **Live prices & market data** — via the CoinGecko API, with a static fallback so the app stays usable if the API is unavailable.
 - **Trend‑coloured sparklines** — 7‑day mini‑charts coloured green/red by direction; full labelled price charts on the detail view (3m / 9m / 1y / all‑time).
 - **Proper financial ledger** — right‑aligned, tabular numerals; directional ▲/▼ cues (not colour alone).
-- **Sign in with Google or MetaMask** — Firebase Auth or Ethereum wallet sign‑in.
-- **Demo mode** — explore the full app with seeded data, no account required.
+- **Sign in with Google or MetaMask** — sign‑in is required to view your portfolio, which is saved to your account (`users/{uid}` in Firestore).
+- **Demo mode** — choose **Explore the demo** on the sign‑in screen to browse a seeded sample portfolio (stored locally), no account required.
 - **EUR / USD** toggle, sortable + paginated table, and exchange filtering.
 - **Responsive** — adaptive columns, mobile stat stacking, and a floating add button on small screens.
 - **Accessible** — WCAG‑AA contrast, visible focus states, ARIA labels, and reduced‑motion support.
@@ -32,7 +32,7 @@ The UI follows a flat, Linear/Vercel‑style design system: layered surfaces wit
 
 [https://cointracker-26919.web.app](https://cointracker-26919.web.app)
 
-> Tip: the app drops into **demo mode** automatically when you're not signed in, so you can browse a populated portfolio right away.
+> Tip: click **Explore the demo** on the sign‑in screen to browse a populated sample portfolio right away — no account needed.
 
 ## Screenshots
 
@@ -96,7 +96,7 @@ ng serve --proxy-config proxy.conf.json
 # open http://localhost:4200
 ```
 
-To explore without configuring Firebase, just open the app — it falls back to **demo mode** with seeded coins. (You can also force it: `localStorage.setItem('demoMode', '1')`.)
+To explore without configuring Firebase, open the app and click **Explore the demo** on the sign‑in screen. Demo data is stored locally in your browser, and add/edit/delete update the view live. Signing in with Google or a wallet instead gives you your own portfolio, persisted per account in Firestore.
 
 ```bash
 # Production build

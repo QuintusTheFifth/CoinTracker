@@ -17,6 +17,11 @@ export class AppComponent {
   opened = false;
   navScrolled = false;
 
+  /** True when exploring the seeded demo portfolio (no real account). */
+  get isDemo(): boolean {
+    return localStorage.getItem('demoMode') === '1';
+  }
+
   @HostListener('window:scroll', [])
   onWindowScroll(): void {
     this.navScrolled = window.scrollY > 20;

@@ -123,7 +123,9 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
   transactionsList: any[];
 
   getTransactions() {
-    this._coinService.getCoinsPayload().subscribe((transactions: any[]) => {
+    this._coinService.getCoinsPayload().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((transactions: any[]) => {
       (this.transactionsList = transactions.map((c: any) => {
         const data = c.payload.doc.data();
         const coin = {

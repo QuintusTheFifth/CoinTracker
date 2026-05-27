@@ -86,6 +86,9 @@ export class AuthService {
     const uid = account.toLowerCase();
     this.uid = uid;
 
+    // Leaving demo mode now that the user is signing in for real
+    localStorage.removeItem('demoMode');
+
     // Persist wallet session
     localStorage.setItem('walletUid', uid);
 
@@ -119,6 +122,7 @@ export class AuthService {
 
   async signOut() {
     localStorage.removeItem('walletUid');
+    localStorage.removeItem('demoMode');
     await this.afAuth.auth.signOut();
     this.ngZone.run(() => {
       this.router.navigate(['login']);
@@ -138,6 +142,9 @@ export class AuthService {
       photoURL: user.photoURL,
     };
     this.uid = data.uid;
+
+    // Leaving demo mode now that the user is signed in for real
+    localStorage.removeItem('demoMode');
     //
 
     this.ngZone.run(() => {

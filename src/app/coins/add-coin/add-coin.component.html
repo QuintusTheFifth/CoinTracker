@@ -11,84 +11,88 @@
   </div>
   <input type="hidden" formControlName="$key" />
   <div class="controls-container">
-      <!-- Als coinsymbol leeg is, doe toevoeging met autocomplete field -->
-      <div *ngIf="!message; else elseBlock">
-        <mat-form-field class="coin-full-width">
-          <input
-            type="text"
-            matInput
-            placeholder="Coin"
-            aria-label="coin name"
-            [matAutocomplete]="auto"
-            [formControl]="coinName"
-            minlength="2"
-            [matAutocompleteDisabled]="!coins || !coins.length"
-          />
-
-          <mat-autocomplete #auto="matAutocomplete">
-            <mat-option
-              *ngFor="let coin of filteredCoins | async"
-              [value]="coin.symbol"
-            >
-              <img
-                class="coin-option-img"
-                aria-hidden
-                [src]="getImage(coin)"
-                height="25"
-              />
-              <span>{{ coin.symbol }}</span> |
-              <small>Name: {{ coin.name }}</small>
-            </mat-option>
-          </mat-autocomplete>
-          <mat-error *ngIf="!checkCoinSymbol(coinName.value)">
-            Insert valid coin
-          </mat-error>
+    <!-- Coin (autocomplete) when adding a new coin; locked symbol when editing -->
+    <div class="field" *ngIf="!message; else elseBlock">
+      <label class="field-label">Coin</label>
+      <mat-form-field floatLabel="never" class="coin-full-width">
+        <input
+          type="text"
+          matInput
+          placeholder="Search a coin"
+          aria-label="coin name"
+          [matAutocomplete]="auto"
+          [formControl]="coinName"
+          minlength="2"
+          [matAutocompleteDisabled]="!coins || !coins.length"
+        />
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option
+            *ngFor="let coin of filteredCoins | async"
+            [value]="coin.symbol"
+          >
+            <img class="coin-option-img" aria-hidden [src]="getImage(coin)" height="25" />
+            <span>{{ coin.symbol }}</span> |
+            <small>{{ coin.name }}</small>
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="!checkCoinSymbol(coinName.value)">
+          Insert valid coin
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <ng-template #elseBlock>
+      <div class="field">
+        <label class="field-label">Coin</label>
+        <mat-form-field floatLabel="never">
+          <input matInput disabled [value]="message" aria-label="coin name" />
         </mat-form-field>
       </div>
-      <ng-template #elseBlock>
-        <mat-form-field>
-          <input
-            placeholder="Coin Symbol"
-            matInput
-            disabled
-            [value]="message"
-            aria-label="coin name"
-            #spy
-          />
-        </mat-form-field>
-      </ng-template>
+    </ng-template>
 
-      <mat-form-field>
+    <div class="field">
+      <label class="field-label">Amount</label>
+      <mat-form-field floatLabel="never">
         <input
           formControlName="amount"
           type="number"
           min="0"
           matInput
-          placeholder="Amount"
+          placeholder="0.00"
           aria-label="amount"
           required
-          #spy
         />
         <mat-error>More than 0 units required</mat-error>
       </mat-form-field>
-      <mat-form-field>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Price bought</label>
+      <mat-form-field floatLabel="never">
         <input
           formControlName="priceBought"
           type="number"
           min="0"
           matInput
-          placeholder="Price Bought"
+          placeholder="0.00"
           aria-label="price bought"
         />
       </mat-form-field>
-      <mat-form-field>
-        <input formControlName="date" type="date" matInput placeholder="Date" />
+    </div>
+
+    <div class="field">
+      <label class="field-label">Date</label>
+      <mat-form-field floatLabel="never">
+        <input formControlName="date" type="date" matInput aria-label="date" />
       </mat-form-field>
-      <mat-form-field>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Exchange</label>
+      <mat-form-field floatLabel="never">
         <input
           type="text"
           matInput
-          placeholder="Exchange"
+          placeholder="e.g. Binance"
           aria-label="Exchange"
           formControlName="exchange"
           [matAutocomplete]="autoExchange"
@@ -99,16 +103,17 @@
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
-      <div class="button-row">
-        <button
-          class="save-btn"
-          type="submit"
-          [disabled]="!coinService.form.valid"
-        >
-          Save
-        </button>
-        <button class="close-btn" type="button" (click)="onClose()">Close</button>
-      </div>
     </div>
-</form>
 
+    <div class="button-row">
+      <button
+        class="save-btn"
+        type="submit"
+        [disabled]="!coinService.form.valid"
+      >
+        Save
+      </button>
+      <button class="close-btn" type="button" (click)="onClose()">Close</button>
+    </div>
+  </div>
+</form>

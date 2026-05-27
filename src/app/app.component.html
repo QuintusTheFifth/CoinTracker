@@ -30,10 +30,10 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="(auth.user$ | async) || isDemo">
           <a class="nav-link portfolio-link" [routerLink]="['/coin-list']" routerLinkActive="active-link">Portfolio</a>
         </li>
-        <div *ngIf="auth.user$ | async as user; else login" class="nav-user-area">
+        <div *ngIf="auth.user$ | async as user; else loggedOut" class="nav-user-area">
           <li class="nav-item">
             <p class="displayName">
               Keep HODLing,
@@ -46,11 +46,12 @@
             >
           </li>
         </div>
-        <ng-template #login>
+        <ng-template #loggedOut>
+          <li class="nav-item" *ngIf="isDemo">
+            <span class="demo-badge">Demo</span>
+          </li>
           <li class="nav-item">
-            <button mat-button class="sign-in-link" (click)="auth.googleSignin()"
-              >Sign in</button
-            >
+            <a mat-button class="sign-in-link" [routerLink]="['/login']">Sign in</a>
           </li>
         </ng-template>
       </ul>

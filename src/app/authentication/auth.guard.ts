@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { take, map, tap } from 'rxjs/operators';
 
@@ -16,22 +16,22 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean>
   {
-    // Allow demo mode without authentication
-    if (localStorage.getItem('demoMode')) {
-      return new Observable<boolean>(observer => {
-        observer.next(true);
-        observer.complete();
-      });
+    // Explicit demo mode — only set when the user chooses "Try the demo".
+    if (localStorage.getItem('demoMode') === '1') {
+      return of(true);
     }
+    // Wallet session (MetaMask) is authenticated even if Firestore is slow/offline.
+    if (localStorage.getItem('walletUid')) {
+      return of(true);
+    }
+    // Otherwise require a signed-in user; if none, send them to /login.
     return this.auth.user$.pipe(
       take(1),
       map(user => !!user),
       tap(loggedIn => {
         if (!loggedIn) {
-          // Auto-enable demo mode as fallback when no user is authenticated
-          localStorage.setItem('demoMode', '1');
           this.ngZone.run(() => {
-            this.router.navigate(['coin-list']);
+            this.router.navigate(['login']);
           });
         }
       })

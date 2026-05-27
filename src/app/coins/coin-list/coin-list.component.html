@@ -56,9 +56,9 @@
           class="valuta"
           #group="matButtonToggleGroup"
           (change)="changeValuta(group.value)"
-          value="EUR"
-          name="fontStyle"
-          aria-label="Font Style"
+          [value]="valuta"
+          name="currency"
+          aria-label="Display currency"
         >
           <mat-button-toggle value="EUR">EUR</mat-button-toggle>
           <mat-button-toggle value="USD">USD</mat-button-toggle>
@@ -127,7 +127,7 @@
         <!-- Amount Column -->
         <ng-container matColumnDef="amount">
           <mat-header-cell *matHeaderCellDef
-            ><strong>Amount Bought</strong></mat-header-cell
+            ><strong>Amount</strong></mat-header-cell
           >
           <mat-cell
             *matCellDef="let element; let i = index"
@@ -140,7 +140,7 @@
         <!-- Transactions Column -->
         <ng-container matColumnDef="transactions">
           <mat-header-cell *matHeaderCellDef>
-            <strong>Transactions</strong>
+            <strong>Txns</strong>
           </mat-header-cell>
           <mat-cell
             *matCellDef="let element; let i = index"
@@ -170,7 +170,7 @@
         <!-- Change Column -->
         <ng-container matColumnDef="change">
           <mat-header-cell *matHeaderCellDef>
-            <strong>Price Change (24h)</strong>
+            <strong>24h</strong>
           </mat-header-cell>
           <ng-container *ngIf="priceChange$ | async as changes">
             <mat-cell
@@ -191,7 +191,7 @@
         <!-- Graph Column -->
         <ng-container matColumnDef="graph">
           <mat-header-cell *matHeaderCellDef>
-            <strong>Price Graph (7d)</strong>
+            <strong>7d</strong>
           </mat-header-cell>
           <mat-cell
               *matCellDef="let element; let i = index"

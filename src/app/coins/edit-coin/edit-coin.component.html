@@ -39,12 +39,16 @@
     <button class="add-tx-btn" (click)="onCreate()" data-cy="add">
       <mat-icon>add</mat-icon>Add a transaction
     </button>
-    &nbsp; &nbsp;
-    <mat-form-field class="exchange-filter-input" appearance="outline">
-      <mat-label>Filter by exchange</mat-label>
-      <input matInput [(ngModel)]="exchangeFilter" placeholder="Exchange name" />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
+    <div class="filter-field">
+      <mat-icon class="filter-icon">search</mat-icon>
+      <input
+        class="filter-input"
+        type="text"
+        [(ngModel)]="exchangeFilter"
+        placeholder="Filter by exchange"
+        aria-label="Filter by exchange"
+      />
+    </div>
   </div>
   <div class="table-responsive-wrapper">
     <table

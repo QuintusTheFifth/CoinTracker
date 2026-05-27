@@ -147,7 +147,7 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
       this._coinService.enableDemoMode();
       obs = this._coinService.getCoins();
     }
-    obs.subscribe((allCoins: any[]) => {
+    obs.pipe(takeUntil(this.destroy$)).subscribe((allCoins: any[]) => {
       this.allCoins = this.getUnique(
         //Geeft coins met zelfde "symbol" gelijke 'amount'
         allCoins.map((c) => {
@@ -288,11 +288,11 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   changeValuta(valuta) {
+    this.valuta = valuta;
     this._coinService.changeValuta(valuta);
-    this.router
-      .navigateByUrl('edit-coin', { skipLocationChange: true })
-      .then(() => {
-        this.router.navigate(['coin-list']);
-      });
+    // Re-fetch prices (and 24h change) in the newly selected currency.
+    for (const coin of this.allCoins) {
+      this.geefPrijs(coin);
+    }
   }
 }

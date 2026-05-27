@@ -95,12 +95,39 @@
   margin-bottom: var(--s4);
 }
 
-.exchange-filter-input { width: 250px; max-width: 100%; }
-.exchange-filter-input ::ng-deep .mat-form-field-outline { color: var(--border); }
-.exchange-filter-input ::ng-deep .mat-form-field-outline-thick { color: var(--accent); }
-.exchange-filter-input ::ng-deep .mat-form-field-label { color: var(--text-muted); }
-.exchange-filter-input ::ng-deep .mat-input-element { color: var(--text-primary); }
-.exchange-filter-input ::ng-deep .mat-icon { color: var(--text-muted); }
+.filter-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  height: 38px;
+  padding: 0 var(--s3);
+  width: 260px;
+  max-width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.14s ease;
+}
+.filter-field:focus-within { border-color: var(--accent); }
+.filter-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.filter-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+}
+.filter-input::placeholder { color: var(--text-muted); }
 
 /* ── Buttons ────────────────────────────────────────────── */
 .back-btn {

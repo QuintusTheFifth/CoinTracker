@@ -29,7 +29,7 @@ export class CoinsService {
   private periodSource = new BehaviorSubject<number>(2000);
   currentPeriod = this.periodSource.asObservable();
 
-  private valutaSource = new BehaviorSubject<string>('EUR');
+  private valutaSource = new BehaviorSubject<string>(localStorage.getItem('cointracker_valuta') || 'EUR');
   currentValuta = this.valutaSource.asObservable();
 
   // CoinGecko coin ID map: symbol.toLowerCase() -> coin_id
@@ -43,6 +43,9 @@ export class CoinsService {
     'fil': 'filecoin', 'vet': 'vechain', 'aave': 'aave', 'algo': 'algorand',
   };
   coinIdMapSubject = new BehaviorSubject<Record<string, string>>({});
+
+  // Emits whenever demo-mode coins change, so views update live (like Firestore valueChanges).
+  private demoChange$ = new BehaviorSubject<number>(0);
 
   // CoinGecko image cache: symbol.toLowerCase() -> image_url
   coinImageCache: Record<string, string> = {};
@@ -83,6 +86,10 @@ export class CoinsService {
   }
 
   changeValuta(valuta) {
+    // Keep both the reactive stream AND the plain property in sync — the
+    // price/chart API calls read this.valuta directly for vs_currency.
+    this.valuta = valuta;
+    try { localStorage.setItem('cointracker_valuta', valuta); } catch (e) {}
     this.valutaSource.next(valuta);
   }
 
@@ -115,7 +122,7 @@ export class CoinsService {
   message: string;
   bigChart: boolean;
   period: number;
-  valuta: string = 'EUR';
+  valuta: string = localStorage.getItem('cointracker_valuta') || 'EUR';
 
   setValuta(valuta) {
     this.valuta = valuta;
@@ -180,9 +187,10 @@ export class CoinsService {
     } catch { return []; }
   }
 
-  /** Save coins to localStorage (demo mode) */
+  /** Save coins to localStorage (demo mode) and notify subscribers */
   private saveDemoCoins(coins: any[]): void {
     localStorage.setItem(this.demoKey, JSON.stringify(coins));
+    this.demoChange$.next(Date.now());
   }
 
   /** Whether the app is running in demo mode (localStorage fallback) */
@@ -461,29 +469,25 @@ export class CoinsService {
     this.coinCollection.doc(key).delete();
   }
 
-  getCoins() {
+  getCoins(): Observable<any[]> {
     if (this.isDemoMode) {
       // Auto-seed demo data if empty
       if (this.getDemoCoins().length === 0) {
         this.enableDemoMode();
       }
-      return new Observable(observer => {
-        observer.next(this.getDemoCoins());
-        observer.complete();
-      });
+      // Reactive: re-emits whenever demo coins change (add/edit/delete)
+      return this.demoChange$.pipe(map(() => this.getDemoCoins()));
     }
     return this.coinCollection.valueChanges();
   }
 
-  getCoinsPayload() {
+  getCoinsPayload(): Observable<any[]> {
     if (this.isDemoMode) {
-      return new Observable(observer => {
-        const coins = this.getDemoCoins();
-        observer.next(coins.map((c: any, i: number) => ({
+      return this.demoChange$.pipe(
+        map(() => this.getDemoCoins().map((c: any, i: number) => ({
           payload: { doc: { id: c.key || `demo_${i}`, data: () => c } }
-        })));
-        observer.complete();
-      });
+        })))
+      );
     }
     return this.coinCollection.snapshotChanges();
   }

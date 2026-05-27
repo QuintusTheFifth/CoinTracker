@@ -379,6 +379,16 @@ html { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent;
 }
 .mat-button-toggle-checked:hover { background: var(--surface-3) !important; }
 
+/* Kill Material's default (blue) focus overlay on toggles; use a themed
+   keyboard-focus ring instead so there's no stray indigo outline. */
+.mat-button-toggle-focus-overlay { background-color: transparent !important; }
+.mat-button-toggle .mat-button-toggle-button { outline: none !important; }
+.mat-button-toggle.cdk-keyboard-focused {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-radius: 5px;
+}
+
 /* Raised primary button */
 .mat-raised-button.mat-primary {
   background-color: var(--accent) !important;

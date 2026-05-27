@@ -160,6 +160,7 @@
   letter-spacing: 0.06em;
   border-bottom: none;
   padding: 0 14px;
+  white-space: nowrap;
 }
 .coin-table ::ng-deep .mat-row {
   min-height: 60px;

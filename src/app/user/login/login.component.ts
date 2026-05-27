@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from 'src/app/authentication/auth.service';
+import { CoinsService } from 'src/app/coins/services/coin.data.service';
 
 @Component({
   selector: 'app-login',
@@ -15,10 +16,18 @@ export class LoginComponent implements OnInit {
   public walletLoggingIn: boolean = false;
 
   constructor(
-   public auth: AuthService
+   public auth: AuthService,
+   private coinService: CoinsService,
+   private router: Router
   ) {}
 
   ngOnInit() {
+  }
+
+  /** Explicitly enter demo mode (seeded sample portfolio, no account). */
+  onDemo() {
+    this.coinService.enableDemoMode();
+    this.router.navigate(['coin-list']);
   }
 
   async onWalletLogin() {

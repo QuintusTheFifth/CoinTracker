@@ -75,9 +75,29 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--s2);
+  gap: var(--s4);
 }
 .controls-container > * { width: 100%; }
+
+/* Field = static label above a clean input box */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Compact the Material field: no floating label, no reserved subscript gap */
+.coin-form ::ng-deep .mat-form-field { width: 100%; }
+.coin-form ::ng-deep .mat-form-field-wrapper { padding-bottom: 0; margin: 0; }
+.coin-form ::ng-deep .mat-form-field-infix {
+  border-top: 0;
+  width: auto;
+}
+.coin-form ::ng-deep .mat-form-field-flex { align-items: center; }
+.coin-form ::ng-deep .mat-form-field-subscript-wrapper { position: static; margin-top: 4px; }
 
 /* Buttons */
 .button-row {
