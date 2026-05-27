@@ -11,7 +11,7 @@
 
       <button mat-raised-button class="wallet-btn" (click)="onWalletLogin()" [disabled]="walletLoggingIn">
         <span *ngIf="!walletLoggingIn">
-          <img src="assets/eth-diamond.svg" alt="ETH" class="eth-icon" onerror="this.style.display='none'" />
+          <mat-icon class="eth-icon">account_balance_wallet</mat-icon>
           Connect Wallet
         </span>
         <span *ngIf="walletLoggingIn">

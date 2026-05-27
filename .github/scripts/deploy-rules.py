@@ -73,44 +73,51 @@ def main():
         print(f"✗ Ruleset creation failed: {e.code} - {body}")
         return False
 
-    # Step 2: Create release using a different approach
-    # Try using the Firestore REST API directly with the fields collection
-    # Actually, let's try the Firebase Management API
+    # Step 2: Create release using firebase-tools with gcloud auth
+    # firebase-tools uses Application Default Credentials when available
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SA_PATH
     
-    # Try to deploy using the gcloud firebase CLI
-    # First check if firebase CLI is available
-    result = run_cmd(["which", "firebase"])
+    # Try firebase-tools deploy - the API check warning is non-fatal
+    result = run_cmd(["npx", "firebase-tools", "deploy", "--only", "firestore:rules",
+                     "--project", PROJECT_ID, "--non-interactive", "--json"],
+                    timeout=60)
+    print(f"firebase deploy stdout:\n{result.stdout[:2000]}")
+    print(f"firebase deploy stderr:\n{result.stderr[:1000]}")
+    
     if result.returncode == 0:
-        print("firebase CLI found, trying to deploy...")
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SA_PATH
-        result = run_cmd(["npx", "firebase-tools", "deploy", "--only", "firestore:rules",
-                         "--project", PROJECT_ID, "--non-interactive"],
-                        timeout=30)
-        print(f"firebase deploy: {result.stdout[:500]}")
-        if result.returncode == 0:
-            print("✓ Firestore rules deployed via firebase CLI!")
-            return True
+        try:
+            output = json.loads(result.stdout)
+            if any(r.get("status") == "success" for r in output.get("result", [])
+                   if isinstance(r, dict)):
+                print("✓ Firestore rules deployed via firebase CLI!")
+                return True
+        except (json.JSONDecodeError, KeyError, AttributeError):
+            pass
     
-    # Fallback: try the Firebase Rules API v1beta1
-    print("Trying v1beta1 API...")
+    # Try Firebase Rules API with explicit firestore release name
+    print("Trying releases/firestore instead of releases/cloud.firestore...")
     try:
         body = json.dumps({"rulesetName": ruleset_name}).encode()
         req = urllib.request.Request(
-            f"https://firebaserules.googleapis.com/v1beta1/projects/{PROJECT_ID}/releases/cloud.firestore",
+            f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases/firestore",
             data=body,
             headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
             method="PATCH"
         )
         resp = json.loads(urllib.request.urlopen(req).read())
-        print(f"✓ Release via v1beta1: {resp.get('name', '?')}")
+        print(f"✓ Created via releases/firestore: {resp.get('name', '?')}")
         return True
     except urllib.error.HTTPError as e:
         body = e.read().decode()
-        print(f"v1beta1 PATCH failed: {e.code} - {body[:200]}")
+        if "json" in body.lower() or "{" in body:
+            print(f"releases/firestore PATCH failed: {e.code} - {body[:200]}")
+        else:
+            print(f"releases/firestore PATCH failed: {e.code} - (HTML response)")
     
-    # Try creating the release via v1 with a field called 'ruleset_name'
+    # Try creating the release via v1 API (empty POST, let server pick release name)
+    print("Trying v1 POST to /releases...")
     try:
-        body = json.dumps({"ruleset_name": ruleset_name}).encode()
+        body = json.dumps({}).encode()
         req = urllib.request.Request(
             f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases",
             data=body,
@@ -118,27 +125,31 @@ def main():
             method="POST"
         )
         resp = json.loads(urllib.request.urlopen(req).read())
-        print(f"✓ Created via v1 snake_case: {resp.get('name', '?')}")
+        print(f"✓ Created via v1 POST: {resp.get('name', '?')}")
         return True
     except urllib.error.HTTPError as e:
         body = e.read().decode()
-        print(f"v1 snake_case POST failed: {e.code} - {body[:200]}")
+        print(f"v1 POST failed: {e.code} - {body[:200]}")
     
-    # Try with a different release name (just "firestore" instead of "cloud.firestore")
+    # Last resort: try the Firebase Management API
+    print("Trying Firebase Management API...")
     try:
-        body = json.dumps({"rulesetName": ruleset_name}).encode()
+        body = json.dumps({
+            "ruleset": {"source": {"files": [{"name": "firestore.rules", "content": rules_content}]}},
+            "release": {"name": f"projects/{PROJECT_ID}/releases/cloud.firestore", "rulesetName": ruleset_name}
+        }).encode()
         req = urllib.request.Request(
-            f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases/cloud.firestore",
+            f"https://firebase.googleapis.com/storage/v1beta2/projects/{PROJECT_ID}/releases",
             data=body,
             headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-            method="PUT"
+            method="POST"
         )
         resp = json.loads(urllib.request.urlopen(req).read())
-        print(f"✓ Created via v1 PUT: {resp.get('name', '?')}")
+        print(f"✓ Via Firebase Mgmt API: {resp}")
         return True
     except urllib.error.HTTPError as e:
         body = e.read().decode()
-        print(f"v1 PUT failed: {e.code} - {body[:200]}")
+        print(f"Firebase Mgmt API failed: {e.code} - {body[:200]}")
     
     return False
 

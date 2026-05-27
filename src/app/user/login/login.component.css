@@ -3,23 +3,27 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 1.5rem;
   width: 100%;
   box-sizing: border-box;
-  min-height: 60vh;
+  min-height: 0;
 }
 
 .login-img-container {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 480px;
+  width: 100%;
 }
 
 .login-img {
   max-width: 100%;
+  max-height: 280px;
   height: auto;
   display: block;
+  object-fit: contain;
 }
 
 /* Glassmorphism card */
@@ -76,6 +80,7 @@
 }
 
 .eth-icon {
+  font-size: 20px;
   width: 20px;
   height: 20px;
   vertical-align: middle;
