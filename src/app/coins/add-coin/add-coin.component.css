@@ -67,13 +67,17 @@
 .coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-label { color: var(--accent); }
 .coin-form ::ng-deep .mat-form-field-invalid .mat-form-field-label { color: var(--red); }
 .coin-form ::ng-deep .mat-error { color: var(--red); font-size: 0.78rem; }
-.coin-form ::ng-deep .mat-form-field-infix {
+/* The input box lives on the flex wrapper (not the infix), so the placeholder —
+   which Material positions absolutely at the infix's left edge — is inset by the
+   padding too, instead of hugging the left border. */
+.coin-form ::ng-deep .mat-form-field-flex {
+  align-items: center;
   background: var(--surface-2);
-  border-radius: var(--radius-sm);
-  padding: 0.55rem 0.75rem;
   border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.62rem 0.85rem;
 }
-.coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-infix { border-color: var(--accent); }
+.coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-flex { border-color: var(--accent); }
 .coin-form ::ng-deep .mat-form-field-disabled .mat-input-element { color: var(--text-muted); }
 
 /* Controls */
@@ -100,13 +104,14 @@
 .coin-form ::ng-deep .mat-form-field { width: 100%; }
 .coin-form ::ng-deep .mat-form-field-wrapper { padding-bottom: 0; margin: 0; }
 .coin-form ::ng-deep .mat-form-field-infix {
+  border: none;
   border-top: 0;
+  background: transparent;
+  padding: 0;
   width: auto;
-  padding: 0.72rem 0.9rem;
-  min-height: 22px;
+  min-height: 20px;
 }
 .coin-form ::ng-deep .mat-input-element { line-height: 1.5; }
-.coin-form ::ng-deep .mat-form-field-flex { align-items: center; }
 /* Dark-friendly native date picker icon (was bright blue) */
 .coin-form ::ng-deep input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.6);
