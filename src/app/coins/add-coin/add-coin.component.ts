@@ -49,9 +49,7 @@ export class AddCoinComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService
   ) {
     this.filteredCoins = this.coinName.valueChanges.pipe(
-      this.coinService.getCoinSymbol()
-        ? startWith(this.coinService.getCoinSymbol())
-        : startWith(),
+      startWith(''),
       map((coin) => (coin ? this._filterCoins(coin) : this.coins.slice()))
     );
 
@@ -62,9 +60,9 @@ export class AddCoinComponent implements OnInit, OnDestroy {
 
   private _filterCoins(value: string): Coin[] {
     const filterValue = value.toLowerCase();
-    if (!this.coins || !this.coins.length || !this.coins[0]) { return []; }
-    return this.coins[0].filter(
-      (coin) => coin.symbol.toLowerCase().indexOf(filterValue) === 0
+    if (!this.coins || !this.coins.length) { return []; }
+    return this.coins.filter(
+      (coin: any) => coin.symbol && coin.symbol.toLowerCase().indexOf(filterValue) === 0
     );
   }
 
@@ -77,6 +75,18 @@ export class AddCoinComponent implements OnInit, OnDestroy {
     ).subscribe(message => this.message = message)
 
     this.coins = this.coinService.getValidCoins();
+
+    // If the API hasn't loaded coins yet, seed from static coinIdMap
+    if (!this.coins || this.coins.length === 0) {
+      const staticCoins: Coin[] = Object.keys(this.coinService.coinIdMap).map(sym => ({
+        icon: '',
+        symbol: sym.toUpperCase(),
+        name: sym,
+      }));
+      if (staticCoins.length > 0) {
+        this.coins = staticCoins;
+      }
+    }
 
     this.filteredExchanges = this.coinService.form.get('exchange').valueChanges.pipe(
       startWith(''),
@@ -103,9 +113,9 @@ export class AddCoinComponent implements OnInit, OnDestroy {
   key;
 
   checkCoinSymbol(symbol) {
-    if (!this.coins || !this.coins[0]) { return true; }
+    if (!symbol || !this.coins || !this.coins.length) { return true; }
     var good = false;
-    for (var coin of this.coins[0]) {
+    for (var coin of this.coins) {
       if (coin.symbol == symbol) {
         good = true;
         break;
