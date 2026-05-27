@@ -27,20 +27,20 @@
 
 ## 📸 Screenshots
 
-### Login Page
-![Login page with dark glassmorphism card](screenshots/login.png)
-
-*Clean glassmorphism card with Google Sign-In and MetaMask Connect Wallet buttons*
-
 ### Portfolio Dashboard
-![Portfolio dashboard with crypto holdings](screenshots/portfolio-empty.png)
+![Portfolio dashboard with crypto table and 7-day graphs](screenshots/portfolio-dashboard.png)
 
-*Real-time portfolio tracker with live CoinGecko prices, 7-day sparkline charts, and 24h change indicators*
+*Live portfolio with sortable table, CoinGecko prices, 24h change indicators, 7-day sparkline graphs, and paginator*
 
 ### Add Coin Dialog
 ![Add coin form dialog](screenshots/add-coin.png)
 
 *Add coins with symbol auto-complete, amount, price, date picker, and exchange fields*
+
+### Login Page
+![Login page with dark glassmorphism card](screenshots/login.png)
+
+*Clean glassmorphism card with Google Sign-In and MetaMask Connect Wallet buttons*
 
 ### 404 Page
 ![404 page with animated floating number](screenshots/404.png)
