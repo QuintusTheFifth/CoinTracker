@@ -17,6 +17,7 @@
             [matAutocomplete]="auto"
             [formControl]="coinName"
             minlength="2"
+            [matAutocompleteDisabled]="!coins || !coins.length"
           />
 
           <mat-autocomplete #auto="matAutocomplete">

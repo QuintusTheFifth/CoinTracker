@@ -24,7 +24,7 @@ export class AddCoinComponent implements OnInit, OnDestroy {
   coinSubmit: Coin;
 
   coinName = new FormControl();
-  coins;
+  coins = [];
 
   filteredCoins: Observable<Coin[]>;
 
@@ -62,7 +62,7 @@ export class AddCoinComponent implements OnInit, OnDestroy {
 
   private _filterCoins(value: string): Coin[] {
     const filterValue = value.toLowerCase();
-    if (!this.coins || !this.coins[0]) { return []; }
+    if (!this.coins || !this.coins.length || !this.coins[0]) { return []; }
     return this.coins[0].filter(
       (coin) => coin.symbol.toLowerCase().indexOf(filterValue) === 0
     );

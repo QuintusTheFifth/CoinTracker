@@ -37,6 +37,11 @@
 
 *Real-time portfolio tracker with live CoinGecko prices, 7-day sparkline charts, and 24h change indicators*
 
+### Add Coin Dialog
+![Add coin form dialog](screenshots/add-coin.png)
+
+*Add coins with symbol auto-complete, amount, price, date picker, and exchange fields*
+
 ### 404 Page
 ![404 page with animated floating number](screenshots/404.png)
 
