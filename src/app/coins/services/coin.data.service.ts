@@ -33,7 +33,15 @@ export class CoinsService {
   currentValuta = this.valutaSource.asObservable();
 
   // CoinGecko coin ID map: symbol.toLowerCase() -> coin_id
-  coinIdMap: Record<string, string> = {};
+  // Static fallback for top coins so the app works without the /coins/list API call
+  coinIdMap: Record<string, string> = {
+    'btc': 'bitcoin', 'eth': 'ethereum', 'sol': 'solana', 'ada': 'cardano',
+    'usdt': 'tether', 'bnb': 'binancecoin', 'xrp': 'ripple', 'usdc': 'usd-coin',
+    'doge': 'dogecoin', 'dot': 'polkadot', 'matic': 'matic-network', 'shib': 'shiba-inu',
+    'trx': 'tron', 'avax': 'avalanche-2', 'link': 'chainlink', 'uni': 'uniswap',
+    'atom': 'cosmos', 'ltc': 'litecoin', 'etc': 'ethereum-classic', 'xlm': 'stellar',
+    'fil': 'filecoin', 'vet': 'vechain', 'aave': 'aave', 'algo': 'algorand',
+  };
   coinIdMapSubject = new BehaviorSubject<Record<string, string>>({});
 
   // CoinGecko image cache: symbol.toLowerCase() -> image_url
@@ -85,7 +93,7 @@ export class CoinsService {
   message: string;
   bigChart: boolean;
   period: number;
-  valuta: string;
+  valuta: string = 'EUR';
 
   setValuta(valuta) {
     this.valuta = valuta;
@@ -210,7 +218,8 @@ export class CoinsService {
 
   /** Resolve a coin symbol to its CoinGecko coin ID using the coinIdMap */
   private resolveCoinId(coinSymbol: string): string {
-    return this.coinIdMap[coinSymbol.toLowerCase()];
+    if (!coinSymbol) return '';
+    return this.coinIdMap[coinSymbol.toLowerCase()] || '';
   }
 
   /** Get current price from CoinGecko /simple/price using coin IDs */
@@ -251,12 +260,17 @@ export class CoinsService {
 
   counter = 0;
   addCoinsToList() {
-    this.getCoinSymbols().subscribe((coinsArr: any[]) => {
-      this.coins = coinsArr.map((c: any) => ({
-        icon: '',
-        symbol: c.symbol,
-        name: c.name,
-      }));
+    this.getCoinSymbols().subscribe({
+      next: (coinsArr: any[]) => {
+        if (coinsArr && coinsArr.length > 0) {
+          this.coins = coinsArr.map((c: any) => ({
+            icon: '',
+            symbol: c.symbol,
+            name: c.name,
+          }));
+        }
+      },
+      error: () => {} // Silently ignore — static coinIdMap already covers fallback
     });
   }
 
@@ -280,13 +294,16 @@ export class CoinsService {
       .get('https://api.coingecko.com/api/v3/coins/list')
       .pipe(
         map((result: any[]) => {
-          const map: Record<string, string> = {};
           result.forEach((coin) => {
-            map[coin.symbol.toLowerCase()] = coin.id;
+            this.coinIdMap[coin.symbol.toLowerCase()] = coin.id;
           });
-          this.coinIdMap = map;
-          this.coinIdMapSubject.next({ ...map });
+          this.coinIdMapSubject.next({ ...this.coinIdMap });
           return result;
+        }),
+        catchError(() => {
+          // API failed — emit static fallback immediately so prices still work
+          this.coinIdMapSubject.next({ ...this.coinIdMap });
+          return of([]);
         })
       );
   }

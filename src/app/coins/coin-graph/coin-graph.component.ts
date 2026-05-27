@@ -79,7 +79,7 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
   getWeekData() {
     if (this.chart instanceof Chart) { this.chart.destroy(); }
     this.chart = [];
-    var coinName = this.coinSymbol;
+    var coinName = this.coinSymbol || this.message;
 
     this.coinName = coinName;
     if (!coinName) { this.loading = false; return; }
@@ -170,7 +170,7 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
   getBigData() {
     if (this.overviewChart instanceof Chart) { this.overviewChart.destroy(); }
     this.overviewChart = [];
-    var coinName = this.coinSymbol;
+    var coinName = this.coinSymbol || this.message;
     this.coinName = coinName;
     if (!coinName) { this.loading = false; return; }
     this._coinService.bigData(coinName, this.period).pipe(

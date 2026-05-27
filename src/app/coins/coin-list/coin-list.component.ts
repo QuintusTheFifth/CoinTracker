@@ -204,21 +204,26 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
           return val[coinId][this.valuta.toLowerCase()];
         })
       )
-    }).subscribe(({ oldPrice, price }) => {
-      coin.price = price;
-      coin.oldPrice = oldPrice;
-      const percent = price && oldPrice ? (((price - oldPrice) / oldPrice) * 100).toFixed(2) : '0.00';
-      this.priceChange$.next({
-        ...this.priceChange$.value,
-        [coin.symbol]: percent
-      });
-      this.pricesLoadedCount++;
-      if (
-        !this.confettiFired &&
-        this.pricesLoadedCount >= this.allCoins.length &&
-        this.allCoins.every(c => c.price && c.price > 0)
-      ) {
-        setTimeout(() => this.triggerConfetti(), 500);
+    }).subscribe({
+      next: ({ oldPrice, price }) => {
+        coin.price = price;
+        coin.oldPrice = oldPrice;
+        const percent = price && oldPrice ? (((price - oldPrice) / oldPrice) * 100).toFixed(2) : '0.00';
+        this.priceChange$.next({
+          ...this.priceChange$.value,
+          [coin.symbol]: percent
+        });
+        this.pricesLoadedCount++;
+        if (
+          !this.confettiFired &&
+          this.pricesLoadedCount >= this.allCoins.length &&
+          this.allCoins.every(c => c.price && c.price > 0)
+        ) {
+          setTimeout(() => this.triggerConfetti(), 500);
+        }
+      },
+      error: () => {
+        this.pricesLoadedCount++;
       }
     });
   }
