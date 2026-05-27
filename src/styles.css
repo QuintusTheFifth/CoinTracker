@@ -18,8 +18,11 @@
   --text-secondary: #8b949e;
   --green: #3fb950;
   --red: #f85149;
-  --border: #30363d;
-  --warn: #f99157;
+  --gradient-end: #448aff;
+  --accent-dark: #d67e1a;
+  --chart-accent: #3cba9f;
+  --bg-primary: #0d1117;
+  --warn: var(--warn);
 }
 
 /* --- Body & Global --- */
@@ -60,6 +63,12 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
+}
+
+/* Firefox scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--bg-primary);
 }
 
 /* --- Global transitions --- */
@@ -229,7 +238,7 @@ snack-bar-container.success {
   color: #fff !important;
 }
 snack-bar-container.warn {
-  background-color: #f99157 !important;
+  background-color: var(--warn) !important;
   color: #fff !important;
 }
 snack-bar-container.notification simple-snack-bar {

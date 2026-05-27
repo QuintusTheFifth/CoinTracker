@@ -17,7 +17,6 @@ const darkBackgroundPlugin = {
     ctx.restore();
   }
 };
-Chart.pluginService.register(darkBackgroundPlugin);
 
 @Component({
   selector: 'app-coin-graph',
@@ -114,12 +113,14 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
           datasets: [
             {
               data: data,
-              borderColor: '#3cba9f',
-              fill: false,
+              borderColor: '#f7931a',
+              backgroundColor: 'rgba(247, 147, 26, 0.08)',
+              fill: true,
             },
           ],
         },
         options: {
+          plugins: [darkBackgroundPlugin],
           legend: {
             display: false,
           },
@@ -202,12 +203,14 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
           datasets: [
             {
               data: data,
-              borderColor: '#3cba9f',
+              borderColor: '#f7931a',
+              backgroundColor: 'rgba(247, 147, 26, 0.12)',
               fill: true,
             },
           ],
         },
         options: {
+          plugins: [darkBackgroundPlugin],
           legend: {
             display: false,
           },
