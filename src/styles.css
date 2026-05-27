@@ -163,6 +163,17 @@ html {
   color: var(--text-primary) !important;
   caret-color: var(--accent) !important;
 }
+/* Visible input backgrounds for dark theme */
+.mat-form-field-infix {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+}
+.mat-form-field.mat-focused .mat-form-field-infix {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.06);
+}
 .mat-select-value {
   color: var(--text-primary) !important;
 }

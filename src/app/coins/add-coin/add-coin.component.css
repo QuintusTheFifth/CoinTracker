@@ -73,6 +73,19 @@
   font-size: 0.8rem;
 }
 
+/* ── Visible input backgrounds for dark theme ──────────── */
+.coin-form ::ng-deep .mat-form-field-infix {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+}
+
+.coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-infix {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 /* ── Dark Autocomplete Panel ────────────────────────────── */
 ::ng-deep .mat-autocomplete-panel {
   background: var(--bg-card);

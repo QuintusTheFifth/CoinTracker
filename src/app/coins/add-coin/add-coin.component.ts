@@ -103,6 +103,7 @@ export class AddCoinComponent implements OnInit, OnDestroy {
   key;
 
   checkCoinSymbol(symbol) {
+    if (!this.coins || !this.coins[0]) { return true; }
     var good = false;
     for (var coin of this.coins[0]) {
       if (coin.symbol == symbol) {
