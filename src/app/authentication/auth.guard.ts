@@ -16,13 +16,22 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean>
   {
+    // Allow demo mode without authentication
+    if (localStorage.getItem('demoMode')) {
+      return new Observable<boolean>(observer => {
+        observer.next(true);
+        observer.complete();
+      });
+    }
     return this.auth.user$.pipe(
       take(1),
       map(user => !!user),
       tap(loggedIn => {
         if (!loggedIn) {
+          // Auto-enable demo mode as fallback when no user is authenticated
+          localStorage.setItem('demoMode', '1');
           this.ngZone.run(() => {
-            this.router.navigate(['login']);
+            this.router.navigate(['coin-list']);
           });
         }
       })

@@ -312,7 +312,7 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onEdit(coinSymbol) {
     this._coinService.changeMessage(coinSymbol);
-    this.router.navigateByUrl('edit-coin');
+    this.router.navigateByUrl('edit-coin/' + coinSymbol);
   }
 
   onDelete(coin) {

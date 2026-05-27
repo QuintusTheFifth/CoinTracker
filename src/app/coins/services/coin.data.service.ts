@@ -362,6 +362,10 @@ export class CoinsService {
 
   getCoins() {
     if (this.isDemoMode) {
+      // Auto-seed demo data if empty
+      if (this.getDemoCoins().length === 0) {
+        this.enableDemoMode();
+      }
       return new Observable(observer => {
         observer.next(this.getDemoCoins());
         observer.complete();
