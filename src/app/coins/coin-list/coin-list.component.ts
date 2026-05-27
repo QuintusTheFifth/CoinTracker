@@ -194,19 +194,27 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   value;
   geefPrijs(coin) {
-    forkJoin({
-      oldPrice: this._coinService.dailyChange(coin.symbol).pipe(
-        map((val: any) => val.prices?.[0]?.[1])
-      ),
-      price: this._coinService.getCoinPrice(coin.symbol).pipe(
-        map((val: any) => {
-          const coinId = this._coinService.coinIdMap[coin.symbol.toLowerCase()];
-          return val[coinId][(this.valuta || 'eur').toLowerCase()];
-        })
-      )
-    }).subscribe({
-      next: ({ oldPrice, price }) => {
-        coin.price = price;
+    // Fetch price independently — don't block on dailyChange
+    this._coinService.getCoinPrice(coin.symbol).pipe(
+      map((val: any) => {
+        const coinId = this._coinService.coinIdMap[coin.symbol.toLowerCase()];
+        return val[coinId][(this.valuta || 'eur').toLowerCase()];
+      })
+    ).subscribe({
+      next: (price) => {
+        coin.price = price || 0;
+      },
+      error: () => {
+        coin.price = 0;
+      }
+    });
+
+    // Fetch 24h change independently
+    this._coinService.dailyChange(coin.symbol).pipe(
+      map((val: any) => val.prices?.[0]?.[1])
+    ).subscribe({
+      next: (oldPrice) => {
+        const price = coin.price;
         coin.oldPrice = oldPrice;
         const percent = price && oldPrice ? (((price - oldPrice) / oldPrice) * 100).toFixed(2) : '0.00';
         this.priceChange$.next({
