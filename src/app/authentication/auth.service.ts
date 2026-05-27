@@ -120,7 +120,9 @@ export class AuthService {
   async signOut() {
     localStorage.removeItem('walletUid');
     await this.afAuth.auth.signOut();
-    return this.router.navigate(['login']);
+    this.ngZone.run(() => {
+      this.router.navigate(['login']);
+    });
   }
 
   private updateUserData(user) {
@@ -138,7 +140,9 @@ export class AuthService {
     this.uid = data.uid;
     //
 
-    this.router.navigateByUrl('coin-list');
+    this.ngZone.run(() => {
+      this.router.navigateByUrl('coin-list');
+    });
 
     //change only the properties that changed
     return userRef.set(data, { merge: true });

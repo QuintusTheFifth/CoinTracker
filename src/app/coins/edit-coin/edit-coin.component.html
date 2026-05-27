@@ -4,15 +4,15 @@
     <h1 class="md-display-4">
       <span
       ><img
-        src="{{ _coinService.coinImageCache[message.toLowerCase()] || 'assets/add.png' }}"
+        [src]="_coinService.coinImageCache[message.toLowerCase()] || 'assets/add.png'"
         style="width: 30px; height: 30px; margin-right:-15px;margin-bottom:5px;"
-        onerror="this.src='assets/add.png'"
+        (error)="$event.target.src='assets/add.png'"
       />&nbsp; &nbsp;</span>
       {{ message }} price: {{ price | currency: valuta:"symbol":"1.2-2" }}
     </h1>
     <div class="header-controls">
       <mat-button-toggle-group class="times" #group="matButtonToggleGroup"
-       (change)="changePeriod(group.value)" value = "group.value" name="fontStyle" aria-label="Font Style">
+       (change)="changePeriod(group.value)" value="90" name="fontStyle" aria-label="Font Style">
         <mat-button-toggle value="90">3m</mat-button-toggle>
         <mat-button-toggle value="270">9m</mat-button-toggle>
         <mat-button-toggle value="365">1y</mat-button-toggle>
@@ -56,7 +56,7 @@
         <td mat-cell *matCellDef="let element" (click)="onEdit(element)">
           <span
             ><img
-              src="assets/svg/icon/{{ element.symbol.toLowerCase() }}.svg"
+              [src]="'assets/svg/icon/' + element.symbol.toLowerCase() + '.svg'"
               style="width: 30px; height: 30px;"
             />&nbsp; &nbsp;</span
           >

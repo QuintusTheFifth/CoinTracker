@@ -74,6 +74,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     MatTableModule,
     MatAutocompleteModule,
     MatSnackBarModule,
+    MatDialogModule,
+    MatSortModule,
     FlexLayoutModule,
     MatListModule,
     MatCardModule,

@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, Input, Optional } from '@angular/core';
 import { CoinsService } from '../services/coin.data.service';
 import { NotificationService } from '../services/notification.service';
 import { AddCoinComponent } from '../add-coin/add-coin.component';
@@ -8,17 +8,21 @@ import {
   MatDialogConfig,
 } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-edit-coin',
   templateUrl: './edit-coin.component.html',
   styleUrls: ['./edit-coin.component.css'],
 })
-export class EditCoinComponent implements OnInit, AfterViewInit {
+export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   constructor(
     public _coinService: CoinsService,
     private notificationService: NotificationService,
-    public dialogRef: MatDialogRef<AddCoinComponent>,
+    @Optional() public dialogRef: MatDialogRef<AddCoinComponent>,
     private dialog: MatDialog,
     private router: Router
   ) {}
@@ -52,27 +56,37 @@ export class EditCoinComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this._coinService.currentMessage.subscribe(
+    this._coinService.currentMessage.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
       (message) => (this.message = message)
     );
-    this._coinService.currentBigChart.subscribe(
+    this._coinService.currentBigChart.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
       (bigChart)=>(this.bigChart=bigChart)
     )
 
-    this._coinService.currentValuta.subscribe(
+    this._coinService.currentValuta.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
       (valuta)=>this.valuta=valuta
     )
     if (this.message) {
       const coinId = this._coinService.coinIdMap[this.message.toLowerCase()];
-      this._coinService.getCoinPrice(this.message).subscribe(
+      this._coinService.getCoinPrice(this.message).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe(
         (price: any) => {
-          if (coinId && price[coinId]) {
+          if (coinId && price[coinId] && this.valuta) {
             this.price = price[coinId][this.valuta.toLowerCase()];
           }
         }
       );
       // Pre-fetch coin image for the header
-      this._coinService.getCoinImageUrl(this.message).subscribe();
+      this._coinService.getCoinImageUrl(this.message).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe();
     }
 
     this.getTransactions();
@@ -80,12 +94,14 @@ export class EditCoinComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this._coinService.changeBigChart(true);
-    this._coinService.setCoinSymbol(this.message);
+    setTimeout(() => {
+      this._coinService.changeBigChart(true);
+      this._coinService.setCoinSymbol(this.message);
+    });
   }
 
-  async changePeriod(number){
-    await this._coinService.changePeriod(number)
+  changePeriod(number){
+    this._coinService.changePeriod(number)
     this.router.navigateByUrl('coin-graph', { skipLocationChange: true }).then(() => {
       this.router.navigate(['edit-coin']);
   }); 
@@ -144,5 +160,10 @@ export class EditCoinComponent implements OnInit, AfterViewInit {
     dialogConfig.width = window.innerWidth < 600 ? '90vw' : '400px';
     dialogConfig.maxHeight = '90vh';
     this.dialog.open(AddCoinComponent, dialogConfig);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

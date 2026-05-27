@@ -8,7 +8,6 @@ import { AuthService } from 'src/app/authentication/auth.service';
 })
 export class AppComponent {
   public pageTitle: string = 'CoinTracker';
-  title: any;
   constructor(public auth: AuthService) {}
 
   opened = false;

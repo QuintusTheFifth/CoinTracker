@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Pipe, PipeTransform } from '@angular/core';
 import { AddCoinComponent } from '../add-coin/add-coin.component';
@@ -8,7 +8,8 @@ import { NotificationService } from '../services/notification.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { BehaviorSubject, forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { MatPaginator } from '@angular/material/paginator';
 
 export interface PeriodicElement {
@@ -23,7 +24,7 @@ export interface PeriodicElement {
   styleUrls: ['./coin-list.component.css'],
   selector: 'coin-list',
 })
-export class CoinListComponent implements OnInit, OnDestroy {
+export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   pageTitle: string = 'CoinTracker';
   imageWidth = 10;
   imageMargin = 2;
@@ -46,11 +47,11 @@ export class CoinListComponent implements OnInit, OnDestroy {
 
   message: string;
 
+  allCoins: any[] = [];
 
+  dataSource = new MatTableDataSource<any>([]);
 
-  allCoins: any[];
-
-  dataSource = new MatTableDataSource(this.allCoins);
+  private destroy$ = new Subject<void>();
 
   private confettiFired = false;
   private pricesLoadedCount = 0;
@@ -63,7 +64,9 @@ export class CoinListComponent implements OnInit, OnDestroy {
     private router: Router
   ) {
     this._coinService.addCoinsToList();
-    this._coinService.currentValuta.subscribe(
+    this._coinService.currentValuta.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
       (valuta) => (this.valuta = valuta)
     );
   }
@@ -72,11 +75,17 @@ export class CoinListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.geefCoins();
     this.dataSource.sort = this.sort;
-    this._coinService.currentMessage.subscribe(
+    this._coinService.currentMessage.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
       (message) => (this.message = message)
     );
     this._coinService.changeMessage('');
     this._coinService.changeBigChart(false);
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   valuta;
@@ -130,7 +139,6 @@ export class CoinListComponent implements OnInit, OnDestroy {
 
       this.allCoins.sort((a, b) => a.symbol.localeCompare(b.symbol));
       this.dataSource.data = this.allCoins;
-      this.dataSource.paginator = this.paginator;
 
       for (var coin of this.allCoins) {
         this.geefPrijs(coin);
@@ -166,7 +174,7 @@ export class CoinListComponent implements OnInit, OnDestroy {
   geefPrijs(coin) {
     forkJoin({
       oldPrice: this._coinService.dailyChange(coin.symbol).pipe(
-        map((val: any) => val.prices[0][1])
+        map((val: any) => val.prices?.[0]?.[1])
       ),
       price: this._coinService.getCoinPrice(coin.symbol).pipe(
         map((val: any) => {
@@ -263,6 +271,8 @@ export class CoinListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.confettiRAFId) {
       cancelAnimationFrame(this.confettiRAFId);
     }

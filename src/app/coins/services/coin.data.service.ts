@@ -17,7 +17,6 @@ export interface Coin {
   providedIn: 'root',
 })
 export class CoinsService {
-  test: 'hello';
 
   coins: Coin[] = [];
 
@@ -63,7 +62,7 @@ export class CoinsService {
       date: coin.date,
       exchange: coin.exchange,
       priceBought: coin.priceBought,
-      symbol: this.message,
+      symbol: coin.symbol,
     });
   }
 
@@ -83,7 +82,7 @@ export class CoinsService {
   populateForm(coin) {
     this.form.setValue({
       $key: coin.key,
-      coinName: this.message,
+      coinName: coin.symbol,
       amount: coin.amount,
       priceBought: coin.priceBought,
       exchange: coin.exchange,
@@ -96,15 +95,14 @@ export class CoinsService {
     private afs: AngularFirestore,
     public auth: AuthService
   ) {
-    this.currentMessage.subscribe((message) => (this.message = message));
-    this.bigChartSource.subscribe((bigChart) => (this.bigChart = bigChart));
-    this.periodSource.subscribe((period) => (this.period = period));
-    this.valutaSource.subscribe((valuta) => (this.valuta = valuta));
   }
 
   /** Get reference to the user's coins subcollection in Firestore */
   private get coinCollection(): AngularFirestoreCollection<any> {
     const uid = this.auth.getUID();
+    if (!uid) {
+      throw new Error('User not authenticated');
+    }
     return this.afs.collection(`users/${uid}/coins`);
   }
 
@@ -165,39 +163,36 @@ export class CoinsService {
   getCoinPrice(coinSymbol: string) {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
-      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+      return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
     return this._http
       .get(
         `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=${this.valuta.toLowerCase()}`
-      )
-      .pipe(map((result) => result));
+      );
   }
 
   /** Get 7-day market chart data for the mini graph */
   weekData(coinSymbol: string) {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
-      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+      return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
     return this._http
       .get(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${this.valuta.toLowerCase()}&days=7`
-      )
-      .pipe(map((result) => result));
+      );
   }
 
   /** Get extended period market chart data for the big graph */
   bigData(coinSymbol: string, period: number) {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
-      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+      return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
     return this._http
       .get(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${this.valuta.toLowerCase()}&days=${period}`
-      )
-      .pipe(map((result) => result));
+      );
   }
 
   counter = 0;
@@ -246,20 +241,19 @@ export class CoinsService {
   dailyChange(coinSymbol: string) {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
-      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+      return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
     return this._http
       .get(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${this.valuta.toLowerCase()}&days=2`
-      )
-      .pipe(map((result) => result));
+      );
   }
 
   /** Get coin image URL from CoinGecko */
   getCoinImageUrl(coinSymbol: string): Observable<string> {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
-      return throwError(`Unknown coin symbol: ${coinSymbol}`);
+      return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
     if (this.coinImageCache[coinSymbol.toLowerCase()]) {
       return of(this.coinImageCache[coinSymbol.toLowerCase()]);
@@ -318,22 +312,5 @@ export class CoinsService {
       date: coin.date,
       exchange: coin.exchange,
     });
-  }
-
-  key = 'e1d125c0-d5ed-4165-85eb-ddc177c4f134';
-  requestCMC(method, url) {
-    return new Promise(function (resolve, reject) {
-      var xhr = new XMLHttpRequest();
-      xhr.open(method, url);
-      xhr.onload = resolve;
-      xhr.onerror = reject;
-      xhr.send();
-    });
-  }
-
-  chart = [];
-
-  getChart() {
-    return this.chart;
   }
 }

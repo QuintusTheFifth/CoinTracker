@@ -41,19 +41,19 @@
           <li class="nav-item">
             <p class="displayName">
               Keep HODLing,
-              {{ user.displayName.split(" ").slice(0, 1).join(" ") }}!
+              {{ user?.displayName?.split(" ").slice(0, 1).join(" ") || 'HODLer' }}!
             </p>
           </li>
           <li class="nav-item">
-            <a href="javascript:;" class="nav-link sign-out-link" (click)="auth.signOut()"
-              >Sign Out</a
+            <button mat-button class="sign-out-link" (click)="auth.signOut()"
+              >Sign Out</button
             >
           </li>
         </div>
         <ng-template #login>
           <li class="nav-item">
-            <a href="javascript:;" class="nav-link sign-in-link" (click)="auth.googleSignin()"
-              >Sign in</a
+            <button mat-button class="sign-in-link" (click)="auth.googleSignin()"
+              >Sign in</button
             >
           </li>
         </ng-template>

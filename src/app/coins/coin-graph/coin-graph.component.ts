@@ -1,6 +1,8 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CoinsService } from '../services/coin.data.service';
 import { Chart } from 'chart.js';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 // Dark theme chart area background plugin
 const darkBackgroundPlugin = {
@@ -22,12 +24,14 @@ Chart.pluginService.register(darkBackgroundPlugin);
   templateUrl: './coin-graph.component.html',
   styleUrls: ['./coin-graph.component.css'],
 })
-export class CoinGraphComponent implements OnInit {
-  chart = [];
-  overviewChart = [];
+export class CoinGraphComponent implements OnInit, OnDestroy {
+  chart: Chart | any[] = [];
+  overviewChart: Chart | any[] = [];
   loading: boolean = true;
 
   @Input() coinSymbol: string;
+
+  private destroy$ = new Subject<void>();
 
   constructor(private _coinService: CoinsService) {}
 
@@ -36,14 +40,19 @@ export class CoinGraphComponent implements OnInit {
   period: number;
 
   ngOnInit(): void {
-    this._coinService.currentMessage.subscribe(
+    this._coinService.currentMessage.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
       (message) => (this.message = message)
     );
-    this._coinService.currentBigChart.subscribe(
+    this._coinService.currentBigChart.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
       (bigChart) => (this.bigChart = bigChart)
     );
-    this._coinService.currentPeriod.subscribe(
-      // (period)=>(this.period=period)
+    this._coinService.currentPeriod.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
       (period) => {
         this.period = period;
       }
@@ -66,12 +75,15 @@ export class CoinGraphComponent implements OnInit {
   }
 
   getWeekData() {
+    if (this.chart instanceof Chart) { this.chart.destroy(); }
     this.chart = [];
     var coinName = this.coinSymbol;
 
     this.coinName = coinName;
     if (!coinName) { this.loading = false; return; }
-    this._coinService.weekData(coinName).subscribe((res) => {
+    this._coinService.weekData(coinName).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((res) => {
       let allDates = [];
       let data = [];
       const prices = res['prices'] || [];
@@ -152,11 +164,14 @@ export class CoinGraphComponent implements OnInit {
   }
 
   getBigData() {
+    if (this.overviewChart instanceof Chart) { this.overviewChart.destroy(); }
     this.overviewChart = [];
     var coinName = this.coinSymbol;
     this.coinName = coinName;
     if (!coinName) { this.loading = false; return; }
-    this._coinService.bigData(coinName, this.period).subscribe((res) => {
+    this._coinService.bigData(coinName, this.period).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((res) => {
       let allDates = [];
       let data = [];
       const prices = res['prices'] || [];
@@ -238,6 +253,10 @@ export class CoinGraphComponent implements OnInit {
       this.loading = false;
     });
   }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    if (this.chart instanceof Chart) { this.chart.destroy(); }
+    if (this.overviewChart instanceof Chart) { this.overviewChart.destroy(); }
+  }
 }
-
-// }

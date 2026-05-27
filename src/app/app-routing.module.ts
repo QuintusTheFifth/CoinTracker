@@ -11,7 +11,7 @@ const appRoutes: Routes = [
   { path: 'coin-list', component: CoinListComponent
   ,canActivate:[AuthGuard] 
 },
-  { path: 'edit-coin', component: EditCoinComponent
+  { path: 'edit-coin/:symbol', component: EditCoinComponent
    ,canActivate:[AuthGuard] 
 },
   { path: 'login', component: LoginComponent },
@@ -23,6 +23,7 @@ const appRoutes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forRoot(appRoutes, {
+      scrollPositionRestoration: 'enabled',
     }),
   ],
   exports: [RouterModule],

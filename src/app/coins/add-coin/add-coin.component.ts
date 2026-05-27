@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -12,7 +12,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 
 import { Observable } from 'rxjs';
 import { CoinsService, Coin } from '../services/coin.data.service';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../services/notification.service';
 
 @Component({
@@ -20,7 +20,7 @@ import { NotificationService } from '../services/notification.service';
   templateUrl: './add-coin.component.html',
   styleUrls: ['./add-coin.component.css'],
 })
-export class AddCoinComponent implements OnInit {
+export class AddCoinComponent implements OnInit, OnDestroy {
   coinSubmit: Coin;
 
   coinName = new FormControl();
@@ -39,6 +39,8 @@ export class AddCoinComponent implements OnInit {
 
   exchanges: string[] = ['Binance', 'UpBit', 'Bittrex', 'eToroX'];
   filteredExchanges: Observable<string[]>;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     public coinService: CoinsService,
@@ -60,6 +62,7 @@ export class AddCoinComponent implements OnInit {
 
   private _filterCoins(value: string): Coin[] {
     const filterValue = value.toLowerCase();
+    if (!this.coins || !this.coins[0]) { return []; }
     return this.coins[0].filter(
       (coin) => coin.symbol.toLowerCase().indexOf(filterValue) === 0
     );
@@ -69,12 +72,15 @@ export class AddCoinComponent implements OnInit {
   message: string
 
   ngOnInit(): void {
-    this.coinService.currentMessage.subscribe(message => this.message = message)
+    this.coinService.currentMessage.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(message => this.message = message)
 
     this.coins = this.coinService.getValidCoins();
 
     this.filteredExchanges = this.coinService.form.get('exchange').valueChanges.pipe(
       startWith(''),
+      takeUntil(this.destroy$),
       map(value => this._filterExchanges(value ? value : ''))
     );
   }
@@ -88,9 +94,9 @@ export class AddCoinComponent implements OnInit {
 
   getCoinSymbols() {
     this.coinService.getCoinSymbols().subscribe((res) => {
-      Object.keys(res).forEach((key) => {
-        //
-        this.coinSymbols.push(res[key].symbol);
+      if (!res) { return; }
+      res.forEach((coin: any) => {
+        this.coinSymbols.push(coin.symbol);
       });
     });
   }
@@ -146,12 +152,6 @@ export class AddCoinComponent implements OnInit {
     }
   }
 
-  Close() {
-    //
-    this.coinService.form.reset();
-    this.dialogRef.close();
-  }
-
   getImage(coin) {
     // Use CoinGecko image if cached, otherwise return a placeholder
     const cached = this.coinService.coinImageCache[coin.symbol.toLowerCase()];
@@ -162,5 +162,10 @@ export class AddCoinComponent implements OnInit {
     this.coinService.form.reset();
     this.coinService.initializeFormGroup();
     this.dialogRef.close();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -11,29 +11,17 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 
-import {
-  MatDialogModule,
-  MatDialog,
-  MatDialogRef,
-} from '@angular/material/dialog';
-import { AngularFireModule } from 'angularfire2';
+import { MatDialogModule } from '@angular/material/dialog';
+import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 
-import { MatSortModule } from '@angular/material/sort';
-import { RouterModule } from '@angular/router';
-import { LoginComponent } from './user/login/login.component';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { LoginModule } from './user/login/login.module';
 import { MaterialModule } from './material/material.module';
 
 @NgModule({
-  declarations: [AppComponent, PageNotFoundComponent, LoginComponent],
+  declarations: [AppComponent, PageNotFoundComponent],
   imports: [
-
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireAuthModule,
@@ -44,9 +32,8 @@ import { MaterialModule } from './material/material.module';
     LayoutModule,
     BrowserModule,
     HttpClientModule,
-    RouterModule,
     CoinModule,
-  
+    LoginModule,
   ],
   bootstrap: [AppComponent],
 })

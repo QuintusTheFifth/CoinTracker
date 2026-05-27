@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   firebase: {
     apiKey: "AIzaSyCHIsabE7vgOgC9eeIYyRI_vxh2zYQsK4U",
     authDomain: "cointracker-26919.firebaseapp.com",

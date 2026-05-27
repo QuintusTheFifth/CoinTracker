@@ -45,7 +45,7 @@
           class="valuta"
           #group="matButtonToggleGroup"
           (change)="changeValuta(group.value)"
-          value="group.value"
+          value="EUR"
           name="fontStyle"
           aria-label="Font Style"
         >
@@ -79,20 +79,19 @@
           </mat-header-cell>
           <mat-cell *matCellDef="let element; let i = index" (click)="onEdit(element.symbol)"
             [style.animation-delay]="i * 0.04 + 's'">
-            <a
-              [routerLink]=""
+            <span
               (click)="onEdit(element.symbol)"
               style="text-decoration: none"
             >
               <span class="symbol-cell">
                 <img
-                  src="{{ element.image_url }}"
-                  onerror="this.style.display='none'"
+                  [src]="element.image_url"
+                  (error)="$event.target.style.display='none'"
                   alt="{{ element.symbol }}"
                 />
                 <b class="symbol-name">{{ element.symbol }}</b>
               </span>
-            </a>
+            </span>
           </mat-cell>
         </ng-container>
 

@@ -11,19 +11,13 @@
         <mat-form-field class="example-full-width">
           <input
             type="text"
-            ng
-            Model
-            required
-            ngModel
-            minLength="2"
             matInput
             placeholder="Coin"
             aria-label="coin name"
             [matAutocomplete]="auto"
             [formControl]="coinName"
-            [value]="coinsymbol"
+            minlength="2"
           />
-          <!-- </ng-template> -->
 
           <mat-autocomplete #auto="matAutocomplete">
             <mat-option
@@ -51,7 +45,7 @@
             placeholder="Coin Symbol"
             matInput
             disabled
-            value="{{ message }}"
+            [value]="message"
             aria-label="coin name"
             #spy
           />
@@ -108,7 +102,7 @@
         >
           Save
         </button>
-        <button mat-raised-button color="warn" (click)="Close()">Close</button>
+        <button mat-raised-button color="warn" (click)="onClose()">Close</button>
       </div>
     </div>
   </mat-grid-list>
