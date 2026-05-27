@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { throwError, Observable, BehaviorSubject, of } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import * as _ from 'lodash';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, timeout } from 'rxjs/operators';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { AuthService } from 'src/app/authentication/auth.service';
@@ -255,6 +255,7 @@ export class CoinsService {
       .get(
         `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=${(this.valuta || 'eur').toLowerCase()}`
       ).pipe(
+        timeout(5000),
         catchError(() => {
           // Return static fallback price wrapped in the expected format
           const price = this.staticPrices[sym];
@@ -280,6 +281,7 @@ export class CoinsService {
       .get(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${(this.valuta || 'eur').toLowerCase()}&days=7`
       ).pipe(
+        timeout(5000),
         catchError(() => {
           const price = this.staticPrices[sym];
           if (price !== undefined) {
@@ -307,6 +309,7 @@ export class CoinsService {
       .get(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${(this.valuta || 'eur').toLowerCase()}&days=${period}`
       ).pipe(
+        timeout(5000),
         catchError(() => {
           const price = this.staticPrices[sym];
           if (price !== undefined) {
@@ -358,6 +361,7 @@ export class CoinsService {
     return this._http
       .get('https://api.coingecko.com/api/v3/coins/list')
       .pipe(
+        timeout(5000),
         map((result: any[]) => {
           result.forEach((coin) => {
             this.coinIdMap[coin.symbol.toLowerCase()] = coin.id;
@@ -384,6 +388,7 @@ export class CoinsService {
       .get(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${(this.valuta || 'eur').toLowerCase()}&days=2`
       ).pipe(
+        timeout(5000),
         catchError(() => {
           const oldPrice = this.staticOldPrices[sym];
           if (oldPrice !== undefined) {
@@ -408,6 +413,7 @@ export class CoinsService {
         `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false`
       )
       .pipe(
+        timeout(5000),
         map((result: any) => {
           const url = result.image?.small || result.image?.large || '';
           this.coinImageCache[coinSymbol.toLowerCase()] = url;
