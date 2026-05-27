@@ -28,14 +28,14 @@
 ## 📸 Screenshots
 
 ### Login Page
-![Login page with dark theme and MetaMask integration](screenshots/login.png)
+![Login page with dark glassmorphism card](screenshots/login.png)
 
-*MetaMask wallet authentication with glassmorphism card design*
+*Clean glassmorphism card with Google Sign-In and MetaMask Connect Wallet buttons*
 
-### Portfolio Dashboard
-![Portfolio dashboard with crypto portfolio table](screenshots/portfolio.png)
+### 404 Page
+![404 page with animated floating number](screenshots/404.png)
 
-*Live portfolio balance, price charts, and transaction management. View your BTC, ETH holdings with real-time prices and 24h changes.*
+*Dark-themed 404 with floating animation and Bitcoin orange accent*
 
 ## 🛠️ Tech Stack
 
