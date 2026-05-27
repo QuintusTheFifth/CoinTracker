@@ -5,8 +5,7 @@
 >
   <h2 class="dialog-title">Add / Edit Coin</h2>
   <input type="hidden" formControlName="$key" />
-  <mat-grid-list cols="1" rowHeight="350px">
-    <div class="controls-container">
+  <div class="controls-container">
       <!-- Als coinsymbol leeg is, doe toevoeging met autocomplete field -->
       <div *ngIf="!message; else elseBlock">
         <mat-form-field class="coin-full-width">
@@ -105,6 +104,5 @@
         <button class="close-btn" type="button" (click)="onClose()">Close</button>
       </div>
     </div>
-  </mat-grid-list>
 </form>
 

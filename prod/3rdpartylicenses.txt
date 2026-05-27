@@ -331,9 +331,6 @@ Apache-2.0
 @firebase/component
 Apache-2.0
 
-@firebase/database
-Apache-2.0
-
 @firebase/firestore
 Apache-2.0
 
@@ -345,12 +342,6 @@ Apache-2.0
 
 @firebase/webchannel-wrapper
 Apache-2.0
-
-angularfire2
-MIT
-
-angularfire2/database
-MIT
 
 chart.js
 MIT
@@ -415,8 +406,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 firebase/app
 
 firebase/auth
-
-firebase/database
 
 firebase/firestore
 
