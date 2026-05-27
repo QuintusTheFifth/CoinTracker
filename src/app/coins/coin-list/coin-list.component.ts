@@ -106,18 +106,24 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
     return totalValue ? weighted / totalValue : 0;
   }
 
+  // Cost basis stored in EUR; converted to the display currency for the P&L.
   totalCost(): number {
     if (!this.allCoins) { return 0; }
     return this.allCoins.reduce((sum, c) => sum + (c.cost || 0), 0);
   }
 
-  // All-time return = current value − cost basis.
+  // Cost basis in the currently displayed currency.
+  private displayCost(): number {
+    return this._coinService.convertEurToDisplay(this.totalCost());
+  }
+
+  // All-time return = current value − cost basis (both in the display currency).
   plAbsolute(): number {
-    return this.berekenEindTotaal(this.allCoins) - this.totalCost();
+    return this.berekenEindTotaal(this.allCoins) - this.displayCost();
   }
 
   plPercent(): number {
-    const cost = this.totalCost();
+    const cost = this.displayCost();
     return cost ? (this.plAbsolute() / cost) * 100 : 0;
   }
 
@@ -165,7 +171,9 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
             if (coin.symbol === item.symbol) {
               coin.amount += item.amount;
               coin.transactions += 1;
-              coin.cost += (item.amount || 0) * (Number(item.priceBought) || 0);
+              // Normalise cost basis to EUR using the currency it was entered in.
+              coin.cost += (item.amount || 0) *
+                this._coinService.convertToEur(Number(item.priceBought) || 0, item.currency || 'EUR');
             }
           }
           return coin;

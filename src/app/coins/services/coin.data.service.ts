@@ -136,6 +136,11 @@ export class CoinsService {
   period: number;
   valuta: string = localStorage.getItem('cointracker_valuta') || 'EUR';
 
+  // Live EUR→USD rate (derived from the same price source so it stays consistent
+  // with displayed prices). Used to convert the cost basis between currencies.
+  fxUsdPerEur: number = 1.16;
+  private fxLoaded = false;
+
   setValuta(valuta) {
     this.valuta = valuta;
   }
@@ -360,6 +365,44 @@ export class CoinsService {
       });
   }
 
+  /** Load the EUR→USD rate from BTC priced in both currencies (CoinGecko, then
+   *  Coinbase) so it matches the prices we display. Falls back to a sane default. */
+  loadFx(): void {
+    if (this.fxLoaded) { return; }
+    this.fxLoaded = true;
+    this._http
+      .get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur,usd')
+      .pipe(
+        timeout(6000),
+        map((j: any) => {
+          if (j && j.bitcoin && j.bitcoin.eur && j.bitcoin.usd) { return j.bitcoin.usd / j.bitcoin.eur; }
+          throw new Error('no fx');
+        }),
+        catchError(() =>
+          forkJoin([
+            this._http.get('https://api.exchange.coinbase.com/products/BTC-EUR/ticker').pipe(timeout(6000), catchError(() => of(null))),
+            this._http.get('https://api.exchange.coinbase.com/products/BTC-USD/ticker').pipe(timeout(6000), catchError(() => of(null))),
+          ]).pipe(map((arr: any[]) => {
+            const e = arr[0] ? parseFloat(arr[0].price) : 0;
+            const u = arr[1] ? parseFloat(arr[1].price) : 0;
+            return e && u ? u / e : this.fxUsdPerEur;
+          }))
+        )
+      )
+      .subscribe((rate: number) => { if (rate && isFinite(rate) && rate > 0) { this.fxUsdPerEur = rate; } });
+  }
+
+  /** Normalise an amount entered in `cur` to EUR (for the stored cost basis). */
+  convertToEur(amount: number, cur: string): number {
+    if (!amount) { return 0; }
+    return (cur && cur.toUpperCase() === 'USD') ? amount / (this.fxUsdPerEur || 1) : amount;
+  }
+
+  /** Convert a EUR amount to the current display currency. */
+  convertEurToDisplay(amountEur: number): number {
+    return (this.valuta && this.valuta.toUpperCase() === 'USD') ? amountEur * (this.fxUsdPerEur || 1) : amountEur;
+  }
+
   /** Best available icon for a symbol: live CoinGecko image, then a known static
    *  image, then the bundled SVG (template falls back to add.png on error). */
   iconFor(symbol: string): string {
@@ -560,6 +603,7 @@ export class CoinsService {
 
   counter = 0;
   addCoinsToList() {
+    this.loadFx();
     if (this.universeLoaded) { return; }
     // Full searchable universe (ids + names) so users can add most coins.
     this.getCoinSymbols().subscribe({
@@ -741,6 +785,7 @@ export class CoinsService {
         priceBought: coin.priceBought,
         date: coin.date,
         exchange: coin.exchange,
+        currency: this.valuta,
         key: `demo_${Date.now()}`,
       });
       this.saveDemoCoins(coins);
@@ -752,6 +797,7 @@ export class CoinsService {
       priceBought: coin.priceBought,
       date: coin.date,
       exchange: coin.exchange,
+      currency: this.valuta,
     });
   }
 }
