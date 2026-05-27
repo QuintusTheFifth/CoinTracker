@@ -19,6 +19,7 @@
   --green: #3fb950;
   --red: #f85149;
   --border: #30363d;
+  --warn: #f99157;
 }
 
 /* --- Body & Global --- */
@@ -30,12 +31,19 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* --- Selection color --- */
 ::selection {
   background-color: var(--accent);
   color: #fff;
+}
+
+/* --- Focus visible (accessibility) --- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* --- Scrollbar (dark theme) --- */
@@ -55,8 +63,15 @@ body {
 }
 
 /* --- Global transitions --- */
-* {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+@media (prefers-reduced-motion: no-preference) {
+  a,
+  button,
+  .mat-row,
+  input,
+  .mat-button-toggle,
+  .mat-tab-link {
+    transition: all 0.2s ease;
+  }
 }
 
 /* ===========================
@@ -267,7 +282,7 @@ div.card {
 }
 
 div.card-header {
-  font-size: large;
+  font-size: 1.15rem;
   background: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
   border-bottom: 1px solid var(--border) !important;
@@ -287,6 +302,9 @@ div.container {
 @media (max-width: 480px) {
   div.container {
     margin: 0px 5px;
+  }
+  body {
+    font-size: 0.9rem;
   }
 }
 
@@ -345,13 +363,11 @@ h2 {
   align-items: center;
 }
 
-.inline {
+.flex-row {
+  display: flex;
   flex-direction: row;
 }
 
-.btn-primary {
-  width: 10em;
-}
 
 .table {
   margin-top: 10px;
@@ -405,4 +421,18 @@ mat-footer-row mat-footer-cell {
   min-width: 0px !important;
   height: 40px;
   padding: 0px !important;
+}
+
+/* ===========================
+   PRINT STYLES
+   =========================== */
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
 }

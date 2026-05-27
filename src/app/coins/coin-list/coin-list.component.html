@@ -81,7 +81,6 @@
             [style.animation-delay]="i * 0.04 + 's'">
             <span
               (click)="onEdit(element.symbol)"
-              style="text-decoration: none"
             >
               <span class="symbol-cell">
                 <img
@@ -186,7 +185,6 @@
           <mat-cell
               *matCellDef="let element; let i = index"
               (click)="onEdit(element.symbol)"
-              style="padding-bottom: 1em; padding-top: 1em"
               [style.animation-delay]="i * 0.04 + 's'"
               class="chart-container">
               <app-coin-graph [coinSymbol]="element.symbol"> </app-coin-graph>

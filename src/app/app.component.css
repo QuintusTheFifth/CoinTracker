@@ -8,7 +8,7 @@
   align-items: center;
   padding: 0.6rem 1.5rem;
   min-height: 64px;
-  background: linear-gradient(135deg, #0b0e1a 0%, #1a1f36 100%);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   transition: background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
   position: sticky;
@@ -18,7 +18,7 @@
 
 /* Glassmorphism on scroll */
 .crypto-nav.nav-scrolled {
-  background: linear-gradient(135deg, rgba(11, 14, 26, 0.85) 0%, rgba(26, 31, 54, 0.85) 100%);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
@@ -38,18 +38,20 @@
 .brand-icon img {
   width: 32px;
   height: 32px;
-  filter: drop-shadow(0 0 6px rgba(247, 147, 26, 0.4));
+  filter: drop-shadow(0 0 6px var(--accent));
   transition: filter 0.3s ease;
+  opacity: 0.4;
 }
 
 .brand-icon img:hover {
-  filter: drop-shadow(0 0 12px rgba(247, 147, 26, 0.7));
+  opacity: 0.7;
+  filter: drop-shadow(0 0 12px var(--accent));
 }
 
 .brand-text {
   font-size: 1.3rem;
   font-weight: 700;
-  background: linear-gradient(90deg, #f7931a, #ffb347);
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -114,7 +116,7 @@
   transform: translateX(-50%) scaleX(0);
   width: 60%;
   height: 2px;
-  background: linear-gradient(90deg, #f7931a, #ffb347);
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
   border-radius: 4px;
   transition: transform 0.25s ease;
 }
@@ -124,7 +126,7 @@
 }
 
 .portfolio-link.active-link {
-  color: #f7931a !important;
+  color: var(--accent) !important;
 }
 
 .portfolio-link.active-link::after {
@@ -160,7 +162,7 @@
 
 /* Sign in link */
 .sign-in-link {
-  color: #f7931a !important;
+  color: var(--accent) !important;
   border: 1px solid rgba(247, 147, 26, 0.3);
   border-radius: 8px !important;
   padding: 0.4rem 1rem !important;
@@ -170,7 +172,7 @@
 .sign-in-link:hover {
   background-color: rgba(247, 147, 26, 0.12) !important;
   border-color: rgba(247, 147, 26, 0.5) !important;
-  color: #ffb347 !important;
+  color: var(--accent-hover) !important;
 }
 
 /* Info / Settings button */
@@ -194,7 +196,7 @@
 .info-button:hover {
   background: rgba(247, 147, 26, 0.15);
   border-color: rgba(247, 147, 26, 0.3);
-  color: #f7931a;
+  color: var(--accent);
   transform: rotate(30deg);
 }
 
@@ -222,7 +224,7 @@
    ========================================= */
 
 mat-sidenav {
-  background: linear-gradient(180deg, #0f1324 0%, #161b32 100%) !important;
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%) !important;
   color: rgba(255, 255, 255, 0.85);
   width: 320px;
   padding: 0 !important;
@@ -281,7 +283,7 @@ mat-sidenav-content {
 }
 
 .sidenav-icon {
-  color: #f7931a;
+  color: var(--accent);
   font-size: 24px;
   width: 24px;
   height: 24px;
@@ -320,7 +322,7 @@ mat-sidenav-content {
 }
 
 .sidenav-list li a:hover {
-  color: #f7931a;
+  color: var(--accent);
 }
 
 .api-badge {
@@ -472,13 +474,4 @@ mat-sidenav-content {
   mat-sidenav {
     width: 280px;
   }
-}
-
-/* =========================================
-   LEGACY / OVERRIDES
-   ========================================= */
-
-.nav-link {
-  text-align: right;
-  font-size: large;
 }

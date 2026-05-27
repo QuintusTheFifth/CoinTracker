@@ -60,12 +60,12 @@ h1 {
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
-  color: #e0e0ff;
+  color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
 .portfolio-balance .accent {
-  color: #f7931a;
+  color: var(--accent);
 }
 
 .portfolio-meta {
@@ -87,11 +87,11 @@ h1 {
 }
 
 .change-positive {
-  color: #4caf50 !important;
+  color: var(--green) !important;
 }
 
 .change-negative {
-  color: #f44336 !important;
+  color: var(--red) !important;
 }
 
 /* ── Valuta Toggle ─────────────────────────────────────── */
@@ -115,7 +115,7 @@ h1 {
 }
 
 .valuta ::ng-deep .mat-button-toggle-checked {
-  background: linear-gradient(135deg, #f7931a, #d67e1a) !important;
+  background: linear-gradient(135deg, var(--accent), #d67e1a) !important;
   color: #fff !important;
   box-shadow: 0 2px 8px rgba(247, 147, 26, 0.35);
 }
@@ -132,7 +132,7 @@ h1 {
   padding: 12px 28px;
   border: none;
   border-radius: 40px;
-  background: linear-gradient(135deg, #f7931a 0%, #448aff 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, #448aff 100%);
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
@@ -171,7 +171,7 @@ h1 {
   border-spacing: 0;
   border-radius: 16px;
   overflow: hidden;
-  background: #1a1a2e;
+  background: var(--bg-card);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
 }
 
@@ -197,6 +197,7 @@ h1 {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition: background 0.2s ease, transform 0.15s ease;
   cursor: pointer;
+  animation: rowFadeIn 0.4s ease both;
 }
 
 .coin-table ::ng-deep .mat-row:last-child {
@@ -216,11 +217,6 @@ h1 {
   font-size: 0.9rem;
   border-bottom: none;
   padding: 0 12px;
-}
-
-/* ── Row Entrance Animation (staggered) ────────────────── */
-.coin-table ::ng-deep .mat-row {
-  animation: rowFadeIn 0.4s ease both;
 }
 
 @keyframes rowFadeIn {
@@ -253,7 +249,7 @@ h1 {
 
 .symbol-cell .symbol-name {
   font-weight: 600;
-  color: #e0e0ff;
+  color: var(--text-primary);
   text-decoration: none;
   font-size: 0.95rem;
 }
@@ -261,6 +257,11 @@ h1 {
 .symbol-cell a {
   text-decoration: none;
   color: inherit;
+}
+
+/* Wrapper span around symbol cell — ensure no underline */
+.mat-column-symbol .mat-cell > span {
+  text-decoration: none;
 }
 
 /* ── Price Column (Monospace) ──────────────────────────── */
@@ -277,7 +278,7 @@ h1 {
 }
 
 .price-change.positive {
-  color: #4caf50;
+  color: var(--green);
 }
 
 .price-change.positive::before {
@@ -285,7 +286,7 @@ h1 {
 }
 
 .price-change.negative {
-  color: #f44336;
+  color: var(--red);
 }
 
 /* ── Price Flash Animation (on update) ─────────────────── */
@@ -312,6 +313,11 @@ h1 {
   flex: 0 0 14% !important;
 }
 
+/* Chart container cell padding */
+.chart-container {
+  padding: 1em 0;
+}
+
 /* ── Buttons Column ────────────────────────────────────── */
 .coin-table ::ng-deep .mat-column-buttons .mat-icon-button {
   width: 36px;
@@ -330,7 +336,7 @@ h1 {
 
 /* ── Paginator (Dark Theme) ────────────────────────────── */
 .coin-table ::ng-deep .mat-paginator {
-  background: #12121e;
+  background: var(--bg-secondary);
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.85rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -375,7 +381,7 @@ h1 {
 }
 
 .loading-container ::ng-deep .mat-spinner circle {
-  stroke: #f7931a;
+  stroke: var(--accent);
 }
 
 .loading-text {
@@ -406,7 +412,7 @@ h1 {
 .empty-state-title {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #c0c0e0;
+  color: var(--text-primary);
   margin: 0 0 0.5rem 0;
 }
 
@@ -420,15 +426,15 @@ h1 {
 
 /* ── Positive / Negative Utils ─────────────────────────── */
 .positive {
-  color: #4caf50;
+  color: var(--green);
 }
 
 .negative {
-  color: #f44336;
+  color: var(--red);
 }
 
 th.mat-sort-header-sorted {
-  color: #f7931a;
+  color: var(--accent);
 }
 
 /* ── Pulsating Circle (kept from original) ─────────────── */
@@ -481,7 +487,7 @@ th.mat-sort-header-sorted {
   background: rgba(244, 67, 54, 0.08);
   border: 1px solid rgba(244, 67, 54, 0.2);
   border-radius: 12px;
-  color: #f44336;
+  color: var(--red);
   padding: 1.5rem;
   text-align: center;
   margin: 2rem 0;
@@ -570,13 +576,13 @@ th.mat-sort-header-sorted {
   .add-coin-fab {
     display: inline-flex;
     position: fixed;
-    bottom: 24px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
     right: 24px;
     z-index: 100;
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #f7931a 0%, #448aff 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, #448aff 100%);
     color: #fff;
     border: none;
     align-items: center;

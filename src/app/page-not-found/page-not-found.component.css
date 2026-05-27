@@ -8,7 +8,22 @@
   text-align: center;
 }
 
-.not-found h1 {
+.not-found-card {
+  background: rgba(30, 30, 50, 0.55);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 480px;
+  width: 100%;
+}
+
+.not-found-card h1 {
   font-size: 8rem;
   font-weight: 800;
   line-height: 1;
@@ -18,7 +33,7 @@
   animation: float 3s ease-in-out infinite;
 }
 
-.not-found p {
+.not-found-card p {
   font-size: 1.4rem;
   color: var(--text-secondary);
   margin: 0.5rem 0 2rem 0;
@@ -26,28 +41,8 @@
   line-height: 1.6;
 }
 
-.not-found button {
-  padding: 12px 32px;
-  border: none;
-  border-radius: 40px;
-  background: linear-gradient(135deg, #f7931a 0%, #d67e1a 100%);
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(247, 147, 26, 0.30);
-  transition: all 0.25s ease;
-  letter-spacing: 0.3px;
-}
-
-.not-found button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 28px rgba(247, 147, 26, 0.45);
-}
-
-.not-found button:active {
-  transform: translateY(0);
-}
+/* Uses shared Material button from styles.css
+   (mat-raised-button.mat-primary gets accent color automatically) */
 
 @keyframes float {
   0%, 100% {

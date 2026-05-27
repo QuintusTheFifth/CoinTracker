@@ -1,19 +1,197 @@
-.example-form {
+/* ============================================================
+   Add Coin Dialog — Dark Theme Redesign
+   ============================================================ */
+
+/* ── Form Container (Card) ──────────────────────────────── */
+.coin-form {
   min-width: 150px;
   max-width: 500px;
   width: 100%;
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
 }
 
-.example-full-width {
+.coin-full-width {
   width: 100%;
 }
 
-.example-option-img {
+.coin-option-img {
   vertical-align: middle;
   margin-right: 8px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
 }
 
-[dir='rtl'] .example-option-img {
+[dir='rtl'] .coin-option-img {
   margin-right: 0;
   margin-left: 8px;
+}
+
+/* ── Dark Form Field Overrides ──────────────────────────── */
+.coin-form ::ng-deep .mat-form-field-label {
+  color: var(--text-secondary);
+}
+
+.coin-form ::ng-deep .mat-form-field-underline {
+  background-color: var(--border);
+}
+
+.coin-form ::ng-deep .mat-form-field-ripple {
+  background-color: var(--accent);
+}
+
+.coin-form ::ng-deep .mat-input-element {
+  color: var(--text-primary);
+}
+
+.coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-label {
+  color: var(--accent);
+}
+
+.coin-form ::ng-deep .mat-form-field-invalid .mat-form-field-label {
+  color: var(--red);
+}
+
+.coin-form ::ng-deep .mat-form-field-invalid .mat-form-field-ripple {
+  background-color: var(--red);
+}
+
+.coin-form ::ng-deep .mat-error {
+  color: var(--red);
+  font-size: 0.8rem;
+}
+
+/* ── Dark Autocomplete Panel ────────────────────────────── */
+::ng-deep .mat-autocomplete-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-top: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+::ng-deep .mat-autocomplete-panel .mat-option {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  min-height: 44px;
+  line-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+::ng-deep .mat-autocomplete-panel .mat-option:hover {
+  background: rgba(247, 147, 26, 0.1);
+}
+
+::ng-deep .mat-autocomplete-panel .mat-option.mat-active {
+  background: rgba(247, 147, 26, 0.15);
+}
+
+/* ── Disabled Field ─────────────────────────────────────── */
+.coin-form ::ng-deep .mat-form-field-disabled .mat-input-element {
+  color: var(--text-secondary);
+}
+
+/* ── Controls Container ─────────────────────────────────── */
+.controls-container {
+  width: 100%;
+  padding: 0;
+}
+
+.controls-container > * {
+  width: 100%;
+}
+
+/* ── Button Row ─────────────────────────────────────────── */
+.button-row {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+/* Save Button — Accent Gradient + Hover Lift */
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 40px;
+  background: linear-gradient(135deg, var(--accent) 0%, #448aff 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(247, 147, 26, 0.3);
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(247, 147, 26, 0.45);
+}
+
+.save-btn:active {
+  transform: translateY(0);
+}
+
+.save-btn:disabled {
+  background: var(--border);
+  color: var(--text-secondary);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Close Button — Dark Warn Styling */
+.close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border: 1px solid rgba(249, 145, 87, 0.3);
+  border-radius: 40px;
+  background: rgba(249, 145, 87, 0.08);
+  color: #f99157;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
+}
+
+.close-btn:hover {
+  background: rgba(249, 145, 87, 0.15);
+  border-color: rgba(249, 145, 87, 0.5);
+  transform: translateY(-2px);
+}
+
+.close-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .coin-form {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .button-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .save-btn,
+  .close-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

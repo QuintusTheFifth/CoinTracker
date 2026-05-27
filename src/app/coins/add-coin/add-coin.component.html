@@ -1,6 +1,6 @@
 <form
   [formGroup]="coinService.form"
-  class="example-form"
+  class="coin-form"
   (ngSubmit)="onSubmit()"
 >
   <input type="hidden" formControlName="$key" />
@@ -8,7 +8,7 @@
     <div class="controls-container">
       <!-- Als coinsymbol leeg is, doe toevoeging met autocomplete field -->
       <div *ngIf="!message; else elseBlock">
-        <mat-form-field class="example-full-width">
+        <mat-form-field class="coin-full-width">
           <input
             type="text"
             matInput
@@ -25,7 +25,7 @@
               [value]="coin.symbol"
             >
               <img
-                class="example-option-img"
+                class="coin-option-img"
                 aria-hidden
                 [src]="getImage(coin)"
                 height="25"
@@ -95,14 +95,13 @@
       </mat-form-field>
       <div class="button-row">
         <button
-          mat-raised-button
-          color="primary"
+          class="save-btn"
           type="submit"
           [disabled]="!coinService.form.valid"
         >
           Save
         </button>
-        <button mat-raised-button color="warn" (click)="onClose()">Close</button>
+        <button class="close-btn" type="button" (click)="onClose()">Close</button>
       </div>
     </div>
   </mat-grid-list>
