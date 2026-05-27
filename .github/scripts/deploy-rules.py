@@ -99,12 +99,11 @@ def main():
 
     # Update release
     release_body = json.dumps({
-        "name": f"projects/{PROJECT_ID}/releases/cloud.firestore",
         "rulesetName": ruleset_name
     }).encode()
 
     release_req = urllib.request.Request(
-        f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases/cloud.firestore",
+        f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases/cloud.firestore?allowMissing=true",
         data=release_body,
         headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
         method="PATCH"
