@@ -6,24 +6,7 @@
   padding: 1.5rem;
   width: 100%;
   box-sizing: border-box;
-  min-height: 0;
-}
-
-.login-img-container {
-  margin-bottom: 1.5rem;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-width: 480px;
-  width: 100%;
-}
-
-.login-img {
-  max-width: 100%;
-  max-height: 280px;
-  height: auto;
-  display: block;
-  object-fit: contain;
+  min-height: 80vh;
 }
 
 /* Glassmorphism card */
@@ -33,10 +16,25 @@
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
-  padding: 2rem 2rem 1.5rem;
+  padding: 2.5rem 2rem 2rem;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.login-title {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 0.3rem 0;
+}
+
+.login-subtitle {
+  color: var(--text-secondary, #8b949e);
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0 0 1.5rem 0;
 }
 
 .login-buttons {
