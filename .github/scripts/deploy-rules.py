@@ -97,54 +97,47 @@ def main():
         print(f"Ruleset creation failed: {e.code} - {body}")
         return False
 
-    # Update release - try PATCH first, fall back to POST if 404
-    import http.client
-    
-    release_body = json.dumps({
-        "rulesetName": ruleset_name
+    # Try to create the release with POST (first-time deploy)
+    create_url = f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases"
+    create_body = json.dumps({
+        "rulesetName": ruleset_name,
+        "name": f"projects/{PROJECT_ID}/releases/cloud.firestore"
     }).encode()
-    
-    # Try PATCH first
-    release_url = f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases/cloud.firestore"
-    release_req = urllib.request.Request(
-        release_url,
-        data=release_body,
+    create_req = urllib.request.Request(
+        f"{create_url}?releaseId=cloud.firestore",
+        data=create_body,
         headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
-        method="PATCH"
+        method="POST"
     )
     try:
-        release_resp = json.loads(urllib.request.urlopen(release_req).read())
-        print(f"Updated release: {release_resp.get('name', '?')}")
+        create_resp = json.loads(urllib.request.urlopen(create_req).read())
+        print(f"Created release: {create_resp.get('name', '?')}")
         print("Firestore rules deployed successfully!")
         return True
     except urllib.error.HTTPError as e:
         body = e.read().decode()
-        if e.code == 404:
-            print("Release not found, trying POST to create...")
-            # Try POST to create it
-            create_url = f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases"
-            # POST with release_id in the URL
-            create_body = json.dumps({
-                "name": f"projects/{PROJECT_ID}/releases/cloud.firestore",
-                "rulesetName": ruleset_name
-            }).encode()
-            create_req = urllib.request.Request(
-                f"{create_url}?releaseId=cloud.firestore",
-                data=create_body,
+        if "already exists" in body.lower() or e.code == 409:
+            print("Release already exists, updating with PATCH...")
+            # Try PATCH with updateMask
+            patch_url = f"https://firebaserules.googleapis.com/v1/projects/{PROJECT_ID}/releases/cloud.firestore?updateMask=rulesetName"
+            patch_body = json.dumps({"rulesetName": ruleset_name}).encode()
+            patch_req = urllib.request.Request(
+                patch_url,
+                data=patch_body,
                 headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
-                method="POST"
+                method="PATCH"
             )
             try:
-                create_resp = json.loads(urllib.request.urlopen(create_req).read())
-                print(f"Created release: {create_resp.get('name', '?')}")
+                patch_resp = json.loads(urllib.request.urlopen(patch_req).read())
+                print(f"Updated release: {patch_resp.get('name', '?')}")
                 print("Firestore rules deployed successfully!")
                 return True
             except urllib.error.HTTPError as e2:
                 body2 = e2.read().decode()
-                print(f"Release creation failed: {e2.code} - {body2}")
+                print(f"Release update failed: {e2.code} - {body2}")
                 return False
         else:
-            print(f"Release update failed: {e.code} - {body}")
+            print(f"Release creation failed: {e.code} - {body}")
             return False
 
 if __name__ == "__main__":
