@@ -32,6 +32,11 @@
 
 *Clean glassmorphism card with Google Sign-In and MetaMask Connect Wallet buttons*
 
+### Portfolio Dashboard
+![Portfolio dashboard with crypto holdings](screenshots/portfolio-empty.png)
+
+*Real-time portfolio tracker with live CoinGecko prices, 7-day sparkline charts, and 24h change indicators*
+
 ### 404 Page
 ![404 page with animated floating number](screenshots/404.png)
 
