@@ -21,8 +21,8 @@
   --gradient-end: #448aff;
   --accent-dark: #d67e1a;
   --chart-accent: #3cba9f;
-  --bg-primary: #0d1117;
-  --warn: var(--warn);
+  --border: #30363d;
+  --warn: #f99157;
 }
 
 /* --- Body & Global --- */
