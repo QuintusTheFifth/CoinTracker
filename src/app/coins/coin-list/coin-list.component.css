@@ -37,11 +37,11 @@ h1 {
   margin: 1.5rem 0 2rem 0;
   padding: 1.5rem 2rem;
   border-radius: 16px;
-  background: rgba(30, 30, 50, 0.55);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .portfolio-header-left {
@@ -67,12 +67,12 @@ h1 {
 .portfolio-balance .accent {
   color: var(--accent);
 }
-
+/* ── Portfolio Meta ──────────────────────────────────────── */
 .portfolio-meta {
   display: flex;
   gap: 2rem;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-secondary);
 }
 
 .portfolio-meta-item {
@@ -83,7 +83,7 @@ h1 {
 
 .portfolio-meta-value {
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
 }
 
 .change-positive {
@@ -102,12 +102,12 @@ h1 {
 .valuta ::ng-deep .mat-button-toggle-group {
   border-radius: 10px !important;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: var(--overlay-hover) !important;
+  border: 1px solid var(--glass-border);
 }
 
 .valuta ::ng-deep .mat-button-toggle {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.8rem;
   min-width: 56px;
@@ -172,29 +172,29 @@ h1 {
   border-radius: 16px;
   overflow: hidden;
   background: var(--bg-card);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 24px var(--glass-shadow);
 }
 
 /* Table header */
 .coin-table ::ng-deep .mat-header-row {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover);
   min-height: 56px;
 }
 
 .coin-table ::ng-deep .mat-header-cell {
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--overlay-hover);
   padding: 0 12px;
 }
 
 /* Table rows */
 .coin-table ::ng-deep .mat-row {
   min-height: 60px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--overlay-hover);
   transition: background 0.2s ease, transform 0.15s ease;
   cursor: pointer;
   animation: rowFadeIn 0.4s ease both;
@@ -213,7 +213,7 @@ h1 {
 }
 
 .coin-table ::ng-deep .mat-cell {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
   font-size: 0.9rem;
   border-bottom: none;
   padding: 0 12px;
@@ -327,7 +327,7 @@ h1 {
 }
 
 .coin-table ::ng-deep .mat-column-buttons .mat-icon-button:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--glass-border);
 }
 
 .coin-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"]:hover {
@@ -337,9 +337,9 @@ h1 {
 /* ── Paginator (Dark Theme) ────────────────────────────── */
 .coin-table ::ng-deep .mat-paginator {
   background: var(--bg-secondary);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   font-size: 0.85rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--overlay-hover);
   border-radius: 0 0 16px 16px;
 }
 
@@ -349,7 +349,7 @@ h1 {
 }
 
 .coin-table ::ng-deep .mat-paginator .mat-paginator-page-size .mat-select-trigger {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
 }
 
 .coin-table ::ng-deep .mat-paginator .mat-paginator-range-label {
@@ -357,17 +357,17 @@ h1 {
 }
 
 .coin-table ::ng-deep .mat-paginator .mat-icon-button {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
 .coin-table ::ng-deep .mat-paginator .mat-icon-button:hover {
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  background: var(--overlay-hover);
 }
 
 .coin-table ::ng-deep .mat-paginator .mat-icon-button[disabled] {
-  color: rgba(255, 255, 255, 0.15);
+  color: var(--text-secondary);
 }
 
 /* ── Loading Spinner ───────────────────────────────────── */
@@ -385,7 +385,7 @@ h1 {
 }
 
 .loading-text {
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-secondary);
   font-size: 0.9rem;
   letter-spacing: 0.02em;
 }
@@ -419,7 +419,7 @@ h1 {
 
 .empty-state-subtitle {
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-secondary);
   max-width: 320px;
   line-height: 1.6;
   margin: 0 0 2rem 0;
@@ -467,7 +467,7 @@ th.mat-sort-header-sorted {
   height: 12px;
   background-color: rgb(66, 165, 115);
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 8px var(--glass-shadow);
   animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
 }
 
@@ -485,8 +485,8 @@ th.mat-sort-header-sorted {
 
 /* ── Error Card ────────────────────────────────────────── */
 .error-card {
-  background: rgba(244, 67, 54, 0.08);
-  border: 1px solid rgba(244, 67, 54, 0.2);
+  background: var(--overlay-hover);
+  border: 1px solid var(--red);
   border-radius: 12px;
   color: var(--red);
   padding: 1.5rem;

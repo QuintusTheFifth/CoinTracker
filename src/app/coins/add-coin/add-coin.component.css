@@ -75,7 +75,7 @@
 
 /* ── Visible input backgrounds for dark theme ──────────── */
 .coin-form ::ng-deep .mat-form-field-infix {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover);
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
@@ -83,7 +83,7 @@
 
 .coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-infix {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-hover);
 }
 
 /* ── Dark Autocomplete Panel ────────────────────────────── */

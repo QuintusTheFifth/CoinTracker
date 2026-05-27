@@ -23,6 +23,47 @@
   --chart-accent: #3cba9f;
   --border: #30363d;
   --warn: #f99157;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(30, 30, 50, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+
+  /* Subtle overlays */
+  --overlay-hover: rgba(255, 255, 255, 0.06);
+  --overlay-active: rgba(255, 255, 255, 0.10);
+
+  /* Navbar */
+  --navbar-bg: linear-gradient(135deg, #0d1117 0%, #1c2333 50%, #0d1117 100%);
+}
+
+/* ===========================
+   ☀️ LIGHT THEME OVERRIDES
+   =========================== */
+body.light-theme {
+  --bg-primary: #f5f5f7;
+  --bg-secondary: #e8e8ed;
+  --bg-card: #ffffff;
+  --accent: #f7931a;
+  --accent-hover: #e6830d;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --green: #2e7d32;
+  --red: #d32f2f;
+  --gradient-end: #448aff;
+  --accent-dark: #d67e1a;
+  --chart-accent: #26a69a;
+  --border: #d2d2d7;
+  --warn: #e65100;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  --overlay-hover: rgba(0, 0, 0, 0.04);
+  --overlay-active: rgba(0, 0, 0, 0.08);
+
+  --navbar-bg: linear-gradient(135deg, #ffffff 0%, #f5f5f7 50%, #ffffff 100%);
 }
 
 /* --- Body & Global --- */
@@ -35,6 +76,21 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   padding-bottom: env(safe-area-inset-bottom);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Smooth transitions for themed elements */
+.mat-table, .mat-header-row, .mat-cell, .mat-paginator,
+.mat-dialog-container, .mat-select-panel, .mat-option,
+div.card, div.card-header, .mat-button-toggle,
+.mat-form-field-infix, .mat-form-field-label,
+.mat-button-toggle-group, .mat-button-toggle {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Smooth navbar transition */
+.crypto-nav {
+  transition: background 0.5s ease !important;
 }
 
 /* --- Selection color --- */
@@ -124,7 +180,7 @@ html {
 
 /* --- mat-row hover --- */
 .mat-row:hover {
-  background: rgba(247, 147, 26, 0.08) !important;
+  background: var(--overlay-hover) !important;
 }
 
 /* --- mat-paginator --- */
@@ -165,14 +221,14 @@ html {
 }
 /* Visible input backgrounds for dark theme */
 .mat-form-field-infix {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover);
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
 }
 .mat-form-field.mat-focused .mat-form-field-infix {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-active);
 }
 .mat-select-value {
   color: var(--text-primary) !important;
@@ -261,7 +317,7 @@ snack-bar-container.notification simple-snack-bar {
    NAVBAR
    =========================== */
 .navbar-dark.bg-dark {
-  background: linear-gradient(135deg, #0d1117 0%, #1c2333 50%, #0d1117 100%) !important;
+  background: var(--navbar-bg) !important;
   border-bottom: 1px solid var(--border) !important;
 }
 .navbar-dark .navbar-brand,
@@ -291,14 +347,14 @@ snack-bar-container.notification simple-snack-bar {
   background: var(--bg-primary);
   color: var(--text-primary);
 }
-
+/* --- Cards --- */
 div.card {
   margin-top: 10px;
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border) !important;
   border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 
 div.card-header {

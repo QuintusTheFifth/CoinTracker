@@ -14,7 +14,7 @@
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--glass-shadow);
 }
 
 .big-graph canvas {

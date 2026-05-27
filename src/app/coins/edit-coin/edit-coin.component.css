@@ -12,11 +12,11 @@
   margin: 1.5rem 0 2rem 0;
   padding: 1.5rem 2rem;
   border-radius: 16px;
-  background: rgba(30, 30, 50, 0.55);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px var(--glass-shadow);
 }
 
 .coin-header-left {
@@ -63,19 +63,19 @@
 .times ::ng-deep .mat-button-toggle-group {
   border-radius: 10px !important;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: var(--overlay-hover) !important;
+  border: 1px solid var(--glass-border);
 }
 
 .times ::ng-deep .mat-button-toggle {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.8rem;
   transition: all 0.2s ease;
 }
 
 .times ::ng-deep .mat-button-toggle:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-hover);
 }
 
 .times ::ng-deep .mat-button-toggle-checked {
@@ -129,9 +129,9 @@
   align-items: center;
   gap: 6px;
   padding: 8px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--glass-border);
   border-radius: 40px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover);
   color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 500;
@@ -141,7 +141,7 @@
 }
 
 .back-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--glass-border);
   border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
 }
@@ -189,29 +189,29 @@
   border-radius: 16px;
   overflow: hidden;
   background: var(--bg-card);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 24px var(--glass-shadow);
   margin-bottom: 24px;
 }
 
 .tx-table ::ng-deep .mat-header-row {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-hover);
   min-height: 56px;
 }
 
 .tx-table ::ng-deep .mat-header-cell {
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--overlay-hover);
   padding: 0 12px;
   text-align: center;
 }
 
 .tx-table ::ng-deep .mat-row {
   min-height: 60px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--overlay-hover);
   transition: background 0.2s ease, transform 0.15s ease;
   cursor: pointer;
   animation: txRowFadeIn 0.4s ease both;
@@ -230,7 +230,7 @@
 }
 
 .tx-table ::ng-deep .mat-cell {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
   font-size: 0.9rem;
   border-bottom: none;
   padding: 0 12px;
@@ -274,12 +274,12 @@
   height: 36px;
   line-height: 36px;
   transition: all 0.2s ease;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
 }
 
 .tx-table ::ng-deep .mat-column-buttons .mat-icon-button:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
+  background: var(--glass-border);
+  color: var(--text-primary);
 }
 
 .tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"] {

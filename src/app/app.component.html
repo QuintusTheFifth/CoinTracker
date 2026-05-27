@@ -60,6 +60,10 @@
       </ul>
     </div>
 
+    <button class="theme-toggle-btn" (click)="toggleTheme()" [attr.aria-label]="themeService.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'" matTooltip="Toggle theme">
+      <mat-icon>{{ themeIcon }}</mat-icon>
+    </button>
+
     <button class="info-button" (click)="opened = !opened" matTooltip="Data sources &amp; info">
       <mat-icon>settings</mat-icon>
     </button>
