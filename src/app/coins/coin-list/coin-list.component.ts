@@ -147,22 +147,21 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
       this._coinService.enableDemoMode();
       obs = this._coinService.getCoins();
     }
-    obs.pipe(takeUntil(this.destroy$)).subscribe((allCoins: any[]) => {
-      this.allCoins = this.getUnique(
+    obs.pipe(takeUntil(this.destroy$)).subscribe((rawCoins: any[]) => {
+      const aggregated = this.getUnique(
         //Geeft coins met zelfde "symbol" gelijke 'amount'
-        allCoins.map((c) => {
+        rawCoins.map((c) => {
           const coin = {
             symbol: c.symbol,
             amount: c.amount,
-            //$key: c.key
             price: 0,
             transactions: 0,
             cost: 0,
-            image_url: '',
+            image_url: this._coinService.iconFor(c.symbol),
+            sparkline: [],
           };
-          //
           coin.amount = 0;
-          for (let item of allCoins) {
+          for (let item of rawCoins) {
             if (coin.symbol === item.symbol) {
               coin.amount += item.amount;
               coin.transactions += 1;
@@ -173,28 +172,52 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
         }),
         'symbol'
       );
+      aggregated.sort((a, b) => a.symbol.localeCompare(b.symbol));
 
-      this.allCoins.sort((a, b) => a.symbol.localeCompare(b.symbol));
-      this.dataSource.data = this.allCoins;
-
-      // Wait for CoinGecko coin ID map before fetching prices/images
-      const loadPrices = () => {
-        for (var coin of this.allCoins) {
-          this.geefPrijs(coin);
-          this.geefImage(coin);
-        }
-      };
-
+      // Fetch market data (price/24h/sparkline/icons) in ONE /coins/markets call,
+      // THEN render — so the mini charts reuse the sparkline (no per-coin burst).
+      const render = () => this.applyMarketsAndShow(aggregated);
       if (Object.keys(this._coinService.coinIdMap).length > 0) {
-        loadPrices();
+        render();
       } else {
         const sub = this._coinService.coinIdMapSubject.subscribe((map) => {
           if (Object.keys(map).length > 0) {
-            loadPrices();
+            render();
             sub.unsubscribe();
           }
         });
       }
+    });
+  }
+
+  /** Load batched market data for the holdings, then publish to the table. */
+  private applyMarketsAndShow(coins: any[]): void {
+    if (!coins.length) {
+      this.allCoins = [];
+      this.dataSource.data = [];
+      return;
+    }
+    this._coinService.loadMarkets(coins.map((c) => c.symbol)).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      const changes = { ...this.priceChange$.value };
+      for (const coin of coins) {
+        coin.image_url = this._coinService.iconFor(coin.symbol);
+        const md = this._coinService.marketData[coin.symbol.toLowerCase()];
+        if (md) {
+          coin.price = md.price || 0;
+          coin.sparkline = md.sparkline || [];
+          if (md.change24h !== null && md.change24h !== undefined) {
+            changes[coin.symbol] = Number(md.change24h).toFixed(2);
+          }
+        } else {
+          // Coin not in the markets response — fall back to a per-coin fetch.
+          this.geefPrijs(coin);
+        }
+      }
+      this.priceChange$.next(changes);
+      this.allCoins = coins;
+      this.dataSource.data = coins;
     });
   }
 
@@ -290,9 +313,22 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   changeValuta(valuta) {
     this.valuta = valuta;
     this._coinService.changeValuta(valuta);
-    // Re-fetch prices (and 24h change) in the newly selected currency.
-    for (const coin of this.allCoins) {
-      this.geefPrijs(coin);
-    }
+    // Re-fetch prices/sparklines in the newly selected currency (one batch call).
+    this._coinService.loadMarkets(this.allCoins.map((c) => c.symbol)).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      const changes = { ...this.priceChange$.value };
+      for (const coin of this.allCoins) {
+        const md = this._coinService.marketData[coin.symbol.toLowerCase()];
+        if (md) {
+          coin.price = md.price || 0;
+          coin.sparkline = md.sparkline || [];
+          if (md.change24h !== null && md.change24h !== undefined) {
+            changes[coin.symbol] = Number(md.change24h).toFixed(2);
+          }
+        }
+      }
+      this.priceChange$.next(changes);
+    });
   }
 }

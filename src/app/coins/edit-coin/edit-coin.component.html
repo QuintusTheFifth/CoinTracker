@@ -4,7 +4,7 @@
     <div class="coin-header-left">
       <img
         class="coin-icon"
-        [src]="_coinService.coinImageCache[message.toLowerCase()] || 'assets/add.png'"
+        [src]="_coinService.iconFor(message)"
         (error)="$event.target.src='assets/add.png'"
         alt="coin icon"
       />
@@ -21,10 +21,10 @@
     <div class="header-controls">
       <mat-button-toggle-group class="times" #group="matButtonToggleGroup"
        (change)="changePeriod(group.value)" [value]="period" name="period" aria-label="Chart period">
-        <mat-button-toggle [value]="90">3m</mat-button-toggle>
-        <mat-button-toggle [value]="270">9m</mat-button-toggle>
-        <mat-button-toggle [value]="365">1y</mat-button-toggle>
-        <mat-button-toggle [value]="2000">ALL</mat-button-toggle>
+        <mat-button-toggle [value]="30">1M</mat-button-toggle>
+        <mat-button-toggle [value]="90">3M</mat-button-toggle>
+        <mat-button-toggle [value]="180">6M</mat-button-toggle>
+        <mat-button-toggle [value]="365">1Y</mat-button-toggle>
       </mat-button-toggle-group>
       <button class="back-btn" [routerLink]="['/coin-list']" data-cy="">
         <mat-icon>undo</mat-icon>Back
@@ -67,7 +67,8 @@
           <div class="symbol-cell">
             <img
               class="symbol-cell-img"
-              [src]="'assets/svg/icon/' + element.symbol.toLowerCase() + '.svg'"
+              [src]="_coinService.iconFor(element.symbol)"
+              (error)="$event.target.src='assets/add.png'"
               alt="coin icon"
             />
             <span class="symbol-cell-name">{{ element.symbol }}</span>

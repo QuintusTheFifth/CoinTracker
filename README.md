@@ -18,8 +18,9 @@ The UI follows a flat, Linear/Vercel‑style design system: layered surfaces wit
 
 - **Portfolio at a glance** — total value, value‑weighted **24h change**, and **all‑time return** (current value vs. cost basis), side by side.
 - **Per‑coin holdings** — drill into any asset to see your holding value, amount held, and full transaction history.
-- **Live prices & market data** — via the CoinGecko API, with a static fallback so the app stays usable if the API is unavailable.
-- **Trend‑coloured sparklines** — 7‑day mini‑charts coloured green/red by direction; full labelled price charts on the detail view (3m / 9m / 1y / all‑time).
+- **Live prices & market data** — batched via CoinGecko `/coins/markets` (price, 24h change, 7‑day sparkline and icon in one call), with a static fallback so the app stays usable if the API is unavailable.
+- **Add almost any coin** — the picker searches CoinGecko's full coin list (thousands of assets) and shows each coin's real icon.
+- **Trend‑coloured sparklines** — 7‑day mini‑charts coloured green/red by direction; full labelled price charts on the detail view (1M / 3M / 6M / 1Y of real history).
 - **Proper financial ledger** — right‑aligned, tabular numerals; directional ▲/▼ cues (not colour alone).
 - **Sign in with Google or MetaMask** — sign‑in is required to view your portfolio, which is saved to your account (`users/{uid}` in Firestore).
 - **Demo mode** — choose **Explore the demo** on the sign‑in screen to browse a seeded sample portfolio (stored locally), no account required.
@@ -44,7 +45,7 @@ The UI follows a flat, Linear/Vercel‑style design system: layered surfaces wit
 ### Coin detail
 ![Coin detail: BTC holdings, a one-year price chart with labelled axes, and the transaction history](screenshots/coin-detail.png)
 
-*Your holdings for the asset, a labelled price chart (3m / 9m / 1y / all), and the full transaction history with exchange filtering.*
+*Your holdings for the asset, a labelled price chart (1M / 3M / 6M / 1Y), and the full transaction history with exchange filtering.*
 
 ### Add to portfolio
 ![Add to portfolio dialog with coin autocomplete, amount, price bought, date and exchange fields](screenshots/add-coin.png)

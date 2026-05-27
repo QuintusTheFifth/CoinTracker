@@ -30,7 +30,7 @@
             *ngFor="let coin of filteredCoins | async"
             [value]="coin.symbol"
           >
-            <img class="coin-option-img" aria-hidden [src]="getImage(coin)" height="25" />
+            <img class="coin-option-img" aria-hidden [src]="getImage(coin)" (error)="$event.target.src='assets/add.png'" height="25" />
             <span>{{ coin.symbol }}</span> |
             <small>{{ coin.name }}</small>
           </mat-option>

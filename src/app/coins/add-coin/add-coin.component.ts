@@ -10,9 +10,9 @@ import {
 import { Subject } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { CoinsService, Coin } from '../services/coin.data.service';
-import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../services/notification.service';
 
 @Component({
@@ -48,9 +48,12 @@ export class AddCoinComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private notificationService: NotificationService
   ) {
-    this.filteredCoins = this.coinName.valueChanges.pipe(
-      startWith(''),
-      map((coin) => (coin ? this._filterCoins(coin) : this.coins.slice()))
+    // Re-filter when the user types OR when the coin universe finishes loading.
+    this.filteredCoins = combineLatest([
+      this.coinName.valueChanges.pipe(startWith(''), debounceTime(150), distinctUntilChanged()),
+      this.coinService.coinsSubject,
+    ]).pipe(
+      map(([coin, coins]) => this._filterCoins(typeof coin === 'string' ? coin : '', coins))
     );
 
     // this.coin = this.fb.group({
@@ -58,18 +61,36 @@ export class AddCoinComponent implements OnInit, OnDestroy {
     // });
   }
 
-  private _filterCoins(value: string): Coin[] {
-    const filterValue = value.toLowerCase();
-    if (!this.coins || !this.coins.length) { return []; }
-    return this.coins.filter(
-      (coin: any) => coin.symbol && coin.symbol.toLowerCase().indexOf(filterValue) === 0
-    );
+  private _filterCoins(value: string, coins?: Coin[]): Coin[] {
+    const filterValue = (value || '').toLowerCase();
+    const list = (coins && coins.length) ? coins : this.coins;
+    if (!list || !list.length) { return []; }
+    const cache = this.coinService.coinImageCache;
+    // Empty query → show popular coins (those with a real icon), not all ~10k.
+    const matches = !filterValue
+      ? list.filter((coin: any) => coin.symbol && cache[coin.symbol.toLowerCase()])
+      : list.filter((coin: any) => coin.symbol && coin.symbol.toLowerCase().indexOf(filterValue) === 0);
+    matches.sort((a: any, b: any) => {
+      // Exact symbol match first, then well-known coins (those with a real icon).
+      const aExact = a.symbol.toLowerCase() === filterValue ? 0 : 1;
+      const bExact = b.symbol.toLowerCase() === filterValue ? 0 : 1;
+      if (aExact !== bExact) { return aExact - bExact; }
+      const aKnown = cache[a.symbol.toLowerCase()] ? 0 : 1;
+      const bKnown = cache[b.symbol.toLowerCase()] ? 0 : 1;
+      if (aKnown !== bKnown) { return aKnown - bKnown; }
+      return a.symbol.localeCompare(b.symbol);
+    });
+    return matches.slice(0, 50);
   }
 
   coinSymbols: any[] = [];
   message: string
 
   ngOnInit(): void {
+    // Ensure the searchable universe + top-coin icons are loaded for the picker.
+    this.coinService.addCoinsToList();
+    this.coinService.ensureTopMarkets();
+
     this.coinService.currentMessage.pipe(
       takeUntil(this.destroy$)
     ).subscribe(message => this.message = message)
@@ -164,9 +185,8 @@ export class AddCoinComponent implements OnInit, OnDestroy {
   }
 
   getImage(coin) {
-    // Use CoinGecko image if cached, otherwise return a placeholder
-    const cached = this.coinService.coinImageCache[coin.symbol.toLowerCase()];
-    return cached || 'assets/add.png';
+    // Real CoinGecko icon if known, else the bundled SVG (template falls back to add.png)
+    return this.coinService.iconFor(coin.symbol);
   }
 
   onClose() {

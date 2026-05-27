@@ -102,8 +102,17 @@
 .coin-form ::ng-deep .mat-form-field-infix {
   border-top: 0;
   width: auto;
+  padding: 0.72rem 0.9rem;
+  min-height: 22px;
 }
+.coin-form ::ng-deep .mat-input-element { line-height: 1.5; }
 .coin-form ::ng-deep .mat-form-field-flex { align-items: center; }
+/* Dark-friendly native date picker icon (was bright blue) */
+.coin-form ::ng-deep input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+  opacity: 0.8;
+}
 .coin-form ::ng-deep .mat-form-field-subscript-wrapper { position: static; margin-top: 4px; }
 
 /* Buttons */

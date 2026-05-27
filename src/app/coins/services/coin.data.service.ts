@@ -19,6 +19,9 @@ export interface Coin {
 export class CoinsService {
 
   coins: Coin[] = [];
+  // Emits the searchable coin universe as it loads, so the add picker updates live.
+  coinsSubject = new BehaviorSubject<Coin[]>([]);
+  private universeLoaded = false;
 
   private bigChartSource = new BehaviorSubject<boolean>(false);
   currentBigChart = this.bigChartSource.asObservable();
@@ -50,6 +53,11 @@ export class CoinsService {
   // CoinGecko image cache: symbol.toLowerCase() -> image_url
   coinImageCache: Record<string, string> = {};
 
+  // Batched market data from /coins/markets, keyed by lowercase symbol.
+  // One call returns price + 24h change + 7-day sparkline + image for many coins,
+  // which avoids the per-coin request burst that triggers CoinGecko rate limits.
+  marketData: Record<string, { price: number; change24h: number; sparkline: number[] }> = {};
+
   // Static fallback data when CoinGecko is unreachable (e.g. Firebase CORS)
   private staticPrices: Record<string, number> = {
     btc: 63500, eth: 2910, sol: 129, ada: 0.38, usdt: 1.0,
@@ -60,16 +68,16 @@ export class CoinsService {
     bnb: 610, xrp: 0.49, usdc: 1.0, doge: 0.14, dot: 6.2,
   };
   private staticImages: Record<string, string> = {
-    btc: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
-    eth: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
-    sol: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
-    ada: 'https://assets.coingecko.com/coins/images/975/small/cardano.png',
-    usdt: 'https://assets.coingecko.com/coins/images/325/small/tether.png',
-    bnb: 'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
-    xrp: 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
-    usdc: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png',
-    doge: 'https://assets.coingecko.com/coins/images/5/small/dogecoin.png',
-    dot: 'https://assets.coingecko.com/coins/images/12171/small/polkadot.png',
+    btc: 'https://coin-images.coingecko.com/coins/images/1/small/bitcoin.png',
+    eth: 'https://coin-images.coingecko.com/coins/images/279/small/ethereum.png',
+    sol: 'https://coin-images.coingecko.com/coins/images/4128/small/solana.png',
+    ada: 'https://coin-images.coingecko.com/coins/images/975/small/cardano.png',
+    usdt: 'https://coin-images.coingecko.com/coins/images/325/small/tether.png',
+    bnb: 'https://coin-images.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
+    xrp: 'https://coin-images.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
+    usdc: 'https://coin-images.coingecko.com/coins/images/6319/small/usdc.png',
+    doge: 'https://coin-images.coingecko.com/coins/images/5/small/dogecoin.png',
+    dot: 'https://coin-images.coingecko.com/coins/images/12171/small/polkadot.png',
   };
 
   changeMessage(message: string) {
@@ -292,44 +300,121 @@ export class CoinsService {
     return out;
   }
 
-  /** Get current price from CoinGecko /simple/price using coin IDs */
+  /** Merge a /coins/markets response into the caches. */
+  private ingestMarkets(rows: any[]): void {
+    (rows || []).forEach((r: any) => {
+      const sym = (r.symbol || '').toLowerCase();
+      if (!sym) { return; }
+      this.marketData[sym] = {
+        price: r.current_price,
+        change24h: r.price_change_percentage_24h,
+        sparkline: (r.sparkline_in_7d && r.sparkline_in_7d.price) || [],
+      };
+      if (r.image) { this.coinImageCache[sym] = r.image; }
+      if (r.id) { this.coinIdMap[sym] = r.id; }
+    });
+  }
+
+  /**
+   * Batch-load price, 24h change, sparkline and image for the given symbols via a
+   * single /coins/markets call. Returns true on success. This is the primary data
+   * path for the dashboard — one request instead of ~4 per coin.
+   */
+  loadMarkets(symbols: string[]): Observable<boolean> {
+    const seen: Record<string, boolean> = {};
+    const ids = (symbols || [])
+      .map((s) => this.resolveCoinId(s))
+      .filter((id) => id && !seen[id] && (seen[id] = true));
+    if (!ids.length) { return of(false); }
+    const vs = (this.valuta || 'eur').toLowerCase();
+    return this._http
+      .get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${ids.join(',')}&sparkline=true&price_change_percentage=24h&per_page=250`)
+      .pipe(
+        timeout(9000),
+        map((rows: any[]) => { this.ingestMarkets(rows); return true; }),
+        catchError(() => of(false))
+      );
+  }
+
+  /** Load the top coins (by market cap) once for autocomplete icons + universe. */
+  loadTopMarkets(): void {
+    const vs = (this.valuta || 'eur').toLowerCase();
+    this._http
+      .get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&order=market_cap_desc&per_page=250&page=1&sparkline=false`)
+      .pipe(timeout(9000), catchError(() => of([])))
+      .subscribe((rows: any[]) => {
+        this.ingestMarkets(rows);
+        (rows || []).forEach((r: any) => {
+          const symU = (r.symbol || '').toUpperCase();
+          if (symU && !this.coins.find((c) => c.symbol === symU)) {
+            this.coins.push({ icon: '', symbol: symU, name: r.name });
+          }
+        });
+        this.coinIdMapSubject.next({ ...this.coinIdMap });
+        this.coinsSubject.next(this.coins.slice());
+      });
+  }
+
+  /** Best available icon for a symbol: live CoinGecko image, then a known static
+   *  image, then the bundled SVG (template falls back to add.png on error). */
+  iconFor(symbol: string): string {
+    const s = (symbol || '').toLowerCase();
+    return this.coinImageCache[s] || this.staticImages[s] || ('assets/svg/icon/' + s + '.svg');
+  }
+
+  /** Get current price for one coin (via /coins/markets, which is reliable on the free tier). */
   getCoinPrice(coinSymbol: string) {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
       return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
     const sym = coinSymbol.toLowerCase();
+    const vs = (this.valuta || 'eur').toLowerCase();
+    const wrap = (price: number) => { const r: any = {}; r[coinId] = {}; r[coinId][vs] = price; return r; };
+    // Use the already-fetched batch price if we have it (avoids a redundant call).
+    const cached = this.marketData[sym];
+    if (cached && cached.price !== null && cached.price !== undefined) {
+      return of(wrap(cached.price));
+    }
     return this._http
-      .get(
-        `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=${(this.valuta || 'eur').toLowerCase()}`
-      ).pipe(
-        timeout(5000),
-        catchError(() => {
-          // Return static fallback price wrapped in the expected format
-          const price = this.staticPrices[sym];
-          if (price !== undefined) {
-            const result: any = {};
-            result[coinId] = {};
-            result[coinId][(this.valuta || 'eur').toLowerCase()] = price;
-            return of(result);
+      .get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${coinId}&sparkline=false`)
+      .pipe(
+        timeout(8000),
+        map((rows: any[]) => {
+          const row = rows && rows[0];
+          if (row) {
+            const s = (row.symbol || '').toLowerCase();
+            if (row.image) { this.coinImageCache[s] = row.image; }
+            return wrap(row.current_price);
           }
-          return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
+          return wrap(this.staticPrices[sym] !== undefined ? this.staticPrices[sym] : 0);
+        }),
+        catchError(() => {
+          const price = this.staticPrices[sym];
+          return of(wrap(price !== undefined ? price : 0));
         })
       );
   }
 
-  /** Get 7-day market chart data for the mini graph */
+  /** Get 7-day data for the mini graph — reuses the cached sparkline when available. */
   weekData(coinSymbol: string) {
+    const sym = coinSymbol.toLowerCase();
+    const md = this.marketData[sym];
+    if (md && md.sparkline && md.sparkline.length) {
+      const now = Date.now();
+      const n = md.sparkline.length;
+      const prices = md.sparkline.map((p, i) => [now - (n - 1 - i) * 3600000, p]);
+      return of({ prices });
+    }
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
       return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
-    const sym = coinSymbol.toLowerCase();
     return this._http
       .get(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${(this.valuta || 'eur').toLowerCase()}&days=7`
       ).pipe(
-        timeout(5000),
+        timeout(6000),
         catchError(() => {
           const price = this.staticPrices[sym];
           if (price !== undefined) {
@@ -340,23 +425,39 @@ export class CoinsService {
       );
   }
 
-  /** Get extended period market chart data for the big graph */
+  // Cache of successful market_chart responses, keyed by id_days_currency, so
+  // switching periods / revisiting a coin doesn't refetch (fewer rate limits).
+  private chartCache: Record<string, number[][]> = {};
+
+  /** Get period market chart data for the big graph. CoinGecko's free tier only
+   *  serves up to 365 days of history (longer ranges 401), so we cap days here. */
   bigData(coinSymbol: string, period: number) {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
       return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
     const sym = coinSymbol.toLowerCase();
+    const vs = (this.valuta || 'eur').toLowerCase();
+    const days = Math.min(365, Math.max(1, Number(period) || 90));
+    const key = `${coinId}_${days}_${vs}`;
+    if (this.chartCache[key]) {
+      return of({ prices: this.chartCache[key] });
+    }
     return this._http
-      .get(
-        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${(this.valuta || 'eur').toLowerCase()}&days=${period}`
-      ).pipe(
-        timeout(5000),
+      .get(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${vs}&days=${days}`)
+      .pipe(
+        timeout(8000),
+        map((res: any) => {
+          if (res && res.prices && res.prices.length) { this.chartCache[key] = res.prices; }
+          return res;
+        }),
         catchError(() => {
-          const price = this.staticPrices[sym];
-          if (price !== undefined) {
-            const pts = Math.min(120, Math.max(60, Math.round(Number(period) / 3)));
-            return of({ prices: this.synthSeries(sym, price, pts, Number(period) * 86400000, Number(period)) });
+          const price = this.staticPrices[sym] !== undefined
+            ? this.staticPrices[sym]
+            : (this.marketData[sym] && this.marketData[sym].price);
+          if (price) {
+            const pts = Math.min(120, Math.max(60, Math.round(days / 3)));
+            return of({ prices: this.synthSeries(sym, price, pts, days * 86400000, days) });
           }
           return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
         })
@@ -365,18 +466,31 @@ export class CoinsService {
 
   counter = 0;
   addCoinsToList() {
+    if (this.universeLoaded) { return; }
+    // Full searchable universe (ids + names) so users can add most coins.
     this.getCoinSymbols().subscribe({
       next: (coinsArr: any[]) => {
         if (coinsArr && coinsArr.length > 0) {
+          this.universeLoaded = true;
           this.coins = coinsArr.map((c: any) => ({
             icon: '',
-            symbol: c.symbol,
+            symbol: (c.symbol || '').toUpperCase(),
             name: c.name,
           }));
+          this.coinsSubject.next(this.coins);
         }
       },
       error: () => {} // Silently ignore — static coinIdMap already covers fallback
     });
+  }
+
+  private topMarketsLoaded = false;
+  /** Lazily load top-coin icons/universe (called when the add picker opens) so it
+   *  doesn't compete with the dashboard's holdings request and trip rate limits. */
+  ensureTopMarkets(): void {
+    if (this.topMarketsLoaded) { return; }
+    this.topMarketsLoaded = true;
+    this.loadTopMarkets();
   }
 
   /** Fetch coin images from CoinGecko and cache them */
@@ -398,10 +512,13 @@ export class CoinsService {
     return this._http
       .get('https://api.coingecko.com/api/v3/coins/list')
       .pipe(
-        timeout(5000),
+        timeout(6000),
         map((result: any[]) => {
+          // Only fill in symbols we don't already know — keeps the authoritative
+          // ids for major coins (many obscure coins reuse popular symbols).
           result.forEach((coin) => {
-            this.coinIdMap[coin.symbol.toLowerCase()] = coin.id;
+            const s = (coin.symbol || '').toLowerCase();
+            if (s && !this.coinIdMap[s]) { this.coinIdMap[s] = coin.id; }
           });
           this.coinIdMapSubject.next({ ...this.coinIdMap });
           return result;
