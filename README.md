@@ -32,6 +32,11 @@
 
 *Live portfolio: 4 tracked coins (BTC, ETH, SOL, ADA), real-time prices, 24h change indicators, 7-day sparkline mini-graphs, sortable table with paginator*
 
+### Coin Detail View
+![Coin detail page with big price graph and transaction history](screenshots/coin-detail.png)
+
+*Drill into any coin: big interactive price chart, period selector (3m/9m/1y/ALL), transaction table with exchange filter*
+
 ### Add Coin Dialog
 ![Add coin form dialog](screenshots/add-coin.png)
 
