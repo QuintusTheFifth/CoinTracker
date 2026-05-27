@@ -112,7 +112,15 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   prijs;
 
   geefCoins() {
-    this._coinService.getCoins().subscribe((allCoins) => {
+    // Auto-enable demo mode if auth is missing
+    let obs;
+    try {
+      obs = this._coinService.getCoins();
+    } catch (e) {
+      this._coinService.enableDemoMode();
+      obs = this._coinService.getCoins();
+    }
+    obs.subscribe((allCoins: any[]) => {
       this.allCoins = this.getUnique(
         //Geeft coins met zelfde "symbol" gelijke 'amount'
         allCoins.map((c) => {
@@ -140,11 +148,25 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.allCoins.sort((a, b) => a.symbol.localeCompare(b.symbol));
       this.dataSource.data = this.allCoins;
 
-      for (var coin of this.allCoins) {
-        this.geefPrijs(coin);
-        this.geefImage(coin);
+      // Wait for CoinGecko coin ID map before fetching prices/images
+      const loadPrices = () => {
+        for (var coin of this.allCoins) {
+          this.geefPrijs(coin);
+          this.geefImage(coin);
+        }
+        this.pricesLoadedCount = 0;
+      };
+
+      if (Object.keys(this._coinService.coinIdMap).length > 0) {
+        loadPrices();
+      } else {
+        const sub = this._coinService.coinIdMapSubject.subscribe((map) => {
+          if (Object.keys(map).length > 0) {
+            loadPrices();
+            sub.unsubscribe();
+          }
+        });
       }
-      this.pricesLoadedCount = 0;
     });
   }
 

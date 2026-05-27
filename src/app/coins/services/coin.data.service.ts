@@ -57,6 +57,22 @@ export class CoinsService {
   }
 
   updateCoin(coin) {
+    if (this.isDemoMode) {
+      const coins = this.getDemoCoins();
+      const idx = coins.findIndex((c: any) => c.key === coin.$key);
+      if (idx >= 0) {
+        coins[idx] = {
+          ...coins[idx],
+          amount: coin.amount,
+          date: coin.date,
+          exchange: coin.exchange,
+          priceBought: coin.priceBought,
+          symbol: coin.symbol,
+        };
+        this.saveDemoCoins(coins);
+      }
+      return;
+    }
     this.coinCollection.doc(coin.$key).update({
       amount: coin.amount,
       date: coin.date,
@@ -90,6 +106,20 @@ export class CoinsService {
     });
   }
 
+  // Demo mode helpers
+  enableDemoMode(): void {
+    localStorage.setItem('demoMode', '1');
+    // Seed with demo data if empty
+    if (this.getDemoCoins().length === 0) {
+      this.saveDemoCoins([
+        { symbol: 'BTC', amount: 1.5, priceBought: 45000, date: '2026-01-15', exchange: 'Binance', key: 'demo_1' },
+        { symbol: 'ETH', amount: 15.2, priceBought: 2800, date: '2026-02-20', exchange: 'Coinbase', key: 'demo_2' },
+        { symbol: 'SOL', amount: 120, priceBought: 120, date: '2026-03-10', exchange: 'Binance', key: 'demo_3' },
+        { symbol: 'ADA', amount: 5000, priceBought: 0.35, date: '2026-04-05', exchange: 'Kraken', key: 'demo_4' },
+      ]);
+    }
+  }
+
   constructor(
     private _http: HttpClient,
     private afs: AngularFirestore,
@@ -101,9 +131,33 @@ export class CoinsService {
   private get coinCollection(): AngularFirestoreCollection<any> {
     const uid = this.auth.getUID();
     if (!uid) {
+      // Demo mode — use localStorage fallback instead of throwing
+      if (localStorage.getItem('demoMode')) {
+        return null as any;
+      }
       throw new Error('User not authenticated');
     }
     return this.afs.collection(`users/${uid}/coins`);
+  }
+
+  /** localStorage key for demo mode */
+  private get demoKey(): string { return 'cointracker_demo_coins'; }
+
+  /** Read coins from localStorage (demo mode) */
+  private getDemoCoins(): any[] {
+    try {
+      return JSON.parse(localStorage.getItem(this.demoKey) || '[]');
+    } catch { return []; }
+  }
+
+  /** Save coins to localStorage (demo mode) */
+  private saveDemoCoins(coins: any[]): void {
+    localStorage.setItem(this.demoKey, JSON.stringify(coins));
+  }
+
+  /** Whether the app is running in demo mode (localStorage fallback) */
+  private get isDemoMode(): boolean {
+    return !!localStorage.getItem('demoMode');
   }
 
   form: FormGroup = new FormGroup({
@@ -273,6 +327,11 @@ export class CoinsService {
   }
 
   deleteCoin(coin) {
+    if (this.isDemoMode) {
+      const coins = this.getDemoCoins().filter((c: any) => c.symbol !== coin.symbol);
+      this.saveDemoCoins(coins);
+      return;
+    }
     // Get the user's coin collection and delete all coins matching this symbol
     this.coinCollection.ref.get().then((snapshot) => {
       snapshot.forEach((doc) => {
@@ -293,18 +352,51 @@ export class CoinsService {
   }
 
   deleteTransaction(key) {
+    if (this.isDemoMode) {
+      const coins = this.getDemoCoins().filter((c: any) => c.key !== key);
+      this.saveDemoCoins(coins);
+      return;
+    }
     this.coinCollection.doc(key).delete();
   }
 
   getCoins() {
+    if (this.isDemoMode) {
+      return new Observable(observer => {
+        observer.next(this.getDemoCoins());
+        observer.complete();
+      });
+    }
     return this.coinCollection.valueChanges();
   }
 
   getCoinsPayload() {
+    if (this.isDemoMode) {
+      return new Observable(observer => {
+        const coins = this.getDemoCoins();
+        observer.next(coins.map((c: any, i: number) => ({
+          payload: { doc: { id: c.key || `demo_${i}`, data: () => c } }
+        })));
+        observer.complete();
+      });
+    }
     return this.coinCollection.snapshotChanges();
   }
 
   insertCoin(coin, name) {
+    if (this.isDemoMode) {
+      const coins = this.getDemoCoins();
+      coins.push({
+        symbol: name,
+        amount: coin.amount,
+        priceBought: coin.priceBought,
+        date: coin.date,
+        exchange: coin.exchange,
+        key: `demo_${Date.now()}`,
+      });
+      this.saveDemoCoins(coins);
+      return;
+    }
     this.coinCollection.add({
       symbol: name,
       amount: coin.amount,

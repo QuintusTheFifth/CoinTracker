@@ -54,6 +54,9 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
     ).subscribe(
       (period) => {
         this.period = period;
+        if (this.bigChart) {
+          this.getBigData();
+        }
       }
     );
     if (!this.bigChart) {

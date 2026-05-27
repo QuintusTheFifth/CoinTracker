@@ -102,15 +102,12 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
 
   changePeriod(number){
     this._coinService.changePeriod(number)
-    this.router.navigateByUrl('coin-graph', { skipLocationChange: true }).then(() => {
-      this.router.navigate(['edit-coin']);
-  }); 
   }
 
   transactionsList: any[];
 
   getTransactions() {
-    this._coinService.getCoinsPayload().subscribe((transactions) => {
+    this._coinService.getCoinsPayload().subscribe((transactions: any[]) => {
       (this.transactionsList = transactions.map((c: any) => {
         const data = c.payload.doc.data();
         const coin = {
