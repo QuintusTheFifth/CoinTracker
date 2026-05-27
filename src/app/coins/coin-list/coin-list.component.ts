@@ -90,6 +90,37 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   prices = [];
   priceLive = '';
 
+  // Value-weighted 24h portfolio change (%), from per-symbol change data.
+  portfolioChange(changes: Record<string, string>): number {
+    if (!this.allCoins || !changes) { return 0; }
+    let totalValue = 0;
+    let weighted = 0;
+    for (const coin of this.allCoins) {
+      const value = (coin.amount || 0) * (coin.price || 0);
+      const pct = parseFloat(changes[coin.symbol]);
+      if (!isNaN(pct) && value > 0) {
+        totalValue += value;
+        weighted += value * pct;
+      }
+    }
+    return totalValue ? weighted / totalValue : 0;
+  }
+
+  totalCost(): number {
+    if (!this.allCoins) { return 0; }
+    return this.allCoins.reduce((sum, c) => sum + (c.cost || 0), 0);
+  }
+
+  // All-time return = current value − cost basis.
+  plAbsolute(): number {
+    return this.berekenEindTotaal(this.allCoins) - this.totalCost();
+  }
+
+  plPercent(): number {
+    const cost = this.totalCost();
+    return cost ? (this.plAbsolute() / cost) * 100 : 0;
+  }
+
   berekenEindTotaal(lijstCoins) {
     //
     var eindTotal = 0;
@@ -126,6 +157,7 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
             //$key: c.key
             price: 0,
             transactions: 0,
+            cost: 0,
             image_url: '',
           };
           //
@@ -134,6 +166,7 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
             if (coin.symbol === item.symbol) {
               coin.amount += item.amount;
               coin.transactions += 1;
+              coin.cost += (item.amount || 0) * (Number(item.priceBought) || 0);
             }
           }
           return coin;

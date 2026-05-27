@@ -1,6 +1,6 @@
-<div *ngIf="loading" class="loading-container">
-  <mat-spinner diameter="40"></mat-spinner>
-  <p>Loading chart data...</p>
+<div *ngIf="loading" class="loading-container" [class.loading-mini]="!bigChart">
+  <mat-spinner [diameter]="bigChart ? 32 : 18"></mat-spinner>
+  <p *ngIf="bigChart">Loading chart…</p>
 </div>
 
 <div *ngIf="!loading">

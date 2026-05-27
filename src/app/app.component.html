@@ -18,14 +18,10 @@
 
   <nav class="navbar navbar-expand-lg crypto-nav" [class.nav-scrolled]="navScrolled">
     <a class="navbar-brand" [routerLink]="['/coin-list']">
-      <span class="brand-icon"
-        ><img
-          draggable="false"
-          src="assets/svg/white/btc.svg"
-        />&nbsp;&nbsp;</span
-      >
+      <span class="brand-icon">
+        <img draggable="false" src="assets/svg/logo.svg" alt="" />
+      </span>
       <span class="brand-text">{{ pageTitle }}</span>
-      <span class="brand-tagline">Crypto Portfolio Tracker</span>
     </a>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +70,9 @@
       <router-outlet></router-outlet>
     </div>
     <footer class="app-footer">
-      <span class="footer-text">Made with <span class="footer-heart">❤️</span> &bull; CoinTracker</span>
+      <span class="footer-text">CoinTracker</span>
+      <span class="footer-sep">·</span>
+      <span class="footer-text footer-muted">Prices by CoinGecko</span>
     </footer>
   </div>
 </mat-sidenav-container>

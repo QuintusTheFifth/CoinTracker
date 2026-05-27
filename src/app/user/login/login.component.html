@@ -1,8 +1,11 @@
 <div class="login-container">
 
   <div class="login-card">
+    <div class="login-brand">
+      <img src="assets/svg/logo.svg" alt="CoinTracker" />
+    </div>
     <h1 class="login-title">Welcome to CoinTracker</h1>
-    <p class="login-subtitle">Track your crypto portfolio in real-time</p>
+    <p class="login-subtitle">Track every coin, transaction and exchange in one clean portfolio.</p>
     <div class="login-buttons">
       <button mat-raised-button color="primary" class="google-btn" (click)="onGoogleLogin()">
         <mat-icon>mail_outline</mat-icon> Sign in with Google
@@ -23,5 +26,6 @@
         {{ errorMessage }}
       </div>
     </div>
+    <p class="login-hint">Secure sign-in · No card required</p>
   </div>
 </div>

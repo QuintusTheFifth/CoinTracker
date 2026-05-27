@@ -1,6 +1,6 @@
-# CoinTracker 🪙
+# CoinTracker
 
-**Cryptocurrency Portfolio Tracker** — Track, analyze, and manage your crypto holdings.
+**A clean, modern cryptocurrency portfolio tracker** — see what you hold, what it's worth, and how it's performing, at a glance.
 
 [![Angular](https://img.shields.io/badge/Angular-9-dd0031?logo=angular)](https://angular.io)
 [![Firebase](https://img.shields.io/badge/Firebase-Hosting-ffca28?logo=firebase)](https://firebase.google.com)
@@ -8,122 +8,115 @@
 
 ---
 
-## ✨ Features
+## Overview
 
-- 🔐 **Login with Google or MetaMask** — Firebase Auth + Ethereum wallet sign-in
-- 📊 **Live portfolio balance** — Real-time prices via CoinGecko API
-- 🖼️ **Coin images** — Auto-fetched from CoinGecko with caching
-- 📈 **7-day price graphs** — Mini sparklines + full detail charts
-- 🔄 **24h price change** — Color-coded with live indicators
-- 🔍 **Search & filter** — Filter transactions by exchange
-- 📱 **Fully responsive** — Mobile-first design with adaptive columns
-- 🌙 **Dark crypto theme** — Bitcoin orange accent, glassmorphism effects
-- 🎉 **Confetti delight** — Celebration animation on portfolio load
-- 📄 **Paginated table** — Sortable, with configurable page sizes
+CoinTracker is a dark‑minimal portfolio dashboard for crypto. It pulls live prices and market data from CoinGecko, stores your transactions in Firebase, and presents everything in a restrained, focused interface — a single accent colour, a proper numeric ledger, and calm, purposeful charts.
 
-## 🚀 Live Demo
+The UI follows a flat, Linear/Vercel‑style design system: layered surfaces with hairline borders (no glass or heavy shadows), [Inter](https://rsms.me/inter/) for text, tabular figures for every number, and a single Bitcoin‑orange accent used sparingly. A light theme is included; dark is the default.
+
+## Features
+
+- **Portfolio at a glance** — total value, value‑weighted **24h change**, and **all‑time return** (current value vs. cost basis), side by side.
+- **Per‑coin holdings** — drill into any asset to see your holding value, amount held, and full transaction history.
+- **Live prices & market data** — via the CoinGecko API, with a static fallback so the app stays usable if the API is unavailable.
+- **Trend‑coloured sparklines** — 7‑day mini‑charts coloured green/red by direction; full labelled price charts on the detail view (3m / 9m / 1y / all‑time).
+- **Proper financial ledger** — right‑aligned, tabular numerals; directional ▲/▼ cues (not colour alone).
+- **Sign in with Google or MetaMask** — Firebase Auth or Ethereum wallet sign‑in.
+- **Demo mode** — explore the full app with seeded data, no account required.
+- **EUR / USD** toggle, sortable + paginated table, and exchange filtering.
+- **Responsive** — adaptive columns, mobile stat stacking, and a floating add button on small screens.
+- **Accessible** — WCAG‑AA contrast, visible focus states, ARIA labels, and reduced‑motion support.
+- **Dark & light themes** — with a one‑click toggle.
+
+## Live Demo
 
 [https://cointracker-26919.web.app](https://cointracker-26919.web.app)
 
-## 📸 Screenshots
+> Tip: the app drops into **demo mode** automatically when you're not signed in, so you can browse a populated portfolio right away.
 
-### Portfolio Dashboard
-![Portfolio dashboard with crypto table and 7-day mini-graphs](screenshots/portfolio-dashboard.png)
+## Screenshots
 
-*Live portfolio: 4 tracked coins (BTC, ETH, SOL, ADA), real-time prices, 24h change indicators, 7-day sparkline mini-graphs, sortable table with paginator*
+### Portfolio dashboard
+![Portfolio dashboard: portfolio value, 24h change and all-time return, with a right-aligned ledger of coins and trend-coloured 7-day sparklines](screenshots/portfolio-dashboard.png)
 
-### Coin Detail View
-![Coin detail page with big price graph and transaction history](screenshots/coin-detail.png)
+*Portfolio value, value‑weighted 24h change and all‑time return up top; a clean ledger below with live prices, 24h change, trend‑coloured sparklines and per‑coin totals.*
 
-*Drill into any coin: big interactive price chart, period selector (3m/9m/1y/ALL), transaction table with exchange filter*
+### Coin detail
+![Coin detail: BTC holdings, a one-year price chart with labelled axes, and the transaction history](screenshots/coin-detail.png)
 
-### Add Coin Dialog
-![Add coin form dialog](screenshots/add-coin.png)
+*Your holdings for the asset, a labelled price chart (3m / 9m / 1y / all), and the full transaction history with exchange filtering.*
 
-*Add coins with symbol auto-complete, amount, price bought, date picker, and exchange fields*
+### Add to portfolio
+![Add to portfolio dialog with coin autocomplete, amount, price bought, date and exchange fields](screenshots/add-coin.png)
 
-### Login Page
-![Login page with dark glassmorphism card](screenshots/login.png)
+*A focused dialog: coin autocomplete, amount, price bought, date and exchange.*
 
-*Clean dark glassmorphism card with Google Sign-In and MetaMask Connect Wallet*
+### Sign in
+![Sign-in screen with Google and MetaMask options](screenshots/login.png)
 
-### 404 Page
-![404 page](screenshots/404.png)
+*Sign in with Google or connect a wallet — no card required.*
 
-*Dark 404 page with "Back to Portfolio" navigation*
+### 404
+![Not-found page with a link back to the portfolio](screenshots/404.png)
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | Angular 9, Angular Material, Chart.js |
+| **Framework** | Angular 9, Angular Material |
+| **Charts** | Chart.js (theme‑aware, trend‑coloured) |
 | **Backend** | Firebase (Firestore, Auth, Hosting) |
-| **API** | CoinGecko (prices, images, market data) |
-| **Auth** | Google Sign-In, MetaMask Wallet |
-| **Styling** | CSS Custom Properties, Glassmorphism, Bootstrap |
-| **Build** | Node 16, Angular CLI 9 |
+| **Market data** | CoinGecko API (prices, images, history) |
+| **Auth** | Google Sign‑In, MetaMask wallet |
+| **Styling** | CSS custom properties (design tokens), Inter, Bootstrap grid |
+| **Tooling** | Node 16, Angular CLI 9 |
 
-## 📋 README Checklist
-
-| # | Feature | Status |
-|---|---------|--------|
-| 1 | Center content | ✅ |
-| 2 | Responsive design | ✅ |
-| 3 | Use Async pipe (price change) | ✅ |
-| 4 | Add paginator | ✅ |
-| 5 | Change coins API (coins + images) | ✅ CoinGecko |
-| 6 | Adjust layout "details" page | ✅ |
-| 7 | Change favicon | ✅ Bitcoin ₿ |
-| 8 | Add login with wallet | ✅ MetaMask |
-| 9 | Add search for exchanges | ✅ |
-| 10 | Add loading animation graph | ✅ |
-| 11 | Decentralized | ⏭️ Skipped |
-| 12 | Add delight 🎉 | ✅ Confetti |
-
-## 🏗️ Development
+## Development
 
 ### Prerequisites
-- Node.js 16.x
+- **Node.js 16.x** — required. The Angular 9 / webpack 4 toolchain does **not** run on Node 17+. Use [nvm](https://github.com/nvm-sh/nvm): `nvm install 16 && nvm use 16`.
 - Angular CLI 9.x
-- Firebase account
+- (Optional) A Firebase project, for real auth + persistence.
 
 ### Setup
 
 ```bash
-# Clone the repo
+# Clone
 git clone https://github.com/QuintusTheFifth/CoinTracker.git
 cd CoinTracker
+
+# Use Node 16
+nvm use 16
 
 # Install dependencies
 npm install --legacy-peer-deps
 
-# Run dev server
+# Run the dev server
 ng serve --proxy-config proxy.conf.json
+# open http://localhost:4200
+```
 
-# Build for production
+To explore without configuring Firebase, just open the app — it falls back to **demo mode** with seeded coins. (You can also force it: `localStorage.setItem('demoMode', '1')`.)
+
+```bash
+# Production build
 ng build --prod
 ```
 
 ### Deploy to Firebase
 
 ```bash
-# Local deploy (requires firebase login)
+# Local deploy (requires `firebase login`)
 ./deploy.sh
-
-# Or use GitHub Actions (set FIREBASE_TOKEN or FIREBASE_SERVICE_ACCOUNT secret)
 ```
 
 ### CI/CD
 
-The repo includes a GitHub Actions workflow (`.github/workflows/firebase-deploy.yml`) that:
-1. Installs deps with `npm install --legacy-peer-deps`
-2. Builds with `ng build --prod`
-3. Deploys to Firebase Hosting
+A GitHub Actions workflow (`.github/workflows/firebase-deploy.yml`) installs dependencies, builds with `ng build --prod`, and deploys to Firebase Hosting. Enable it by adding one of these repository secrets:
 
-To enable, add one of these secrets to the repo:
 - `FIREBASE_TOKEN` — from `firebase login:ci`
-- `FIREBASE_SERVICE_ACCOUNT` — service account JSON key (recommended)
+- `FIREBASE_SERVICE_ACCOUNT` — service‑account JSON key (recommended)
 
 ---
 
-*Built with ❤️ using Angular & Firebase*
+*Built with Angular & Firebase.*

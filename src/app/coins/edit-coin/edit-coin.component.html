@@ -10,8 +10,13 @@
       />
       <h1 class="coin-title">
         {{ message }}
-        <span class="coin-price">{{ price | currency: valuta:"symbol":"1.2-2" }}</span>
+        <span class="coin-price num">{{ price | currency: valuta:"symbol":"1.2-2" }}</span>
       </h1>
+      <div class="coin-holdings" *ngIf="holdingsAmount > 0">
+        <span class="holdings-label">Your holdings</span>
+        <span class="holdings-value num">{{ holdingsValue | currency: valuta:"symbol":"1.2-2" }}</span>
+        <span class="holdings-amount num">{{ holdingsAmount }} {{ message }}</span>
+      </div>
     </div>
     <div class="header-controls">
       <mat-button-toggle-group class="times" #group="matButtonToggleGroup"
@@ -102,10 +107,10 @@
       <ng-container matColumnDef="buttons">
         <mat-header-cell *matHeaderCellDef> </mat-header-cell>
         <mat-cell *matCellDef="let row">
-          <button mat-icon-button (click)="onEdit(row)">
+          <button mat-icon-button aria-label="Edit transaction" matTooltip="Edit" (click)="onEdit(row)">
             <mat-icon>edit</mat-icon>
           </button>
-          <button mat-icon-button color="warn" (click)="onDelete(row)">
+          <button mat-icon-button color="warn" aria-label="Delete transaction" matTooltip="Delete" (click)="onDelete(row)">
             <mat-icon>delete_outline</mat-icon>
           </button>
         </mat-cell>
@@ -114,5 +119,8 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
+    <div *ngIf="filteredTransactionsList?.length === 0" class="tx-empty">
+      No transactions to show{{ exchangeFilter ? ' for this filter' : '' }}.
+    </div>
   </div>
 </div>

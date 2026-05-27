@@ -3,7 +3,12 @@
   class="coin-form"
   (ngSubmit)="onSubmit()"
 >
-  <h2 class="dialog-title">Add / Edit Coin</h2>
+  <div class="dialog-header">
+    <h2 class="dialog-title">Add to portfolio</h2>
+    <button class="dialog-close" type="button" aria-label="Close" (click)="onClose()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
   <input type="hidden" formControlName="$key" />
   <div class="controls-container">
       <!-- Als coinsymbol leeg is, doe toevoeging met autocomplete field -->

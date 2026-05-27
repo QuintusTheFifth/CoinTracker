@@ -1,381 +1,248 @@
 /* ============================================================
-   Edit Coin Detail Page — Dark Theme Redesign
+   Edit Coin Detail — Dark minimal
    ============================================================ */
 
-/* ── Coin Header Card (Glassmorphism) ──────────────────── */
 .coin-header-card {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin: 1.5rem 0 2rem 0;
-  padding: 1.5rem 2rem;
-  border-radius: 16px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px var(--glass-shadow);
+  gap: var(--s4);
+  margin: 0 0 var(--s5) 0;
+  padding: var(--s5);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .coin-header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--s4);
   flex-wrap: wrap;
 }
 
 .coin-icon {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  background: var(--surface-2);
 }
 
 .coin-title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 1.35rem;
+  font-weight: 600;
   margin: 0;
   color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
 .coin-price {
-  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-weight: 500;
-  color: var(--accent);
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  letter-spacing: -0.01em;
+}
+
+.coin-holdings {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-left: var(--s4);
+  margin-left: var(--s2);
+  border-left: 1px solid var(--border);
+}
+.holdings-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.holdings-value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.holdings-amount {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
 }
 
 .header-controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--s3);
 }
 
-/* ── Time Toggle Buttons ───────────────────────────────── */
-.times {
-  position: relative;
-}
+/* Time toggle uses global segmented-control styling */
 
-.times ::ng-deep .mat-button-toggle-group {
-  border-radius: 10px !important;
-  overflow: hidden;
-  background: var(--overlay-hover) !important;
-  border: 1px solid var(--glass-border);
-}
-
-.times ::ng-deep .mat-button-toggle {
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.8rem;
-  transition: all 0.2s ease;
-}
-
-.times ::ng-deep .mat-button-toggle:hover {
-  background: var(--overlay-hover);
-}
-
-.times ::ng-deep .mat-button-toggle-checked {
-  background: linear-gradient(135deg, var(--accent), #d67e1a) !important;
-  color: #fff !important;
-  box-shadow: 0 2px 8px rgba(247, 147, 26, 0.35);
-}
-
-.times ::ng-deep .mat-button-toggle-button {
-  padding: 6px 18px !important;
-}
-
-/* ── Search / Filter Div ────────────────────────────────── */
+/* ── Filter / actions row ───────────────────────────────── */
 .search-div {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 16px;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
 }
 
-.exchange-filter-input {
-  width: 250px;
-  max-width: 100%;
-}
-
-/* Dark outline field overrides */
-.exchange-filter-input ::ng-deep .mat-form-field-outline {
-  color: var(--border);
-}
-
-.exchange-filter-input ::ng-deep .mat-form-field-outline-thick {
-  color: var(--accent);
-}
-
-.exchange-filter-input ::ng-deep .mat-form-field-label {
-  color: var(--text-secondary);
-}
-
-.exchange-filter-input ::ng-deep .mat-input-element {
-  color: var(--text-primary);
-}
-
-.exchange-filter-input ::ng-deep .mat-icon {
-  color: var(--text-secondary);
-}
+.exchange-filter-input { width: 250px; max-width: 100%; }
+.exchange-filter-input ::ng-deep .mat-form-field-outline { color: var(--border); }
+.exchange-filter-input ::ng-deep .mat-form-field-outline-thick { color: var(--accent); }
+.exchange-filter-input ::ng-deep .mat-form-field-label { color: var(--text-muted); }
+.exchange-filter-input ::ng-deep .mat-input-element { color: var(--text-primary); }
+.exchange-filter-input ::ng-deep .mat-icon { color: var(--text-muted); }
 
 /* ── Buttons ────────────────────────────────────────────── */
 .back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 20px;
-  border: 1px solid var(--glass-border);
-  border-radius: 40px;
-  background: var(--overlay-hover);
-  color: var(--text-primary);
-  font-size: 0.9rem;
+  gap: var(--s2);
+  height: 38px;
+  padding: 0 var(--s4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.25s ease;
   text-decoration: none;
+  transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
 }
-
-.back-btn:hover {
-  background: var(--glass-border);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-
-.back-btn:active {
-  transform: translateY(0);
-}
+.back-btn:hover { background: var(--overlay-hover); color: var(--text-primary); border-color: var(--text-muted); }
+.back-btn mat-icon { font-size: 17px; width: 17px; height: 17px; line-height: 17px; }
 
 .add-tx-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
+  gap: var(--s2);
+  height: 38px;
+  padding: 0 var(--s4);
   border: none;
-  border-radius: 40px;
-  background: linear-gradient(135deg, var(--accent) 0%, #448aff 100%);
-  color: #fff;
-  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(247, 147, 26, 0.3);
-  transition: all 0.25s ease;
-  letter-spacing: 0.3px;
+  transition: background-color 0.14s ease;
 }
+.add-tx-btn:hover { background: var(--accent-hover); }
+.add-tx-btn mat-icon { font-size: 18px; width: 18px; height: 18px; line-height: 18px; }
 
-.add-tx-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(247, 147, 26, 0.45);
-}
-
-.add-tx-btn:active {
-  transform: translateY(0);
-}
-
-/* ── Transaction Table ─────────────────────────────────── */
-.table-responsive-wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
+/* ── Transaction table ──────────────────────────────────── */
+.table-responsive-wrapper { width: 100%; overflow-x: auto; }
 
 .tx-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--bg-card);
-  box-shadow: 0 4px 24px var(--glass-shadow);
-  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  margin-bottom: var(--s5);
 }
 
 .tx-table ::ng-deep .mat-header-row {
-  background: var(--overlay-hover);
-  min-height: 56px;
+  background: transparent;
+  min-height: 44px;
+  border-bottom: 1px solid var(--border);
 }
-
 .tx-table ::ng-deep .mat-header-cell {
-  color: var(--text-secondary);
-  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border-bottom: 1px solid var(--overlay-hover);
-  padding: 0 12px;
+  border-bottom: none;
+  padding: 0 14px;
   text-align: center;
 }
-
 .tx-table ::ng-deep .mat-row {
-  min-height: 60px;
-  border-bottom: 1px solid var(--overlay-hover);
-  transition: background 0.2s ease, transform 0.15s ease;
+  min-height: 56px;
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.12s ease;
   cursor: pointer;
-  animation: txRowFadeIn 0.4s ease both;
 }
-
-.tx-table ::ng-deep .mat-row:last-child {
-  border-bottom: none;
-}
-
-.tx-table ::ng-deep .mat-row:hover {
-  background: rgba(247, 147, 26, 0.06);
-}
-
-.tx-table ::ng-deep .mat-row:active {
-  background: rgba(247, 147, 26, 0.10);
-}
-
+.tx-table ::ng-deep .mat-row:last-child { border-bottom: none; }
+.tx-table ::ng-deep .mat-row:hover { background: var(--overlay-hover); }
 .tx-table ::ng-deep .mat-cell {
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   border-bottom: none;
-  padding: 0 12px;
+  padding: 0 14px;
   text-align: center;
 }
 
-/* ── Row Entrance Animation ─────────────────────────────── */
-@keyframes txRowFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+.symbol-cell { display: flex; align-items: center; gap: var(--s2); }
+.symbol-cell-img { width: 24px; height: 24px; flex-shrink: 0; }
+.symbol-cell-name { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; }
 
-/* ── Symbol Cell ────────────────────────────────────────── */
-.symbol-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* Ledger alignment */
+.tx-table ::ng-deep .mat-column-symbol,
+.tx-table ::ng-deep .mat-column-date,
+.tx-table ::ng-deep .mat-column-exchange { text-align: left; }
+.tx-table ::ng-deep .mat-column-amount,
+.tx-table ::ng-deep .mat-column-price\ bought,
+.tx-table ::ng-deep .mat-column-buttons { text-align: right; }
 
-.symbol-cell-img {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
-.symbol-cell-name {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 0.95rem;
-}
-
-/* ── Buttons Column ────────────────────────────────────── */
 .tx-table ::ng-deep .mat-column-buttons .mat-icon-button {
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
-  transition: all 0.2s ease;
-  color: var(--text-secondary);
+  width: 34px; height: 34px; line-height: 34px;
+  color: var(--text-muted);
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
+.tx-table ::ng-deep .mat-column-buttons .mat-icon-button:hover { background: var(--overlay-hover); color: var(--text-primary); }
+.tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"] { color: var(--text-muted); }
+.tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"]:hover { background: var(--red-soft); color: var(--red); }
 
-.tx-table ::ng-deep .mat-column-buttons .mat-icon-button:hover {
-  background: var(--glass-border);
-  color: var(--text-primary);
-}
-
-.tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"] {
-  color: rgba(244, 67, 54, 0.7);
-}
-
-.tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"]:hover {
-  background: rgba(244, 67, 54, 0.12);
-  color: var(--red);
-}
-
-/* ── Bought At Column (Monospace) ───────────────────────── */
 .tx-table ::ng-deep .mat-column-price\ bought {
-  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.tx-empty {
+  padding: var(--s7) var(--s5);
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--s5);
+  font-size: 0.9rem;
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .coin-header-card {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1.2rem 1.2rem;
-    gap: 0.75rem;
-  }
-
-  .coin-title {
-    font-size: 1.25rem;
-  }
-
-  .header-controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .times {
-    margin-bottom: 0;
-  }
-
-  .search-div {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .exchange-filter-input {
-    width: 100%;
-  }
-
-  .tx-table ::ng-deep .mat-column-exchange {
-    display: none;
-  }
-
-  .tx-table ::ng-deep .mat-column-price\ bought {
-    display: none;
-  }
-
-  .tx-table {
-    border-radius: 12px;
-    margin-bottom: 40px;
-  }
+  .coin-header-card { flex-direction: column; align-items: flex-start; padding: var(--s4); gap: var(--s4); }
+  .coin-title { font-size: 1.2rem; }
+  .header-controls { width: 100%; justify-content: space-between; }
+  .search-div { flex-direction: column; align-items: stretch; gap: var(--s2); }
+  .exchange-filter-input { width: 100%; }
+  .tx-table ::ng-deep .mat-column-exchange { display: none; }
+  .tx-table ::ng-deep .mat-column-price\ bought { display: none; }
+  .tx-table { border-radius: var(--radius); }
 }
 
 @media (max-width: 600px) {
-  .coin-header-card {
-    border-radius: 12px;
-    padding: 1rem;
-  }
-
-  .coin-title {
-    font-size: 1.1rem;
-  }
-
-  .coin-icon {
-    width: 28px;
-    height: 28px;
-  }
-
-  .add-tx-btn {
-    padding: 8px 18px;
-    font-size: 0.85rem;
-  }
-
-  .back-btn {
-    padding: 6px 16px;
-    font-size: 0.82rem;
-  }
-
-  .tx-table ::ng-deep .mat-column-date {
-    display: none;
-  }
-
-  .tx-table ::ng-deep .mat-column-buttons {
-    display: none;
-  }
-
-  .tx-table {
-    margin-bottom: 30px;
-  }
+  .coin-header-card { border-radius: var(--radius); padding: var(--s4); }
+  .coin-title { font-size: 1.1rem; }
+  .coin-icon { width: 32px; height: 32px; }
+  .coin-holdings { border-left: none; padding-left: 0; margin-left: 0; width: 100%; }
+  .tx-table ::ng-deep .mat-column-date { display: none; }
+  .tx-table ::ng-deep .mat-column-buttons { display: none; }
 }

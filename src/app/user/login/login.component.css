@@ -3,99 +3,111 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 1.5rem;
+  padding: var(--s5);
   width: 100%;
   box-sizing: border-box;
-  min-height: 80vh;
+  min-height: 78vh;
 }
 
-/* Glassmorphism card */
 .login-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 2.5rem 2rem 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--s7) var(--s6) var(--s6);
   width: 100%;
-  max-width: 400px;
-  box-shadow: var(--glass-shadow);
+  max-width: 380px;
+  box-shadow: var(--shadow-lg);
 }
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto var(--s4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.login-brand img { width: 26px; height: 26px; }
 
 .login-title {
   color: var(--text-primary);
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   text-align: center;
-  margin: 0 0 0.3rem 0;
+  margin: 0 0 var(--s2) 0;
 }
 
 .login-subtitle {
-  color: var(--text-secondary, #8b949e);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.55;
   text-align: center;
-  margin: 0 0 1.5rem 0;
+  margin: 0 auto var(--s5);
+  max-width: 280px;
 }
 
 .login-buttons {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--s3);
   width: 100%;
 }
 
 .google-btn, .wallet-btn {
   width: 100% !important;
-  padding: 10px 16px !important;
+  height: 42px !important;
+  padding: 0 var(--s4) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px;
-  border-radius: 12px !important;
-  font-size: 0.95rem !important;
-  font-weight: 500 !important;
+  gap: var(--s2);
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-ui) !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
 }
 
+/* Google = primary accent (via mat-primary global), Wallet = secondary */
 .wallet-btn {
-  background-color: var(--bg-card) !important;
+  background-color: var(--surface-2) !important;
   color: var(--text-primary) !important;
-  border: 1px solid var(--accent) !important;
-  box-shadow: 0 2px 12px rgba(247, 147, 26, 0.15) !important;
-  transition: all 0.25s ease !important;
+  border: 1px solid var(--border-strong) !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
+  transition: background-color 0.14s ease, border-color 0.14s ease !important;
 }
-
-.wallet-btn:hover {
-  background-color: var(--accent) !important;
-  color: #fff !important;
-  box-shadow: 0 4px 20px rgba(247, 147, 26, 0.35) !important;
-  transform: translateY(-1px);
+.wallet-btn:hover:not([disabled]) {
+  background-color: var(--surface-3) !important;
+  border-color: var(--text-muted) !important;
 }
-
 .wallet-btn[disabled] {
   opacity: 0.6 !important;
   border-color: var(--border) !important;
-  box-shadow: none !important;
 }
+.wallet-btn span { display: inline-flex; align-items: center; gap: var(--s2); }
 
-.wallet-spinner {
-  display: inline-block;
-  margin-right: 8px;
-}
-
-.eth-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
-}
+.wallet-spinner { display: inline-block; }
+.eth-icon { font-size: 18px; width: 18px; height: 18px; vertical-align: middle; }
 
 .error-msg {
   color: var(--red);
   text-align: center;
-  font-size: 13px;
-  padding: 10px 14px;
-  background: rgba(248, 81, 73, 0.1);
-  border: 1px solid rgba(248, 81, 73, 0.25);
-  border-radius: 10px;
-  margin-top: 4px;
+  font-size: 0.8rem;
+  padding: var(--s2) var(--s3);
+  background: var(--red-soft);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  margin-top: var(--s1);
+}
+
+.login-hint {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin: var(--s5) 0 0 0;
 }

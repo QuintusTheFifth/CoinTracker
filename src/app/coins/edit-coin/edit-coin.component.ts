@@ -46,6 +46,15 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
   valuta:string;
   exchangeFilter: string = '';
 
+  get holdingsAmount(): number {
+    if (!this.transactionsList) { return 0; }
+    return this.transactionsList.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  }
+
+  get holdingsValue(): number {
+    return this.holdingsAmount * (this.price || 0);
+  }
+
   get filteredTransactionsList(): any[] {
     if (!this.exchangeFilter || this.exchangeFilter.trim() === '') {
       return this.transactionsList;

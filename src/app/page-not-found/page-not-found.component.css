@@ -4,51 +4,36 @@
   align-items: center;
   justify-content: center;
   min-height: 60vh;
-  padding: 2rem;
+  padding: var(--s5);
   text-align: center;
 }
 
 .not-found-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px var(--glass-shadow);
-  padding: 3rem 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  padding: var(--s7) var(--s6);
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 480px;
+  max-width: 420px;
   width: 100%;
 }
 
 .not-found-card h1 {
-  font-size: 8rem;
-  font-weight: 800;
+  font-size: 3.5rem;
+  font-weight: 700;
   line-height: 1;
-  margin: 0;
-  color: var(--accent);
-  text-shadow: 0 0 40px rgba(247, 147, 26, 0.3);
-  animation: float 3s ease-in-out infinite;
+  margin: 0 0 var(--s2) 0;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
 }
 
 .not-found-card p {
-  font-size: 1.4rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  margin: 0.5rem 0 2rem 0;
-  max-width: 400px;
+  margin: 0 0 var(--s5) 0;
+  max-width: 320px;
   line-height: 1.6;
-}
-
-/* Uses shared Material button from styles.css
-   (mat-raised-button.mat-primary gets accent color automatically) */
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
 }
