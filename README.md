@@ -16,7 +16,7 @@ The UI follows a flat, Linear/Vercel‑style design system: layered surfaces wit
 
 ## Features
 
-- **Portfolio at a glance** — total value, value‑weighted **24h change**, and **all‑time return** (current value vs. cost basis), side by side.
+- **Portfolio at a glance** — total value, value‑weighted **24h change**, and **all‑time return** (current value vs. cost basis), side by side. The cost basis is currency‑aware: each transaction's `priceBought` is normalised using a live EUR↔USD rate (derived from BTC priced in both currencies, so it stays consistent with displayed prices), so the return converts sensibly when you switch EUR/USD.
 - **Per‑coin holdings** — drill into any asset to see your holding value, amount held, and full transaction history.
 - **Live prices & market data** — batched via CoinGecko `/coins/markets` (price, 24h change, 7‑day sparkline and icon in one call). If CoinGecko is rate‑limited or unavailable it falls back to **Coinbase** (keyless, real EUR/USD prices + OHLC history), then to deterministic offline data — so charts show *real* data, not placeholders.
 - **Add almost any coin** — the picker searches CoinGecko's full coin list (thousands of assets) and shows each coin's real icon.
