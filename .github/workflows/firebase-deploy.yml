@@ -31,39 +31,4 @@ jobs:
           name: dist
           path: dist/coinTracker/
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    env:
-      FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: prod
-
-      - name: Save service account key
-        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/gcp-sa.json
-
-      - name: Deploy Firestore rules
-        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
-        continue-on-error: true
-        run: python3 .github/scripts/deploy-rules.py
-
-      - name: Deploy to Firebase Hosting
-        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
-        continue-on-error: true
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: cointracker-26919
-
-      - name: Skip Firebase deploy when secret is unavailable
-        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON == '' }}
-        run: echo "FIREBASE_SERVICE_ACCOUNT is not configured; verified build artifact only."
