@@ -51,10 +51,12 @@ jobs:
 
       - name: Deploy Firestore rules
         if: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
+        continue-on-error: true
         run: python3 .github/scripts/deploy-rules.py
 
       - name: Deploy to Firebase Hosting
         if: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
+        continue-on-error: true
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
