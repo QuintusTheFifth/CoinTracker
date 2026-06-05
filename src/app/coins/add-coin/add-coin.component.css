@@ -1,173 +1,290 @@
 /* ============================================================
-   Add / Edit Coin dialog — Dark minimal
+   Add Coin Dialog — Dark Theme Redesign
    ============================================================ */
 
-.dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0 0 var(--s4) 0;
+/* ── Form Container (Card) ──────────────────────────────── */
+::ng-deep .mat-dialog-container {
+  background: transparent;
+  max-height: 92vh;
+  overflow: visible;
+  padding: 0;
 }
+
 .dialog-title {
   color: var(--text-primary);
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   font-weight: 600;
-  text-align: left;
-  letter-spacing: -0.02em;
-  margin: 0;
+  text-align: center;
+  margin: 0 0 0.35rem 0;
 }
-.dialog-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: transparent;
+
+.dialog-subtitle {
   color: var(--text-secondary);
-  cursor: pointer;
-  transition: background-color 0.14s ease, color 0.14s ease;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  margin: 0 auto 1.35rem auto;
+  max-width: 340px;
+  text-align: center;
 }
-.dialog-close:hover { background: var(--overlay-hover); color: var(--text-primary); }
-.dialog-close:focus { outline: none; }
-.dialog-close:focus-visible {
-  outline: none;
-  border-color: var(--accent);
-  background: var(--overlay-hover);
-  color: var(--text-primary);
-}
-.dialog-close mat-icon { font-size: 18px; width: 18px; height: 18px; line-height: 18px; }
 
 .coin-form {
-  min-width: 320px;
-  max-width: 460px;
+  min-width: 150px;
+  max-width: 620px;
   width: 100%;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  padding: var(--s6) var(--s6) var(--s5);
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  box-sizing: border-box;
+  max-height: 88vh;
+  overflow-y: auto;
 }
 
-.coin-full-width { width: 100%; }
+.coin-full-width {
+  width: 100%;
+}
 
 .coin-option-img {
   vertical-align: middle;
-  margin-right: var(--s2);
+  margin-right: 8px;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   object-fit: cover;
-  background: var(--surface-2);
 }
-[dir='rtl'] .coin-option-img { margin-right: 0; margin-left: var(--s2); }
 
-/* Form fields — most styling inherited from global overrides */
-.coin-form ::ng-deep .mat-form-field-label { color: var(--text-muted); }
-.coin-form ::ng-deep .mat-input-element { color: var(--text-primary); }
-.coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-label { color: var(--accent); }
-.coin-form ::ng-deep .mat-form-field-invalid .mat-form-field-label { color: var(--red); }
-.coin-form ::ng-deep .mat-error { color: var(--red); font-size: 0.78rem; }
-/* The input box lives on the flex wrapper (not the infix), so the placeholder —
-   which Material positions absolutely at the infix's left edge — is inset by the
-   padding too, instead of hugging the left border. */
-.coin-form ::ng-deep .mat-form-field-flex {
+[dir='rtl'] .coin-option-img {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+/* ── Dark Form Field Overrides ──────────────────────────── */
+.coin-form ::ng-deep .mat-form-field-label {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.coin-form ::ng-deep .mat-form-field-appearance-legacy .mat-form-field-label {
+  transform: translateY(-1.35em) scale(0.82);
+}
+
+.coin-form ::ng-deep .mat-form-field-underline {
+  background-color: var(--border);
+}
+
+.coin-form ::ng-deep .mat-form-field-ripple {
+  background-color: var(--accent);
+}
+
+.coin-form ::ng-deep .mat-input-element {
+  color: var(--text-primary);
+}
+
+.coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-label {
+  color: var(--accent);
+}
+
+.coin-form ::ng-deep .mat-form-field-invalid .mat-form-field-label {
+  color: var(--red);
+}
+
+.coin-form ::ng-deep .mat-form-field-invalid .mat-form-field-ripple {
+  background-color: var(--red);
+}
+
+.coin-form ::ng-deep .mat-error {
+  color: var(--red);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.coin-form ::ng-deep .mat-hint {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  opacity: 0.95;
+}
+
+/* ── Visible input backgrounds for dark theme ──────────── */
+.coin-form ::ng-deep .mat-form-field-infix {
+  background: rgba(255, 255, 255, 0.045);
+  border-radius: 10px;
+  padding: 0.9rem 0.9rem 0.7rem;
+  border: 1px solid var(--border);
+}
+
+.coin-form ::ng-deep input[type='number']::-webkit-inner-spin-button,
+.coin-form ::ng-deep input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.coin-form ::ng-deep input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.coin-form ::ng-deep input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.72;
+}
+
+.coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-infix {
+  border-color: var(--accent);
+  background: var(--overlay-hover);
+}
+
+/* ── Dark Autocomplete Panel ────────────────────────────── */
+::ng-deep .mat-autocomplete-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-top: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+::ng-deep .mat-autocomplete-panel .mat-option {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  min-height: 44px;
+  line-height: 44px;
+  display: flex;
   align-items: center;
-  background: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 0.62rem 0.85rem;
+  gap: 8px;
 }
-.coin-form ::ng-deep .mat-form-field.mat-focused .mat-form-field-flex { border-color: var(--accent); }
-.coin-form ::ng-deep .mat-form-field-disabled .mat-input-element { color: var(--text-muted); }
 
-/* Controls */
+::ng-deep .mat-autocomplete-panel .mat-option:hover {
+  background: rgba(247, 147, 26, 0.1);
+}
+
+::ng-deep .mat-autocomplete-panel .mat-option.mat-active {
+  background: rgba(247, 147, 26, 0.15);
+}
+
+/* ── Disabled Field ─────────────────────────────────────── */
+.coin-form ::ng-deep .mat-form-field-disabled .mat-input-element {
+  color: var(--text-secondary);
+}
+
+/* ── Controls Container ─────────────────────────────────── */
 .controls-container {
   width: 100%;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s4);
-}
-.controls-container > * { width: 100%; }
-
-/* Field = static label above a clean input box */
-.field { display: flex; flex-direction: column; gap: 5px; }
-.field-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.15rem;
 }
 
-/* Compact the Material field: no floating label, no reserved subscript gap */
-.coin-form ::ng-deep .mat-form-field { width: 100%; }
-.coin-form ::ng-deep .mat-form-field-wrapper { padding-bottom: 0; margin: 0; }
-.coin-form ::ng-deep .mat-form-field-infix {
-  border: none;
-  border-top: 0;
-  background: transparent;
-  padding: 0;
-  width: auto;
-  min-height: 20px;
+.controls-container > * {
+  width: 100%;
 }
-.coin-form ::ng-deep .mat-input-element { line-height: 1.5; }
-/* Dark-friendly native date picker icon (was bright blue) */
-.coin-form ::ng-deep input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.6);
-  cursor: pointer;
-  opacity: 0.8;
-}
-.coin-form ::ng-deep .mat-form-field-subscript-wrapper { position: static; margin-top: 4px; }
 
-/* Buttons */
+.controls-container > div:first-child,
+.controls-container > ng-template,
+.button-row {
+  grid-column: 1 / -1;
+}
+
+/* ── Button Row ─────────────────────────────────────────── */
 .button-row {
   display: flex;
-  gap: var(--s2);
   justify-content: flex-end;
-  margin-top: var(--s4);
+  gap: 0.75rem;
+  margin-top: 1rem;
+  position: static;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
 }
 
+.save-helper {
+  grid-column: 1 / -1;
+  color: var(--text-secondary);
+  font-size: 0.83rem;
+  margin: 0.25rem 0 0;
+}
+
+/* Save Button — Accent Gradient + Hover Lift */
 .save-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  height: 38px;
-  padding: 0 var(--s5);
+  gap: 8px;
+  padding: 10px 24px;
   border: none;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
+  border-radius: 40px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--gradient-end) 100%);
+  color: #fff;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.14s ease;
+  box-shadow: 0 4px 16px rgba(247, 147, 26, 0.3);
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
 }
-.save-btn:hover:not(:disabled) { background: var(--accent-hover); }
-.save-btn:disabled { background: var(--surface-2); color: var(--text-muted); cursor: not-allowed; }
 
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(247, 147, 26, 0.45);
+}
+
+.save-btn:active {
+  transform: translateY(0);
+}
+
+.save-btn:disabled {
+  background: var(--border);
+  color: var(--text-primary);
+  opacity: 0.65;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Close Button — Dark Warn Styling */
 .close-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  height: 38px;
-  padding: 0 var(--s5);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
-  font-weight: 500;
+  gap: 8px;
+  padding: 10px 24px;
+  border: 1px solid rgba(249, 145, 87, 0.3);
+  border-radius: 40px;
+  background: rgba(249, 145, 87, 0.08);
+  color: #f99157;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
 }
-.close-btn:hover { background: var(--overlay-hover); color: var(--text-primary); border-color: var(--text-muted); }
 
-/* Responsive */
+.close-btn:hover {
+  background: rgba(249, 145, 87, 0.15);
+  border-color: rgba(249, 145, 87, 0.5);
+  transform: translateY(-2px);
+}
+
+.close-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .coin-form { padding: var(--s4); min-width: 0; }
-  .button-row { flex-direction: column-reverse; gap: var(--s2); }
-  .save-btn, .close-btn { width: 100%; }
+  .coin-form {
+    padding: 1rem;
+    border-radius: 12px;
+    max-height: 90vh;
+  }
+
+  .button-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .controls-container {
+    grid-template-columns: 1fr;
+  }
+
+  .save-btn,
+  .close-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

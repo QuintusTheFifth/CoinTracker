@@ -1,275 +1,572 @@
 /* ============================================================
-   Edit Coin Detail — Dark minimal
+   Edit Coin Detail Page — Dark Theme Redesign
    ============================================================ */
+
+/* ── Coin Header Card (Glassmorphism) ──────────────────── */
+.detail-page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-left: clamp(0.75rem, 2vw, 1.5rem);
+  padding-right: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 1rem 0 0.75rem;
+}
 
 .coin-header-card {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--s4);
-  margin: 0 0 var(--s5) 0;
-  padding: var(--s5);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  gap: 1rem;
+  margin: 0 0 1.25rem 0;
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px var(--glass-shadow);
 }
 
 .coin-header-left {
   display: flex;
   align-items: center;
-  gap: var(--s4);
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 .coin-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  background: var(--surface-2);
 }
 
 .coin-title {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 1.35rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
   color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
 .coin-price {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
   font-weight: 500;
-  font-size: 1.05rem;
-  color: var(--text-secondary);
-  letter-spacing: -0.01em;
-}
-
-.coin-holdings {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding-left: var(--s4);
-  margin-left: var(--s2);
-  border-left: 1px solid var(--border);
-}
-.holdings-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-.holdings-value {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-.holdings-amount {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
+  color: var(--accent);
 }
 
 .header-controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--s3);
+  gap: 0.75rem;
 }
 
-/* Time toggle uses global segmented-control styling */
+/* ── Time Toggle Buttons ───────────────────────────────── */
+.times {
+  position: relative;
+}
 
-/* ── Filter / actions row ───────────────────────────────── */
+.times ::ng-deep .mat-button-toggle-group {
+  border-radius: 10px !important;
+  overflow: hidden;
+  background: var(--overlay-hover) !important;
+  border: 1px solid var(--glass-border);
+}
+
+.times ::ng-deep .mat-button-toggle {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.times ::ng-deep .mat-button-toggle:hover {
+  background: var(--overlay-hover);
+}
+
+.times ::ng-deep .mat-button-toggle-checked {
+  background: linear-gradient(135deg, var(--accent), #d67e1a) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(247, 147, 26, 0.35);
+}
+
+.times ::ng-deep .mat-button-toggle-button {
+  padding: 6px 18px !important;
+}
+
+/* ── Search / Filter Div ────────────────────────────────── */
 .search-div {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--s3);
-  margin-bottom: var(--s4);
+  gap: 1rem;
+  margin-bottom: 16px;
 }
 
-.filter-field {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s2);
-  height: 38px;
-  padding: 0 var(--s3);
-  width: 260px;
+.exchange-filter-input {
+  width: 280px;
   max-width: 100%;
-  background: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  transition: border-color 0.14s ease;
 }
-.filter-field:focus-within { border-color: var(--accent); }
-.filter-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  line-height: 18px;
-  color: var(--text-muted);
-  flex-shrink: 0;
+
+/* Dark outline field overrides */
+.exchange-filter-input ::ng-deep .mat-form-field-outline {
+  color: var(--border);
 }
-.filter-input {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  border: none;
-  outline: none;
+
+.exchange-filter-input ::ng-deep .mat-form-field-outline-thick {
+  color: var(--accent);
+}
+
+.exchange-filter-input ::ng-deep .mat-form-field-label {
+  color: var(--text-secondary);
+}
+
+.exchange-filter-input ::ng-deep .mat-input-element {
   color: var(--text-primary);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
 }
-.filter-input::placeholder { color: var(--text-muted); }
+
+.exchange-filter-input ::ng-deep .mat-icon {
+  color: var(--text-secondary);
+}
 
 /* ── Buttons ────────────────────────────────────────────── */
 .back-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--s2);
-  height: 38px;
-  padding: 0 var(--s4);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
+  gap: 6px;
+  padding: 8px 20px;
+  border: 1px solid var(--glass-border);
+  border-radius: 40px;
+  background: var(--overlay-hover);
+  color: var(--text-primary);
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.25s ease;
   text-decoration: none;
-  transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
 }
-.back-btn:hover { background: var(--overlay-hover); color: var(--text-primary); border-color: var(--text-muted); }
-.back-btn mat-icon { font-size: 17px; width: 17px; height: 17px; line-height: 17px; }
+
+.back-btn:hover {
+  background: var(--glass-border);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.back-btn:active {
+  transform: translateY(0);
+}
 
 .add-tx-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--s2);
-  height: 38px;
-  padding: 0 var(--s4);
+  gap: 8px;
+  padding: 10px 24px;
   border: none;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
+  border-radius: 40px;
+  background: linear-gradient(135deg, var(--accent) 0%, #448aff 100%);
+  color: #fff;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.14s ease;
+  box-shadow: 0 4px 16px rgba(247, 147, 26, 0.3);
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
 }
-.add-tx-btn:hover { background: var(--accent-hover); }
-.add-tx-btn mat-icon { font-size: 18px; width: 18px; height: 18px; line-height: 18px; }
 
-/* ── Transaction table ──────────────────────────────────── */
-.table-responsive-wrapper { width: 100%; overflow-x: auto; }
+.add-tx-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(247, 147, 26, 0.45);
+}
+
+.add-tx-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Transaction Table ─────────────────────────────────── */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
 
 .tx-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: none;
-  margin-bottom: var(--s5);
+  background: var(--bg-card);
+  box-shadow: 0 4px 24px var(--glass-shadow);
+  margin-bottom: 24px;
 }
 
 .tx-table ::ng-deep .mat-header-row {
-  background: transparent;
-  min-height: 44px;
-  border-bottom: 1px solid var(--border);
+  background: var(--overlay-hover);
+  min-height: 56px;
 }
+
 .tx-table ::ng-deep .mat-header-cell {
-  color: var(--text-muted);
-  font-size: 0.6875rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border-bottom: none;
-  padding: 0 14px;
+  border-bottom: 1px solid var(--overlay-hover);
+  padding: 0 12px;
   text-align: center;
 }
+
 .tx-table ::ng-deep .mat-row {
-  min-height: 56px;
-  border-bottom: 1px solid var(--border);
-  transition: background-color 0.12s ease;
+  min-height: 60px;
+  border-bottom: 1px solid var(--overlay-hover);
+  transition: background 0.2s ease, transform 0.15s ease;
   cursor: pointer;
+  animation: txRowFadeIn 0.4s ease both;
 }
-.tx-table ::ng-deep .mat-row:last-child { border-bottom: none; }
-.tx-table ::ng-deep .mat-row:hover { background: var(--overlay-hover); }
+
+.tx-table ::ng-deep .mat-row:last-child {
+  border-bottom: none;
+}
+
+.tx-table ::ng-deep .mat-row:hover {
+  background: rgba(247, 147, 26, 0.06);
+}
+
+.tx-table ::ng-deep .mat-row:active {
+  background: rgba(247, 147, 26, 0.10);
+}
+
 .tx-table ::ng-deep .mat-cell {
   color: var(--text-primary);
-  font-size: 0.875rem;
-  border-bottom: none;
-  padding: 0 14px;
-  text-align: center;
-}
-
-.symbol-cell { display: flex; align-items: center; gap: var(--s2); }
-.symbol-cell-img { width: 24px; height: 24px; flex-shrink: 0; }
-.symbol-cell-name { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; }
-
-/* Ledger alignment */
-.tx-table ::ng-deep .mat-column-symbol,
-.tx-table ::ng-deep .mat-column-date,
-.tx-table ::ng-deep .mat-column-exchange { text-align: left; }
-.tx-table ::ng-deep .mat-column-amount,
-.tx-table ::ng-deep .mat-column-price\ bought,
-.tx-table ::ng-deep .mat-column-buttons { text-align: right; }
-
-.tx-table ::ng-deep .mat-column-buttons .mat-icon-button {
-  width: 34px; height: 34px; line-height: 34px;
-  color: var(--text-muted);
-  transition: background-color 0.12s ease, color 0.12s ease;
-}
-.tx-table ::ng-deep .mat-column-buttons .mat-icon-button:hover { background: var(--overlay-hover); color: var(--text-primary); }
-.tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"] { color: var(--text-muted); }
-.tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"]:hover { background: var(--red-soft); color: var(--red); }
-
-.tx-table ::ng-deep .mat-column-price\ bought {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ── Empty state ─────────────────────────────────────────── */
-.tx-empty {
-  padding: var(--s7) var(--s5);
-  text-align: center;
-  color: var(--text-secondary);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--s5);
   font-size: 0.9rem;
+  border-bottom: none;
+  padding: 0 12px;
+  text-align: center;
+}
+
+/* ── Row Entrance Animation ─────────────────────────────── */
+@keyframes txRowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Symbol Cell ────────────────────────────────────────── */
+.symbol-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.symbol-cell-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.symbol-icon-fallback {
+  align-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--gradient-end));
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 800;
+  height: 28px;
+  justify-content: center;
+  line-height: 1;
+  text-transform: uppercase;
+  width: 28px;
+}
+
+.symbol-cell-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+/* ── Buttons Column ────────────────────────────────────── */
+.tx-table ::ng-deep .mat-column-buttons .mat-icon-button {
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+}
+
+.tx-table ::ng-deep .mat-column-buttons .mat-icon-button:hover {
+  background: var(--glass-border);
+  color: var(--text-primary);
+}
+
+.tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"] {
+  color: rgba(244, 67, 54, 0.7);
+}
+
+.tx-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"]:hover {
+  background: rgba(244, 67, 54, 0.12);
+  color: var(--red);
+}
+
+.confirm-delete {
+  align-items: center;
+  background: rgba(244, 67, 54, 0.10);
+  border: 1px solid rgba(244, 67, 54, 0.22);
+  border-radius: 999px;
+  color: var(--text-primary);
+  display: inline-flex;
+  gap: 0.4rem;
+  padding: 0.2rem 0.35rem 0.2rem 0.65rem;
+  white-space: nowrap;
+}
+
+.confirm-delete ::ng-deep .mat-button,
+.confirm-delete ::ng-deep .mat-stroked-button {
+  line-height: 28px;
+  min-width: 42px;
+  padding: 0 0.55rem;
+}
+
+/* ── Bought At Column (Monospace) ───────────────────────── */
+.tx-table ::ng-deep .mat-column-price\ bought {
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .coin-header-card { flex-direction: column; align-items: flex-start; padding: var(--s4); gap: var(--s4); }
-  .coin-title { font-size: 1.2rem; }
-  .header-controls { width: 100%; justify-content: space-between; }
-  .search-div { flex-direction: column; align-items: stretch; gap: var(--s2); }
-  .exchange-filter-input { width: 100%; }
-  .tx-table ::ng-deep .mat-column-exchange { display: none; }
-  .tx-table ::ng-deep .mat-column-price\ bought { display: none; }
-  .tx-table { border-radius: var(--radius); }
+  .coin-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.2rem 1.2rem;
+    gap: 0.75rem;
+  }
+
+  .coin-title {
+    font-size: 1.25rem;
+  }
+
+  .header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .times {
+    margin-bottom: 0;
+  }
+
+  .search-div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .exchange-filter-input {
+    width: 100%;
+  }
+
+  .tx-table ::ng-deep .mat-column-exchange {
+    display: none;
+  }
+
+  .tx-table ::ng-deep .mat-column-price\ bought {
+    display: none;
+  }
+
+  .tx-table {
+    border-radius: 12px;
+    margin-bottom: 40px;
+  }
 }
 
 @media (max-width: 600px) {
-  .coin-header-card { border-radius: var(--radius); padding: var(--s4); }
-  .coin-title { font-size: 1.1rem; }
-  .coin-icon { width: 32px; height: 32px; }
-  .coin-holdings { border-left: none; padding-left: 0; margin-left: 0; width: 100%; }
-  .tx-table ::ng-deep .mat-column-date { display: none; }
-  .tx-table ::ng-deep .mat-column-buttons { display: none; }
+  .coin-header-card {
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  .coin-title {
+    font-size: 1.1rem;
+  }
+
+  .coin-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .add-tx-btn {
+    padding: 8px 18px;
+    font-size: 0.85rem;
+  }
+
+  .back-btn {
+    padding: 6px 16px;
+    font-size: 0.82rem;
+  }
+
+  .tx-table ::ng-deep .mat-column-date {
+    display: none;
+  }
+
+  .tx-table ::ng-deep .mat-column-buttons {
+    min-width: 104px;
+  }
+
+  .tx-table {
+    margin-bottom: 30px;
+  }
+}
+
+/* Final detail-page polish overrides */
+.coin-header-left {
+  min-width: min(100%, 360px);
+}
+
+.header-controls {
+  justify-content: flex-end;
+}
+
+.range-label {
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.74;
+  text-transform: uppercase;
+}
+
+.times ::ng-deep .mat-button-toggle {
+  color: var(--text-primary);
+}
+
+.chart-section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px var(--glass-shadow);
+  margin: 0 0 1.25rem;
+  overflow: hidden;
+  padding: 1.35rem 1.5rem 1.5rem;
+}
+
+.section-heading {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  max-width: none;
+}
+
+.section-heading h2 {
+  color: var(--text-primary);
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.section-heading p {
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  margin: 0.25rem 0 0;
+  opacity: 0.72;
+}
+
+.search-div {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 16px;
+  padding: 1rem;
+}
+
+.exchange-filter-input {
+  margin-bottom: -1.25em;
+}
+
+.exchange-filter-input ::ng-deep .mat-form-field-wrapper {
+  margin: 0;
+  padding-bottom: 1.25em;
+}
+
+.exchange-filter-input ::ng-deep .mat-form-field-label,
+.exchange-filter-input ::ng-deep .mat-icon {
+  color: var(--text-primary);
+  opacity: 0.75;
+}
+
+.table-responsive-wrapper {
+  border-radius: 16px;
+  overflow-x: auto;
+}
+
+.tx-table {
+  min-width: 760px;
+}
+
+.tx-table ::ng-deep .mat-header-cell {
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  opacity: 0.86;
+  text-align: left;
+}
+
+.tx-table ::ng-deep .mat-cell {
+  text-align: left;
+}
+
+.tx-table ::ng-deep .mat-column-amount,
+.tx-table ::ng-deep .mat-column-price\ bought {
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.tx-table ::ng-deep .mat-column-buttons {
+  justify-content: center;
+}
+
+.symbol-cell-img {
+  border-radius: 50%;
+  display: block;
+  object-fit: contain;
+}
+
+.tx-table ::ng-deep .mat-column-buttons .tx-action-btn {
+  border-radius: 999px;
+  color: var(--text-primary);
+  height: 40px;
+  line-height: 40px;
+  margin-right: 0.25rem;
+  min-width: 82px;
+  opacity: 0.86;
+  padding: 0 0.65rem;
+}
+
+.tx-table ::ng-deep .mat-column-buttons .tx-action-btn .mat-icon {
+  font-size: 18px;
+  height: 18px;
+  margin-right: 0.25rem;
+  width: 18px;
+}
+
+.tx-table ::ng-deep .mat-column-buttons .tx-action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  opacity: 1;
+}
+
+.tx-table ::ng-deep .mat-column-buttons .tx-action-danger {
+  color: #ff8b8b;
 }

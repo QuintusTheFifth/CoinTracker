@@ -1,39 +1,48 @@
 <mat-sidenav-container>
-  <mat-sidenav mode="push" position="end" [(opened)]="opened">
-    <button class="sidenav-close-btn" (click)="opened = false">
+  <mat-sidenav mode="over" position="end" [(opened)]="opened" role="dialog" aria-modal="true" aria-labelledby="data-sources-title">
+    <button class="sidenav-close-btn" (click)="opened = false" aria-label="Close data sources panel">
       <mat-icon>close</mat-icon>
     </button>
     <div class="sidenav-header">
       <mat-icon class="sidenav-icon">api</mat-icon>
-      <h1>Data Sources</h1>
+      <h1 id="data-sources-title">Data Sources</h1>
     </div>
     <ul class="sidenav-list">
       <li>
         <span class="api-badge live">LIVE</span>
         <a href="https://www.coingecko.com/en/api" target="_blank" rel="noopener">CoinGecko API</a>
       </li>
+      <li>
+        <span class="api-badge live">CACHE</span>
+        <span>Static fallback prices/images keep demo mode usable if CoinGecko is unavailable.</span>
+      </li>
     </ul>
     <p class="sidenav-footer-text">Real-time cryptocurrency data powered by CoinGecko.</p>
   </mat-sidenav>
 
+  <div class="app-shell" [attr.aria-hidden]="opened ? 'true' : null" [attr.inert]="opened ? '' : null">
   <nav class="navbar navbar-expand-lg crypto-nav" [class.nav-scrolled]="navScrolled">
     <a class="navbar-brand" [routerLink]="['/coin-list']">
-      <span class="brand-icon">
-        <img draggable="false" src="assets/svg/logo.svg" alt="" />
-      </span>
+      <span class="brand-icon"
+        ><img
+          draggable="false"
+          src="assets/svg/white/btc.svg"
+        />&nbsp;&nbsp;</span
+      >
       <span class="brand-text">{{ pageTitle }}</span>
+      <span class="brand-tagline">Crypto Portfolio Tracker</span>
     </a>
 
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" (click)="toggleNav()" [attr.aria-expanded]="navOpen" aria-controls="navbarNav" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
+    <div class="collapse navbar-collapse" [class.show]="navOpen" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item" *ngIf="(auth.user$ | async) || isDemo">
+        <li class="nav-item">
           <a class="nav-link portfolio-link" [routerLink]="['/coin-list']" routerLinkActive="active-link">Portfolio</a>
         </li>
-        <div *ngIf="auth.user$ | async as user; else loggedOut" class="nav-user-area">
+        <div *ngIf="auth.user$ | async as user; else login" class="nav-user-area">
           <li class="nav-item">
             <p class="displayName">
               Keep HODLing,
@@ -46,12 +55,11 @@
             >
           </li>
         </div>
-        <ng-template #loggedOut>
-          <li class="nav-item" *ngIf="isDemo">
-            <span class="demo-badge">Demo</span>
-          </li>
+        <ng-template #login>
           <li class="nav-item">
-            <a mat-button class="sign-in-link" [routerLink]="['/login']">Sign in</a>
+            <a mat-button class="sign-in-link" [routerLink]="['/login']"
+              >Sign in</a
+            >
           </li>
         </ng-template>
       </ul>
@@ -61,7 +69,7 @@
       <mat-icon>{{ themeIcon }}</mat-icon>
     </button>
 
-    <button class="info-button" (click)="opened = !opened" matTooltip="Data sources &amp; info">
+    <button class="info-button" (click)="opened = !opened" aria-label="Open data sources panel" matTooltip="Data sources &amp; info">
       <mat-icon>settings</mat-icon>
     </button>
   </nav>
@@ -71,9 +79,8 @@
       <router-outlet></router-outlet>
     </div>
     <footer class="app-footer">
-      <span class="footer-text">CoinTracker</span>
-      <span class="footer-sep">·</span>
-      <span class="footer-text footer-muted">Prices by CoinGecko</span>
+      <span class="footer-text">Made with <span class="footer-heart">❤️</span> &bull; CoinTracker</span>
     </footer>
+  </div>
   </div>
 </mat-sidenav-container>

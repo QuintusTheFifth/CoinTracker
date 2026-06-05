@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from 'src/app/authentication/auth.service';
 import { CoinsService } from 'src/app/coins/services/coin.data.service';
 
@@ -11,7 +9,6 @@ import { CoinsService } from 'src/app/coins/services/coin.data.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  public user: FormGroup;
   public errorMessage: string = '';
   public walletLoggingIn: boolean = false;
 
@@ -36,18 +33,34 @@ export class LoginComponent implements OnInit {
     try {
       await this.auth.walletLogin();
     } catch (err) {
-      this.errorMessage = err.message || 'Failed to connect wallet.';
-      console.error('Wallet login error:', err);
+      this.errorMessage = this.friendlyAuthError(err, 'wallet');
     } finally {
       this.walletLoggingIn = false;
     }
   }
 
   async onGoogleLogin() {
+    this.errorMessage = '';
     try {
       await this.auth.googleSignin();
     } catch (err) {
-      this.errorMessage = err.message || 'Google sign-in failed.';
+      this.errorMessage = this.friendlyAuthError(err, 'google');
     }
+  }
+
+  private friendlyAuthError(err: any, provider: 'google' | 'wallet'): string {
+    const message = String(err && err.message ? err.message : err || '').toLowerCase();
+
+    if (provider === 'google' && (message.includes('unauthorized-domain') || message.includes('domain'))) {
+      return 'Google sign-in is not available in this environment. You can continue in demo mode or use a configured production domain.';
+    }
+
+    if (provider === 'wallet' && (message.includes('metamask') || message.includes('ethereum'))) {
+      return 'MetaMask is not available in this browser. You can still explore CoinTracker in demo mode.';
+    }
+
+    return provider === 'google'
+      ? 'Google sign-in failed. Please try again or continue in demo mode.'
+      : 'Wallet connection failed. Please try again or continue in demo mode.';
   }
 }

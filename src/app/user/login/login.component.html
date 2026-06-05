@@ -7,20 +7,24 @@
     <h1 class="login-title">Welcome to CoinTracker</h1>
     <p class="login-subtitle">Track every coin, transaction and exchange in one clean portfolio.</p>
     <div class="login-buttons">
-      <button mat-raised-button color="primary" class="google-btn" (click)="onGoogleLogin()">
-        <mat-icon>mail_outline</mat-icon> Sign in with Google
+      <button mat-raised-button color="primary" class="google-btn" (click)="onGoogleLogin()" aria-label="Sign in with Google">
+        <span class="google-mark" aria-hidden="true">G</span> Sign in with Google
       </button>
 
       <button mat-raised-button class="wallet-btn" (click)="onWalletLogin()" [disabled]="walletLoggingIn">
         <span *ngIf="!walletLoggingIn">
           <mat-icon class="eth-icon">account_balance_wallet</mat-icon>
-          Connect Wallet
+          Connect Wallet (demo)
         </span>
         <span *ngIf="walletLoggingIn">
           <mat-spinner diameter="20" class="wallet-spinner"></mat-spinner>
           Connecting...
         </span>
       </button>
+
+      <a class="demo-link" href="/coin-list" routerLink="/coin-list" aria-label="Continue in demo mode">
+        Continue in demo mode
+      </a>
 
       <div *ngIf="errorMessage" class="error-msg">
         {{ errorMessage }}

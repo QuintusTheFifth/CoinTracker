@@ -5,10 +5,17 @@
 
 <div *ngIf="!loading">
   <div *ngIf="!bigChart" class="mini-graph">
-    <canvas [attr.id]="coinName"></canvas>
+    <canvas [attr.id]="coinName" role="img" [attr.aria-label]="coinName + ' 7 day price chart'"></canvas>
+  </div>
+
+  <div *ngIf="bigChart" class="chart-metrics" aria-label="Chart summary">
+    <span><strong>Latest close</strong>{{ chartLatest | currency:'EUR':'symbol':'1.2-2' }}</span>
+    <span><strong>High</strong>{{ chartHigh | currency:'EUR':'symbol':'1.2-2' }}</span>
+    <span><strong>Low</strong>{{ chartLow | currency:'EUR':'symbol':'1.2-2' }}</span>
+    <span><strong>Range</strong>{{ chartStart }} — {{ chartEnd }}</span>
   </div>
 
   <div *ngIf="bigChart" class="big-graph">
-    <canvas [attr.id]="coinName"></canvas>
+    <canvas [attr.id]="coinName" role="img" [attr.aria-label]="coinName + ' detailed price chart'"></canvas>
   </div>
 </div>

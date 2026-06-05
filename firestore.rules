@@ -1,10 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow all reads/writes for development
-    // Restrict to authenticated users when launching publicly
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsUserDocument(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if ownsUserDocument(userId);
+      allow delete: if false;
+
+      match /coins/{coinId} {
+        allow read, write: if ownsUserDocument(userId);
+      }
+    }
+
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

@@ -18,10 +18,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps --no-audit --no-fund
+        run: npm install --no-audit --no-fund
 
       - name: Build Angular app
-        run: npx ng build --prod
+        run: npm run build:prod
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -45,12 +45,10 @@ jobs:
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/gcp-sa.json
 
       - name: Deploy Firestore rules
-        continue-on-error: true
         run: python3 .github/scripts/deploy-rules.py
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
-        continue-on-error: true
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'

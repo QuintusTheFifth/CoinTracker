@@ -4,40 +4,19 @@ import { Chart } from 'chart.js';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-// Resolve themed colors from CSS custom properties so charts track light/dark.
-function themeColors() {
-  const css = getComputedStyle(document.body);
-  const read = (name: string, fallback: string) =>
-    (css.getPropertyValue(name) || '').trim() || fallback;
-  return {
-    accent: read('--accent', '#f7931a'),
-    green: read('--green', '#4cc38a'),
-    red: read('--red', '#e5484d'),
-    grid: read('--border', '#23262b'),
-    tick: read('--text-muted', '#868d97'),
-  };
-}
-
-function hexToRgb(hex: string): string {
-  const h = (hex || '').replace('#', '').trim();
-  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
-  const n = parseInt(full, 16);
-  if (isNaN(n) || full.length !== 6) { return '247, 147, 26'; }
-  // tslint:disable-next-line:no-bitwise
-  return ((n >> 16) & 255) + ', ' + ((n >> 8) & 255) + ', ' + (n & 255);
-}
-
-// Soft vertical fill under the line, fading to transparent.
-function fillGradient(canvasId: string, hex: string, topAlpha: number): any {
-  const rgb = hexToRgb(hex);
-  const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-  if (!canvas || !canvas.getContext) { return 'rgba(' + rgb + ', ' + topAlpha + ')'; }
-  const ctx = canvas.getContext('2d');
-  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height || 160);
-  gradient.addColorStop(0, 'rgba(' + rgb + ', ' + topAlpha + ')');
-  gradient.addColorStop(1, 'rgba(' + rgb + ', 0.00)');
-  return gradient;
-}
+// Dark theme chart area background plugin
+const darkBackgroundPlugin = {
+  id: 'darkBackground',
+  beforeDraw: function(chart) {
+    const ctx = chart.ctx;
+    const chartArea = chart.chartArea;
+    if (!chartArea) return;
+    ctx.save();
+    ctx.fillStyle = 'rgba(28, 35, 51, 0.9)';
+    ctx.fillRect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+    ctx.restore();
+  }
+};
 
 @Component({
   selector: 'app-coin-graph',
@@ -58,6 +37,11 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
   message: string;
   bigChart: boolean;
   period: number;
+  chartLow = 0;
+  chartHigh = 0;
+  chartLatest = 0;
+  chartStart = '';
+  chartEnd = '';
 
   ngOnInit(): void {
     this._coinService.currentMessage.pipe(
@@ -65,32 +49,35 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
     ).subscribe(
       (message) => (this.message = message)
     );
-    // Period first: its initial emission must not trigger a render before
-    // bigChart is known (avoids a double draw on init).
+    this._coinService.currentBigChart.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
+      (bigChart) => {
+        const changed = this.bigChart !== bigChart;
+        this.bigChart = bigChart;
+        if (changed && this.coinName) {
+          if (bigChart) {
+            this.getBigData();
+          } else {
+            this.getWeekData();
+          }
+        }
+      }
+    );
     this._coinService.currentPeriod.pipe(
       takeUntil(this.destroy$)
     ).subscribe(
       (period) => {
         this.period = period;
         if (this.bigChart) {
-          this.render();
+          this.getBigData();
         }
       }
     );
-    this._coinService.currentBigChart.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(
-      (bigChart) => (this.bigChart = bigChart)
-    );
-    // Initial draw once message / period / bigChart are resolved.
-    this.render();
-  }
-
-  private render(): void {
-    if (this.bigChart) {
-      this.getBigData();
-    } else {
+    if (!this.bigChart) {
       this.getWeekData();
+    } else {
+      this.getBigData();
     }
   }
 
@@ -140,8 +127,6 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
       this.loading = false;
       this.cdr.detectChanges();
       setTimeout(() => {
-        const c = themeColors();
-        const trend = (data.length > 1 ? (data[data.length - 1] >= data[0]) : true) ? c.green : c.red;
         this.chart = new Chart(coinName, {
         type: 'line',
         data: {
@@ -149,26 +134,50 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
           datasets: [
             {
               data: data,
-              borderColor: trend,
-              backgroundColor: fillGradient(coinName, trend, 0.12),
-              borderWidth: 1.25,
-              lineTension: 0.4,
-              cubicInterpolationMode: 'monotone',
+              borderColor: '#f7931a',
+              backgroundColor: 'rgba(247, 147, 26, 0.08)',
               fill: true,
             },
           ],
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          legend: { display: false },
-          elements: { point: { radius: 0 }, line: { borderJoinStyle: 'round', borderCapStyle: 'round' } },
+          plugins: [darkBackgroundPlugin],
+          layout: {
+            padding: { left: 8, right: 18, top: 8, bottom: 0 },
+          },
+          legend: {
+            display: false,
+          },
+          elements: {
+            point: {
+              radius: 0,
+            },
+          },
           tooltips: { enabled: false },
           hover: { mode: null },
-          layout: { padding: 1 },
           scales: {
-            xAxes: [{ display: false, gridLines: { display: false } }],
-            yAxes: [{ display: false, gridLines: { display: false } }],
+            xAxes: [
+              {
+                display: false,
+                gridLines: {
+                  color: 'rgba(139, 148, 158, 0.22)',
+                },
+                ticks: {
+                  fontColor: '#c9d1d9',
+                },
+              },
+            ],
+            yAxes: [
+              {
+                display: false,
+                gridLines: {
+                  color: 'rgba(139, 148, 158, 0.22)',
+                },
+                ticks: {
+                  fontColor: '#c9d1d9',
+                },
+              },
+            ],
           },
         },
       });
@@ -185,6 +194,14 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
     var coinName = this.coinSymbol || this.message;
     this.coinName = coinName;
     if (!coinName) { this.loading = false; return; }
+    const fallbackPrice = this._coinService.getFallbackPrice(coinName);
+    if (fallbackPrice) {
+      this.chartLatest = fallbackPrice;
+      this.chartHigh = fallbackPrice;
+      this.chartLow = fallbackPrice;
+      this.chartStart = 'Fallback';
+      this.chartEnd = 'Live data pending';
+    }
     this._coinService.bigData(coinName, this.period).pipe(
       takeUntil(this.destroy$)
     ).subscribe((res) => {
@@ -203,18 +220,19 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
       allDates.forEach((res) => {
         let jsDate = new Date(res);
         coinDates.push(
-          jsDate.toLocaleDateString('en', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          })
+          jsDate.toISOString().slice(0, 10)
         );
       });
+
+      this.chartLow = data.length ? Math.min(...data) : 0;
+      this.chartHigh = data.length ? Math.max(...data) : 0;
+      this.chartLatest = data[data.length - 1] || fallbackPrice || 0;
+      this.chartStart = coinDates[0] || '';
+      this.chartEnd = coinDates[coinDates.length - 1] || '';
 
       this.loading = false;
       this.cdr.detectChanges();
       setTimeout(() => {
-        const c = themeColors();
         this.overviewChart = new Chart(coinName, {
         type: 'line',
         data: {
@@ -222,72 +240,80 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
           datasets: [
             {
               data: data,
-              borderColor: c.accent,
-              backgroundColor: fillGradient(coinName, c.accent, 0.14),
-              borderWidth: 1.75,
-              lineTension: 0.4,
-              cubicInterpolationMode: 'monotone',
-              fill: true,
-              pointRadius: 0,
-              pointHoverRadius: 4,
-              pointHoverBackgroundColor: c.accent,
-              pointHoverBorderColor: '#0a0b0d',
-              pointHoverBorderWidth: 2,
+              borderColor: '#f7931a',
+              backgroundColor: 'rgba(247, 147, 26, 0.06)',
+              borderWidth: 2,
+              fill: false,
+              lineTension: 0.22,
+              pointHitRadius: 12,
             },
           ],
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          legend: { display: false },
-          elements: { point: { radius: 0 }, line: { borderJoinStyle: 'round', borderCapStyle: 'round' } },
+          plugins: [darkBackgroundPlugin],
+          legend: {
+            display: false,
+          },
+          elements: {
+            point: {
+              radius: 0,
+            },
+          },
           tooltips: {
-            enabled: true,
             mode: 'index',
             intersect: false,
-            backgroundColor: 'rgba(10, 11, 13, 0.94)',
-            borderColor: c.grid,
+            backgroundColor: 'rgba(13, 17, 23, 0.95)',
+            borderColor: '#f7931a',
             borderWidth: 1,
-            titleFontColor: '#9ba1a8',
-            titleFontFamily: 'Inter, sans-serif',
-            titleFontSize: 11,
-            bodyFontColor: '#ededed',
-            bodyFontFamily: 'Inter, sans-serif',
-            bodyFontStyle: '600',
-            bodyFontSize: 13,
-            xPadding: 10,
-            yPadding: 8,
-            cornerRadius: 8,
-            displayColors: false,
-            caretSize: 5,
+            titleFontColor: '#ffffff',
+            bodyFontColor: '#ffffff',
+            callbacks: {
+              label: (tooltipItem) => `${coinName}: ${Number(tooltipItem.yLabel || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+            }
           },
-          hover: { mode: 'index', intersect: false },
+          hover: { mode: 'nearest', intersect: false },
           scales: {
             xAxes: [
               {
-                type: 'category',
                 display: true,
-                gridLines: { display: false, drawBorder: false },
+                type: 'time',
+                time: {
+                  unit: 'month',
+                },
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Date',
+                  fontColor: '#f0f6fc',
+                  fontSize: 13,
+                },
+                gridLines: {
+                  color: 'rgba(201, 209, 217, 0.24)',
+                  zeroLineColor: 'rgba(201, 209, 217, 0.45)',
+                },
                 ticks: {
-                  fontColor: '#a3a9b0', fontFamily: 'Inter, sans-serif', fontSize: 12,
-                  maxRotation: 0, autoSkip: true, maxTicksLimit: 6, padding: 8,
+                  fontColor: '#f0f6fc',
+                  fontSize: 12,
+                  maxTicksLimit: 6,
                 },
               },
             ],
             yAxes: [
               {
                 display: true,
-                position: 'right',
-                gridLines: { color: 'rgba(255,255,255,0.05)', zeroLineColor: 'rgba(255,255,255,0.05)', drawBorder: false },
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Price',
+                  fontColor: '#f0f6fc',
+                  fontSize: 13,
+                },
+                gridLines: {
+                  color: 'rgba(201, 209, 217, 0.24)',
+                  zeroLineColor: 'rgba(201, 209, 217, 0.45)',
+                },
                 ticks: {
-                  fontColor: '#a3a9b0', fontFamily: 'Inter, sans-serif', fontSize: 12,
-                  maxTicksLimit: 5, padding: 10,
-                  callback: function(value: any) {
-                    const n = Number(value);
-                    if (!isFinite(n)) { return value; }
-                    if (Math.abs(n) >= 1000) { return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + 'k'; }
-                    return n >= 1 ? n.toFixed(0) : n.toPrecision(2);
-                  },
+                  fontColor: '#f0f6fc',
+                  fontSize: 12,
+                  callback: (value) => Number(value).toLocaleString(undefined, { maximumFractionDigits: 0 }),
                 },
               },
             ],

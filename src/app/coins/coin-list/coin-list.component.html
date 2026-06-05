@@ -21,34 +21,23 @@
     <!-- Portfolio Summary Header (shown when coins exist) -->
     <span *ngIf="allCoins?.length > 0" class="portfolio-header">
       <div class="portfolio-header-left">
-        <div class="portfolio-stat">
-          <span class="portfolio-label">Portfolio value</span>
-          <h1 class="portfolio-balance num">{{ berekenEindTotaal(allCoins) | currency: valuta:"symbol":"1.2-2" }}</h1>
-          <div class="portfolio-meta">
-            <ng-container *ngIf="priceChange$ | async as changes">
-              <span class="portfolio-change num"
-                [class.positive]="portfolioChange(changes) > 0"
-                [class.negative]="portfolioChange(changes) < 0">
-                <span class="chg-arrow" aria-hidden="true">{{ portfolioChange(changes) > 0 ? '▲' : (portfolioChange(changes) < 0 ? '▼' : '') }}</span>{{ portfolioChange(changes) | number:'1.2-2' }}%
-                <span class="chg-window">24h</span>
-              </span>
-              <span class="portfolio-meta-dot">·</span>
-            </ng-container>
-            <span class="portfolio-meta-item">{{ allCoins?.length || 0 }} {{ allCoins?.length === 1 ? 'asset' : 'assets' }}</span>
-            <span class="portfolio-meta-dot">·</span>
-            <span class="portfolio-meta-item">{{ valuta }}</span>
+        <h1 class="portfolio-balance">
+          <span class="accent">{{ berekenEindTotaal(allCoins) | currency: valuta:"symbol":"1.2-2" }}</span>
+        </h1>
+        <div class="portfolio-meta">
+          <div class="portfolio-meta-item">
+            <span>Portfolio Value</span>
+            <span class="portfolio-meta-value">{{ valuta }}</span>
           </div>
-        </div>
-        <div class="portfolio-stat portfolio-stat--return" *ngIf="totalCost() > 0">
-          <span class="portfolio-label">All-time return</span>
-          <span class="return-value num"
-            [class.positive]="plAbsolute() > 0"
-            [class.negative]="plAbsolute() < 0">
-            <span class="chg-arrow" aria-hidden="true">{{ plAbsolute() > 0 ? '▲' : (plAbsolute() < 0 ? '▼' : '') }}</span>{{ plAbsolute() | currency: valuta:"symbol":"1.0-0" }}
-          </span>
-          <span class="return-sub num"
-            [class.positive]="plAbsolute() > 0"
-            [class.negative]="plAbsolute() < 0">{{ plPercent() | number:'1.2-2' }}%</span>
+          <div class="portfolio-meta-item">
+            <span>Coins</span>
+            <span class="portfolio-meta-value">{{ allCoins?.length || 0 }}</span>
+          </div>
+          <div class="portfolio-meta-item">
+            <span>Prices</span>
+            <span class="portfolio-meta-value">{{ lastMarketRefresh ? ('updated ' + (lastMarketRefresh | date:'shortTime')) : 'loading' }}</span>
+            <small class="market-data-notice">{{ marketDataNotice }}</small>
+          </div>
         </div>
       </div>
       <div class="portfolio-header-right">
@@ -56,9 +45,9 @@
           class="valuta"
           #group="matButtonToggleGroup"
           (change)="changeValuta(group.value)"
-          [value]="valuta"
+          value="EUR"
           name="currency"
-          aria-label="Display currency"
+          aria-label="Currency"
         >
           <mat-button-toggle value="EUR">EUR</mat-button-toggle>
           <mat-button-toggle value="USD">USD</mat-button-toggle>
@@ -77,6 +66,7 @@
   -->
   <div *ngIf="allCoins; else loadingOrError">
     <div *ngIf="allCoins?.length > 0">
+      <div class="table-scroll" role="region" aria-label="Portfolio holdings" tabindex="0">
       <mat-table
         [dataSource]="dataSource"
         matSort
@@ -96,8 +86,9 @@
               <span class="symbol-cell">
                 <img
                   [src]="element.image_url"
-                  (error)="$event.target.src='assets/add.png'"
-                  alt="{{ element.symbol }}"
+                  (error)="$event.target.style.display='none'"
+                  alt=""
+                  aria-hidden="true"
                 />
                 <b class="symbol-name">{{ element.symbol }}</b>
               </span>
@@ -113,7 +104,7 @@
             matTooltip="current price from coingecko.com"
             matTooltipPosition="above"
           >
-            <strong>Price</strong>
+            <strong>Live Price</strong>
           </mat-header-cell>
           <mat-cell
             *matCellDef="let element; let i = index"
@@ -127,20 +118,20 @@
         <!-- Amount Column -->
         <ng-container matColumnDef="amount">
           <mat-header-cell *matHeaderCellDef
-            ><strong>Amount</strong></mat-header-cell
+            ><strong>Amount Bought</strong></mat-header-cell
           >
           <mat-cell
             *matCellDef="let element; let i = index"
             (click)="onEdit(element.symbol)"
             [style.animation-delay]="i * 0.04 + 's'">
-            {{ element.amount | number:'1.0-8' }}
+            {{ element.amount }}
           </mat-cell>
         </ng-container>
 
         <!-- Transactions Column -->
         <ng-container matColumnDef="transactions">
           <mat-header-cell *matHeaderCellDef>
-            <strong>Txns</strong>
+            <strong>Transactions</strong>
           </mat-header-cell>
           <mat-cell
             *matCellDef="let element; let i = index"
@@ -170,7 +161,7 @@
         <!-- Change Column -->
         <ng-container matColumnDef="change">
           <mat-header-cell *matHeaderCellDef>
-            <strong>24h</strong>
+            <strong>Price Change (24h)</strong>
           </mat-header-cell>
           <ng-container *ngIf="priceChange$ | async as changes">
             <mat-cell
@@ -183,7 +174,7 @@
               }"
               class="price-change"
             >
-              {{ changes[element.symbol] || '0.00' }}%
+              {{ (changes[element.symbol] > 0 ? '+' : '') + (changes[element.symbol] || '0.00') }}%
             </mat-cell>
           </ng-container>
         </ng-container>
@@ -191,7 +182,7 @@
         <!-- Graph Column -->
         <ng-container matColumnDef="graph">
           <mat-header-cell *matHeaderCellDef>
-            <strong>7d</strong>
+            <strong>Price Graph (7d)</strong>
           </mat-header-cell>
           <mat-cell
               *matCellDef="let element; let i = index"
@@ -204,15 +195,24 @@
 
         <!-- Buttons -->
         <ng-container matColumnDef="buttons">
-          <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+          <mat-header-cell *matHeaderCellDef><strong>Actions</strong></mat-header-cell>
           <mat-cell *matCellDef="let row; let i = index"
             [style.animation-delay]="i * 0.04 + 's'">
-            <button mat-icon-button aria-label="Edit coin" matTooltip="Edit" (click)="onEdit(row.symbol)">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" aria-label="Delete coin" matTooltip="Delete" (click)="onDelete(row)">
-              <mat-icon>delete_outline</mat-icon>
-            </button>
+            <ng-container *ngIf="pendingDeleteSymbol !== row.symbol; else confirmDeleteTpl">
+              <button mat-icon-button class="action-btn" (click)="onEdit(row.symbol)" aria-label="Edit coin" matTooltip="Edit coin">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn delete-btn" (click)="onDelete(row)" aria-label="Delete coin" matTooltip="Delete coin">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </ng-container>
+            <ng-template #confirmDeleteTpl>
+              <div class="inline-confirm" role="alertdialog" aria-label="Confirm delete">
+                <span>Delete?</span>
+                <button class="confirm-danger" (click)="confirmDelete(row)">Yes</button>
+                <button class="confirm-cancel" (click)="cancelDelete()">No</button>
+              </div>
+            </ng-template>
           </mat-cell>
         </ng-container>
 
@@ -220,13 +220,15 @@
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
       </mat-table>
+      </div>
       <mat-paginator
+        *ngIf="allCoins?.length > 5"
         [pageSizeOptions]="[5, 10, 25, 100]"
         showFirstLastButtons
       ></mat-paginator>
 
       <!-- Mobile FAB (visible only on small screens) -->
-      <button class="add-coin-fab" aria-label="Add a coin" matTooltip="Add a coin" (click)="onCreate()" data-cy="add-mobile">
+      <button class="add-coin-fab" (click)="onCreate()" data-cy="add-mobile">
         <mat-icon>add</mat-icon>
       </button>
     </div>

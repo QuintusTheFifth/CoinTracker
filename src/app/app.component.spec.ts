@@ -1,6 +1,10 @@
 import { TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { of } from 'rxjs';
 import { AppComponent } from './app.component';
+import { AuthService } from 'src/app/authentication/auth.service';
+import { ThemeService } from './theme.service';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
@@ -11,6 +15,11 @@ describe('AppComponent', () => {
       declarations: [
         AppComponent
       ],
+      providers: [
+        { provide: AuthService, useValue: { user$: of(null), googleSignin: () => null, signOut: () => null } },
+        { provide: ThemeService, useValue: { theme: 'dark', toggle: () => null } }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
   }));
 
@@ -20,16 +29,17 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'coinTracker'`, () => {
+  it('should expose the product title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('coinTracker');
+    expect(app.pageTitle).toEqual('CoinTracker');
   });
 
-  it('should render title', () => {
+  it('should toggle mobile navigation state', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('coinTracker app is running!');
+    const app = fixture.componentInstance;
+    expect(app.navOpen).toBe(false);
+    app.toggleNav();
+    expect(app.navOpen).toBe(true);
   });
 });

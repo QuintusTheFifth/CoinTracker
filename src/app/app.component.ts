@@ -15,6 +15,7 @@ export class AppComponent {
   ) {}
 
   opened = false;
+  navOpen = false;
   navScrolled = false;
 
   /** True when exploring the seeded demo portfolio (no real account). */
@@ -33,5 +34,9 @@ export class AppComponent {
 
   toggleTheme(): void {
     this.themeService.toggle();
+  }
+
+  toggleNav(): void {
+    this.navOpen = !this.navOpen;
   }
 }

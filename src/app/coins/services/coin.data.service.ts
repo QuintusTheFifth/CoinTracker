@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { throwError, Observable, BehaviorSubject, of, forkJoin } from 'rxjs';
+import { throwError, Observable, BehaviorSubject, of } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import * as _ from 'lodash';
-import { map, catchError, timeout } from 'rxjs/operators';
+import { map, catchError, tap, timeout } from 'rxjs/operators';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { AuthService } from 'src/app/authentication/auth.service';
@@ -11,6 +11,26 @@ export interface Coin {
   icon: string;
   symbol: string;
   name: string;
+  id?: string;
+}
+
+export interface CoinTransaction {
+  key?: string;
+  $key?: string;
+  symbol: string;
+  amount: number;
+  priceBought: number;
+  exchange: string;
+  date: string;
+}
+
+interface CoinPayloadSnapshot {
+  payload: {
+    doc: {
+      id: string;
+      data: () => CoinTransaction;
+    };
+  };
 }
 
 @Injectable({
@@ -19,9 +39,6 @@ export interface Coin {
 export class CoinsService {
 
   coins: Coin[] = [];
-  // Emits the searchable coin universe as it loads, so the add picker updates live.
-  coinsSubject = new BehaviorSubject<Coin[]>([]);
-  private universeLoaded = false;
 
   private bigChartSource = new BehaviorSubject<boolean>(false);
   currentBigChart = this.bigChartSource.asObservable();
@@ -32,8 +49,11 @@ export class CoinsService {
   private periodSource = new BehaviorSubject<number>(90);
   currentPeriod = this.periodSource.asObservable();
 
-  private valutaSource = new BehaviorSubject<string>(localStorage.getItem('cointracker_valuta') || 'EUR');
+  private valutaSource = new BehaviorSubject<string>('EUR');
   currentValuta = this.valutaSource.asObservable();
+
+  private marketStatusSource = new BehaviorSubject<string>('Live market data');
+  currentMarketStatus = this.marketStatusSource.asObservable();
 
   // CoinGecko coin ID map: symbol.toLowerCase() -> coin_id
   // Static fallback for top coins so the app works without the /coins/list API call
@@ -45,18 +65,12 @@ export class CoinsService {
     'atom': 'cosmos', 'ltc': 'litecoin', 'etc': 'ethereum-classic', 'xlm': 'stellar',
     'fil': 'filecoin', 'vet': 'vechain', 'aave': 'aave', 'algo': 'algorand',
   };
+  private canonicalSymbols = new Set(Object.keys(this.coinIdMap));
   coinIdMapSubject = new BehaviorSubject<Record<string, string>>({});
-
-  // Emits whenever demo-mode coins change, so views update live (like Firestore valueChanges).
-  private demoChange$ = new BehaviorSubject<number>(0);
 
   // CoinGecko image cache: symbol.toLowerCase() -> image_url
   coinImageCache: Record<string, string> = {};
-
-  // Batched market data from /coins/markets, keyed by lowercase symbol.
-  // One call returns price + 24h change + 7-day sparkline + image for many coins,
-  // which avoids the per-coin request burst that triggers CoinGecko rate limits.
-  marketData: Record<string, { price: number; change24h: number; sparkline: number[] }> = {};
+  private demoCoinsSource = new BehaviorSubject<CoinTransaction[]>(this.getDemoCoins());
 
   // Static fallback data when CoinGecko is unreachable (e.g. Firebase CORS)
   private staticPrices: Record<string, number> = {
@@ -68,17 +82,21 @@ export class CoinsService {
     bnb: 610, xrp: 0.49, usdc: 1.0, doge: 0.14, dot: 6.2,
   };
   private staticImages: Record<string, string> = {
-    btc: 'https://coin-images.coingecko.com/coins/images/1/small/bitcoin.png',
-    eth: 'https://coin-images.coingecko.com/coins/images/279/small/ethereum.png',
-    sol: 'https://coin-images.coingecko.com/coins/images/4128/small/solana.png',
-    ada: 'https://coin-images.coingecko.com/coins/images/975/small/cardano.png',
-    usdt: 'https://coin-images.coingecko.com/coins/images/325/small/tether.png',
-    bnb: 'https://coin-images.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
-    xrp: 'https://coin-images.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
-    usdc: 'https://coin-images.coingecko.com/coins/images/6319/small/usdc.png',
-    doge: 'https://coin-images.coingecko.com/coins/images/5/small/dogecoin.png',
-    dot: 'https://coin-images.coingecko.com/coins/images/12171/small/polkadot.png',
+    btc: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+    eth: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+    sol: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+    ada: 'https://assets.coingecko.com/coins/images/975/small/cardano.png',
+    usdt: 'https://assets.coingecko.com/coins/images/325/small/tether.png',
+    bnb: 'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
+    xrp: 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
+    usdc: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png',
+    doge: 'https://assets.coingecko.com/coins/images/5/small/dogecoin.png',
+    dot: 'https://assets.coingecko.com/coins/images/12171/small/polkadot.png',
   };
+
+  getFallbackPrice(coinSymbol: string): number {
+    return this.staticPrices[(coinSymbol || '').toLowerCase()] || 0;
+  }
 
   changeMessage(message: string) {
     this.messageSource.next(message);
@@ -93,22 +111,15 @@ export class CoinsService {
     this.bigChartSource.next(bigChart);
   }
 
-  changeValuta(valuta) {
-    // Keep both the reactive stream AND the plain property in sync — the
-    // price/chart API calls read this.valuta directly for vs_currency.
-    this.valuta = valuta;
-    try { localStorage.setItem('cointracker_valuta', valuta); } catch (e) {}
-    // Prices and chart history are currency-specific — drop the caches so the
-    // next fetch returns values in the newly selected currency (not stale ones).
-    this.marketData = {};
-    this.chartCache = {};
-    this.valutaSource.next(valuta);
+  changeValuta(valuta: string): void {
+    this.valuta = valuta || 'EUR';
+    this.valutaSource.next(this.valuta);
   }
 
-  updateCoin(coin) {
+  updateCoin(coin: CoinTransaction): void {
     if (this.isDemoMode) {
       const coins = this.getDemoCoins();
-      const idx = coins.findIndex((c: any) => c.key === coin.$key);
+      const idx = coins.findIndex((c: CoinTransaction) => c.key === coin.$key);
       if (idx >= 0) {
         coins[idx] = {
           ...coins[idx],
@@ -134,14 +145,9 @@ export class CoinsService {
   message: string;
   bigChart: boolean;
   period: number;
-  valuta: string = localStorage.getItem('cointracker_valuta') || 'EUR';
+  valuta: string = 'EUR';
 
-  // Live EUR→USD rate (derived from the same price source so it stays consistent
-  // with displayed prices). Used to convert the cost basis between currencies.
-  fxUsdPerEur: number = 1.16;
-  private fxLoaded = false;
-
-  setValuta(valuta) {
+  setValuta(valuta: string): void {
     this.valuta = valuta;
   }
 
@@ -149,7 +155,8 @@ export class CoinsService {
     return this.valuta;
   }
 
-  populateForm(coin) {
+  populateForm(coin: CoinTransaction): void {
+    this.formMode = 'edit';
     this.form.setValue({
       $key: coin.key,
       coinName: coin.symbol,
@@ -182,13 +189,9 @@ export class CoinsService {
   }
 
   /** Get reference to the user's coins subcollection in Firestore */
-  private get coinCollection(): AngularFirestoreCollection<any> {
+  private get coinCollection(): AngularFirestoreCollection<CoinTransaction> {
     const uid = this.auth.getUID();
     if (!uid) {
-      // Demo mode — use localStorage fallback instead of throwing
-      if (localStorage.getItem('demoMode')) {
-        return null as any;
-      }
       throw new Error('User not authenticated');
     }
     return this.afs.collection(`users/${uid}/coins`);
@@ -198,16 +201,16 @@ export class CoinsService {
   private get demoKey(): string { return 'cointracker_demo_coins'; }
 
   /** Read coins from localStorage (demo mode) */
-  private getDemoCoins(): any[] {
+  private getDemoCoins(): CoinTransaction[] {
     try {
       return JSON.parse(localStorage.getItem(this.demoKey) || '[]');
     } catch { return []; }
   }
 
-  /** Save coins to localStorage (demo mode) and notify subscribers */
-  private saveDemoCoins(coins: any[]): void {
+  /** Save coins to localStorage (demo mode) */
+  private saveDemoCoins(coins: CoinTransaction[]): void {
     localStorage.setItem(this.demoKey, JSON.stringify(coins));
-    this.demoChange$.next(Date.now());
+    this.demoCoinsSource.next(coins);
   }
 
   /** Whether the app is running in demo mode (localStorage fallback) */
@@ -217,15 +220,18 @@ export class CoinsService {
 
   form: FormGroup = new FormGroup({
     $key: new FormControl(null),
-    coinName: new FormControl(' ', []),
-    amount: new FormControl(0, [Validators.required, Validators.min(0.01)]),
-    priceBought: new FormControl(0),
+    coinName: new FormControl(''),
+    amount: new FormControl(1, [Validators.required, Validators.min(0.00000001)]),
+    priceBought: new FormControl('', [Validators.min(0)]),
     exchange: new FormControl(''),
     date: new FormControl(''),
   });
 
+  formMode: 'addCoin' | 'addTransaction' | 'edit' = 'addCoin';
+
   setSymbolInit(symbol) {
     this.coinSymbol = symbol;
+    this.formMode = 'addTransaction';
     let today = new Date().toISOString().slice(0, 10);
 
     this.form.setValue({
@@ -239,6 +245,7 @@ export class CoinsService {
   }
 
   initializeFormGroup() {
+    this.formMode = 'addCoin';
     let today = new Date().toISOString().slice(0, 10);
 
     this.form.setValue({
@@ -250,8 +257,6 @@ export class CoinsService {
       date: today,
     });
   }
-
-  result: any;
 
   coinSymbol: string = '';
 
@@ -269,366 +274,112 @@ export class CoinsService {
     return this.coinIdMap[coinSymbol.toLowerCase()] || '';
   }
 
-  /** Deterministic PRNG (mulberry32) so fallback charts are stable across refreshes. */
-  private seededRandom(seed: number): () => number {
-    let s = seed | 0;
-    return function () {
-      s = (s + 0x6d2b79f5) | 0;
-      let t = Math.imul(s ^ (s >>> 15), 1 | s);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  private hashStr(str: string): number {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) { h = (h * 31 + str.charCodeAt(i)) | 0; }
-    return h;
-  }
-
-  /**
-   * Deterministic synthetic price series for the offline fallback. Same symbol +
-   * seed always yields the same shape (no flickering colours on refresh), while a
-   * different `seed` (e.g. the period) produces a distinct curve so timeframe
-   * changes are visible. Ends at the current static price.
-   */
-  private synthSeries(symbol: string, basePrice: number, points: number, spanMs: number, seed: number): number[][] {
-    const rng = this.seededRandom(this.hashStr(symbol) + seed);
-    const startFactor = 0.78 + rng() * 0.44; // 0.78–1.22 of current price
-    const startVal = basePrice * startFactor;
-    const now = Date.now();
-    const out: number[][] = [];
-    for (let i = 0; i < points; i++) {
-      const t = points > 1 ? i / (points - 1) : 1;
-      const trend = startVal * (1 - t) + basePrice * t;       // glide start -> now
-      const noise = (rng() - 0.5) * basePrice * 0.05;          // deterministic wobble
-      const val = Math.max(basePrice * 0.05, trend + noise);
-      out.push([now - (points - i) * (spanMs / points), val]);
-    }
-    out[out.length - 1][1] = basePrice; // anchor the latest point to the current price
-    return out;
-  }
-
-  /** Merge a /coins/markets response into the caches. */
-  private ingestMarkets(rows: any[]): void {
-    (rows || []).forEach((r: any) => {
-      const sym = (r.symbol || '').toLowerCase();
-      if (!sym) { return; }
-      this.marketData[sym] = {
-        price: r.current_price,
-        change24h: r.price_change_percentage_24h,
-        sparkline: (r.sparkline_in_7d && r.sparkline_in_7d.price) || [],
-      };
-      if (r.image) { this.coinImageCache[sym] = r.image; }
-      if (r.id) { this.coinIdMap[sym] = r.id; }
-    });
-  }
-
-  /**
-   * Batch-load price, 24h change, sparkline and image for the given symbols via a
-   * single /coins/markets call. Returns true on success. This is the primary data
-   * path for the dashboard — one request instead of ~4 per coin.
-   */
-  loadMarkets(symbols: string[]): Observable<boolean> {
-    const seen: Record<string, boolean> = {};
-    const ids = (symbols || [])
-      .map((s) => this.resolveCoinId(s))
-      .filter((id) => id && !seen[id] && (seen[id] = true));
-    if (!ids.length) { return of(false); }
-    const vs = (this.valuta || 'eur').toLowerCase();
-    return this._http
-      .get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${ids.join(',')}&sparkline=true&price_change_percentage=24h&per_page=250`)
-      .pipe(
-        timeout(9000),
-        map((rows: any[]) => { this.ingestMarkets(rows); return true; }),
-        // CoinGecko unavailable (CORS / rate-limit) → real prices from Coinbase.
-        catchError(() => this.loadMarketsViaCoinbase(symbols, vs))
-      );
-  }
-
-  /** Load the top coins (by market cap) once for autocomplete icons + universe. */
-  loadTopMarkets(): void {
-    const vs = (this.valuta || 'eur').toLowerCase();
-    this._http
-      .get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&order=market_cap_desc&per_page=250&page=1&sparkline=false`)
-      .pipe(timeout(9000), catchError(() => of([])))
-      .subscribe((rows: any[]) => {
-        this.ingestMarkets(rows);
-        (rows || []).forEach((r: any) => {
-          const symU = (r.symbol || '').toUpperCase();
-          if (symU && !this.coins.find((c) => c.symbol === symU)) {
-            this.coins.push({ icon: '', symbol: symU, name: r.name });
-          }
-        });
-        this.coinIdMapSubject.next({ ...this.coinIdMap });
-        this.coinsSubject.next(this.coins.slice());
-      });
-  }
-
-  /** Load the EUR→USD rate from BTC priced in both currencies (CoinGecko, then
-   *  Coinbase) so it matches the prices we display. Falls back to a sane default. */
-  loadFx(): void {
-    if (this.fxLoaded) { return; }
-    this.fxLoaded = true;
-    this._http
-      .get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur,usd')
-      .pipe(
-        timeout(6000),
-        map((j: any) => {
-          if (j && j.bitcoin && j.bitcoin.eur && j.bitcoin.usd) { return j.bitcoin.usd / j.bitcoin.eur; }
-          throw new Error('no fx');
-        }),
-        catchError(() =>
-          forkJoin([
-            this._http.get('https://api.exchange.coinbase.com/products/BTC-EUR/ticker').pipe(timeout(6000), catchError(() => of(null))),
-            this._http.get('https://api.exchange.coinbase.com/products/BTC-USD/ticker').pipe(timeout(6000), catchError(() => of(null))),
-          ]).pipe(map((arr: any[]) => {
-            const e = arr[0] ? parseFloat(arr[0].price) : 0;
-            const u = arr[1] ? parseFloat(arr[1].price) : 0;
-            return e && u ? u / e : this.fxUsdPerEur;
-          }))
-        )
-      )
-      .subscribe((rate: number) => { if (rate && isFinite(rate) && rate > 0) { this.fxUsdPerEur = rate; } });
-  }
-
-  /** Normalise an amount entered in `cur` to EUR (for the stored cost basis). */
-  convertToEur(amount: number, cur: string): number {
-    if (!amount) { return 0; }
-    return (cur && cur.toUpperCase() === 'USD') ? amount / (this.fxUsdPerEur || 1) : amount;
-  }
-
-  /** Convert a EUR amount to the current display currency. */
-  convertEurToDisplay(amountEur: number): number {
-    return (this.valuta && this.valuta.toUpperCase() === 'USD') ? amountEur * (this.fxUsdPerEur || 1) : amountEur;
-  }
-
-  /** Best available icon for a symbol: live CoinGecko image, then a known static
-   *  image, then the bundled SVG (template falls back to add.png on error). */
-  iconFor(symbol: string): string {
-    const s = (symbol || '').toLowerCase();
-    return this.coinImageCache[s] || this.staticImages[s] || ('assets/svg/icon/' + s + '.svg');
-  }
-
-  /** Fallback price from Coinbase (keyless, EUR/USD pairs) when CoinGecko is unavailable. */
-  private coinbasePrice(symbol: string, vs: string): Observable<number | null> {
-    const product = (symbol || '').toUpperCase() + '-' + (vs || 'EUR').toUpperCase();
-    return this._http
-      .get(`https://api.exchange.coinbase.com/products/${product}/ticker`)
-      .pipe(
-        timeout(6000),
-        map((t: any) => (t && t.price ? parseFloat(t.price) : null)),
-        catchError(() => of(null))
-      );
-  }
-
-  /** Fallback price + 24h change from Coinbase /stats (keyless). */
-  private coinbaseStats(symbol: string, vs: string): Observable<{ price: number; change24h: number } | null> {
-    const product = (symbol || '').toUpperCase() + '-' + (vs || 'EUR').toUpperCase();
-    return this._http
-      .get(`https://api.exchange.coinbase.com/products/${product}/stats`)
-      .pipe(
-        timeout(6000),
-        map((s: any) => {
-          if (!s || s.last == null) { return null; }
-          const last = parseFloat(s.last);
-          const open = parseFloat(s.open);
-          const change = open && isFinite(open) ? ((last - open) / open) * 100 : null;
-          return { price: last, change24h: change } as any;
-        }),
-        catchError(() => of(null))
-      );
-  }
-
-  /** Batch-load holdings prices/24h from Coinbase when CoinGecko is unavailable (e.g. CORS/rate-limit). */
-  private loadMarketsViaCoinbase(symbols: string[], vs: string): Observable<boolean> {
-    const uniq = Array.from(new Set((symbols || []).map((s) => (s || '').toLowerCase()))).filter(Boolean);
-    if (!uniq.length) { return of(false); }
-    return forkJoin(uniq.map((sym) => this.coinbaseStats(sym, vs))).pipe(
-      map((results: any[]) => {
-        let any = false;
-        results.forEach((r, i) => {
-          if (r && r.price != null) {
-            any = true;
-            const sym = uniq[i];
-            this.marketData[sym] = {
-              price: r.price,
-              change24h: r.change24h,
-              sparkline: (this.marketData[sym] && this.marketData[sym].sparkline) || [],
-            };
-          }
-        });
-        return any;
-      }),
-      catchError(() => of(false))
-    );
-  }
-
-  /** Fallback OHLC history from Coinbase (keyless) → real chart data, not synthetic. */
-  private coinbaseCandles(symbol: string, days: number, vs: string): Observable<any> {
-    const product = (symbol || '').toUpperCase() + '-' + (vs || 'EUR').toUpperCase();
-    const gran = days <= 31 ? 21600 : 86400; // 6h for ≤1 month, otherwise daily
-    const end = new Date();
-    const start = new Date(Date.now() - days * 86400000);
-    const url = `https://api.exchange.coinbase.com/products/${product}/candles?granularity=${gran}&start=${start.toISOString()}&end=${end.toISOString()}`;
-    return this._http.get(url).pipe(
-      timeout(8000),
-      map((rows: any[]) => {
-        if (!Array.isArray(rows) || !rows.length) { throw new Error('no candles'); }
-        // Coinbase rows: [time(s), low, high, open, close, volume], newest first.
-        const prices = rows
-          .map((r: any) => [r[0] * 1000, r[4]])
-          .sort((a: any, b: any) => a[0] - b[0]);
-        return { prices };
-      })
-    );
-  }
-
-  /** Get current price for one coin (via /coins/markets, which is reliable on the free tier). */
+  /** Get current price from CoinGecko /simple/price using coin IDs */
   getCoinPrice(coinSymbol: string) {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
-      return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
+      this.marketStatusSource.next('Estimated fallback prices');
+      const result: Record<string, Record<string, number>> = { unknown: {} };
+      result.unknown[(this.valuta || 'eur').toLowerCase()] = 0;
+      return of(result);
     }
     const sym = coinSymbol.toLowerCase();
-    const vs = (this.valuta || 'eur').toLowerCase();
-    const wrap = (price: number) => { const r: any = {}; r[coinId] = {}; r[coinId][vs] = price; return r; };
-    // Use the already-fetched batch price if we have it (avoids a redundant call).
-    const cached = this.marketData[sym];
-    if (cached && cached.price !== null && cached.price !== undefined) {
-      return of(wrap(cached.price));
-    }
     return this._http
-      .get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${coinId}&sparkline=false`)
-      .pipe(
-        timeout(8000),
-        map((rows: any[]) => {
-          const row = rows && rows[0];
-          if (row) {
-            const s = (row.symbol || '').toLowerCase();
-            if (row.image) { this.coinImageCache[s] = row.image; }
-            return wrap(row.current_price);
+      .get(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=${(this.valuta || 'eur').toLowerCase()}`
+      ).pipe(
+        timeout(5000),
+        tap(() => this.marketStatusSource.next('Live market data')),
+        catchError(() => {
+          // Return static fallback price wrapped in the expected format
+          const price = this.staticPrices[sym];
+          if (price !== undefined) {
+            this.marketStatusSource.next('Estimated fallback prices');
+            const result: Record<string, Record<string, number>> = {};
+            result[coinId] = {};
+            result[coinId][(this.valuta || 'eur').toLowerCase()] = price;
+            return of(result);
           }
-          return wrap(this.staticPrices[sym] !== undefined ? this.staticPrices[sym] : 0);
-        }),
-        catchError(() =>
-          // Coinbase fallback, then static.
-          this.coinbasePrice(coinSymbol, vs).pipe(
-            map((p) => wrap(p !== null
-              ? p
-              : (this.staticPrices[sym] !== undefined ? this.staticPrices[sym] : 0)))
-          )
-        )
+          this.marketStatusSource.next('Estimated fallback prices');
+          const result: Record<string, Record<string, number>> = {};
+          result[coinId] = {};
+          result[coinId][(this.valuta || 'eur').toLowerCase()] = 0;
+          return of(result);
+        })
       );
   }
 
-  /** Get 7-day data for the mini graph — reuses the cached sparkline when available. */
+  /** Get 7-day market chart data for the mini graph */
   weekData(coinSymbol: string) {
-    const sym = coinSymbol.toLowerCase();
-    const md = this.marketData[sym];
-    if (md && md.sparkline && md.sparkline.length) {
-      const now = Date.now();
-      const n = md.sparkline.length;
-      const prices = md.sparkline.map((p, i) => [now - (n - 1 - i) * 3600000, p]);
-      return of({ prices });
-    }
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
-      return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
+      return of({ prices: [] });
     }
+    const sym = coinSymbol.toLowerCase();
     return this._http
       .get(
         `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${(this.valuta || 'eur').toLowerCase()}&days=7`
       ).pipe(
-        timeout(6000),
-        catchError(() =>
-          // Coinbase fallback, then deterministic synthetic.
-          this.coinbaseCandles(coinSymbol, 7, this.valuta || 'eur').pipe(
-            catchError(() => {
-              const price = this.staticPrices[sym];
-              if (price !== undefined) {
-                return of({ prices: this.synthSeries(sym, price, 50, 7 * 86400000, 7) });
-              }
-              return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
-            })
-          )
-        )
+        timeout(5000),
+        catchError(() => {
+          const price = this.staticPrices[sym];
+          if (price !== undefined) {
+            const now = Date.now();
+            const points = 50;
+            const prices: number[][] = [];
+            for (let i = 0; i < points; i++) {
+              prices.push([now - (points - i) * (7 * 86400000 / points), price * (0.9 + Math.random() * 0.2)]);
+            }
+            return of({ prices });
+          }
+          return of({ prices: [] });
+        })
       );
   }
 
-  // Cache of successful market_chart responses, keyed by id_days_currency, so
-  // switching periods / revisiting a coin doesn't refetch (fewer rate limits).
-  private chartCache: Record<string, number[][]> = {};
-
-  /** Get period market chart data for the big graph. CoinGecko's free tier only
-   *  serves up to 365 days of history (longer ranges 401), so we cap days here. */
+  /** Get extended period market chart data for the big graph */
   bigData(coinSymbol: string, period: number) {
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
-      return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
+      return of({ prices: [] });
     }
     const sym = coinSymbol.toLowerCase();
-    const vs = (this.valuta || 'eur').toLowerCase();
-    const days = Math.min(365, Math.max(1, Number(period) || 90));
-    const key = `${coinId}_${days}_${vs}`;
-    if (this.chartCache[key]) {
-      return of({ prices: this.chartCache[key] });
-    }
     return this._http
-      .get(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${vs}&days=${days}`)
-      .pipe(
-        timeout(8000),
-        map((res: any) => {
-          if (res && res.prices && res.prices.length) { this.chartCache[key] = res.prices; }
-          return res;
-        }),
-        catchError(() =>
-          // Coinbase fallback (real OHLC), then deterministic synthetic.
-          this.coinbaseCandles(coinSymbol, days, vs).pipe(
-            map((res: any) => { if (res && res.prices && res.prices.length) { this.chartCache[key] = res.prices; } return res; }),
-            catchError(() => {
-              const price = this.staticPrices[sym] !== undefined
-                ? this.staticPrices[sym]
-                : (this.marketData[sym] && this.marketData[sym].price);
-              if (price) {
-                const pts = Math.min(120, Math.max(60, Math.round(days / 3)));
-                return of({ prices: this.synthSeries(sym, price, pts, days * 86400000, days) });
-              }
-              return throwError(() => new Error(`No static fallback for ${coinSymbol}`));
-            })
-          )
-        )
+      .get(
+        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${(this.valuta || 'eur').toLowerCase()}&days=${period}`
+      ).pipe(
+        timeout(5000),
+        catchError(() => {
+          const price = this.staticPrices[sym];
+          if (price !== undefined) {
+            const now = Date.now();
+            const points = 90;
+            const prices: number[][] = [];
+            for (let i = 0; i < points; i++) {
+              prices.push([now - (points - i) * (period * 86400000 / points), price * (0.85 + Math.random() * 0.3)]);
+            }
+            return of({ prices });
+          }
+          return of({ prices: [] });
+        })
       );
   }
 
   counter = 0;
   addCoinsToList() {
-    this.loadFx();
-    if (this.universeLoaded) { return; }
-    // Full searchable universe (ids + names) so users can add most coins.
     this.getCoinSymbols().subscribe({
-      next: (coinsArr: any[]) => {
+      next: (coinsArr: Coin[]) => {
         if (coinsArr && coinsArr.length > 0) {
-          this.universeLoaded = true;
-          this.coins = coinsArr.map((c: any) => ({
+          this.coins = coinsArr.map((c: Coin) => ({
             icon: '',
             symbol: (c.symbol || '').toUpperCase(),
             name: c.name,
+            id: c.id,
           }));
-          this.coinsSubject.next(this.coins);
         }
       },
       error: () => {} // Silently ignore — static coinIdMap already covers fallback
     });
-  }
-
-  private topMarketsLoaded = false;
-  /** Lazily load top-coin icons/universe (called when the add picker opens) so it
-   *  doesn't compete with the dashboard's holdings request and trip rate limits. */
-  ensureTopMarkets(): void {
-    if (this.topMarketsLoaded) { return; }
-    this.topMarketsLoaded = true;
-    this.loadTopMarkets();
   }
 
   /** Fetch coin images from CoinGecko and cache them */
@@ -646,20 +397,30 @@ export class CoinsService {
   }
 
   /** Fetch coin list from CoinGecko /coins/list and build coinIdMap */
-  getCoinSymbols(): Observable<any[]> {
+  getCoinSymbols(): Observable<Coin[]> {
     return this._http
       .get('https://api.coingecko.com/api/v3/coins/list')
       .pipe(
-        timeout(6000),
-        map((result: any[]) => {
-          // Only fill in symbols we don't already know — keeps the authoritative
-          // ids for major coins (many obscure coins reuse popular symbols).
+        timeout(5000),
+        map((result: Coin[]) => {
           result.forEach((coin) => {
-            const s = (coin.symbol || '').toLowerCase();
-            if (s && !this.coinIdMap[s]) { this.coinIdMap[s] = coin.id; }
+            const symbol = (coin.symbol || '').toLowerCase();
+            if (!symbol || this.coinIdMap[symbol]) {
+              return;
+            }
+            this.coinIdMap[symbol] = coin.id;
           });
           this.coinIdMapSubject.next({ ...this.coinIdMap });
-          return result;
+          return result.sort((a, b) => {
+            const aSymbol = (a.symbol || '').toLowerCase();
+            const bSymbol = (b.symbol || '').toLowerCase();
+            const aCanonical = this.canonicalSymbols.has(aSymbol) ? 0 : 1;
+            const bCanonical = this.canonicalSymbols.has(bSymbol) ? 0 : 1;
+            if (aCanonical !== bCanonical) {
+              return aCanonical - bCanonical;
+            }
+            return (a.symbol || '').localeCompare(b.symbol || '');
+          });
         }),
         catchError(() => {
           // API failed — emit static fallback immediately so prices still work
@@ -691,14 +452,20 @@ export class CoinsService {
       );
   }
 
-  /** Get coin image URL from CoinGecko */
+  /** Fetch coin image URL from CoinGecko */
   getCoinImageUrl(coinSymbol: string): Observable<string> {
+    const symbolKey = (coinSymbol || '').toLowerCase();
     const coinId = this.resolveCoinId(coinSymbol);
     if (!coinId) {
       return throwError(() => new Error(`Unknown coin symbol: ${coinSymbol}`));
     }
-    if (this.coinImageCache[coinSymbol.toLowerCase()]) {
-      return of(this.coinImageCache[coinSymbol.toLowerCase()]);
+    if (this.coinImageCache[symbolKey]) {
+      return of(this.coinImageCache[symbolKey]);
+    }
+    const staticUrl = this.staticImages[symbolKey];
+    if (staticUrl) {
+      this.coinImageCache[symbolKey] = staticUrl;
+      return of(staticUrl);
     }
     return this._http
       .get(
@@ -706,7 +473,7 @@ export class CoinsService {
       )
       .pipe(
         timeout(5000),
-        map((result: any) => {
+        map((result: { image?: { small?: string; large?: string } }) => {
           const url = result.image?.small || result.image?.large || '';
           this.coinImageCache[coinSymbol.toLowerCase()] = url;
           return url;
@@ -719,9 +486,9 @@ export class CoinsService {
       );
   }
 
-  deleteCoin(coin) {
+  deleteCoin(coin: Pick<CoinTransaction, 'symbol'>): void {
     if (this.isDemoMode) {
-      const coins = this.getDemoCoins().filter((c: any) => c.symbol !== coin.symbol);
+      const coins = this.getDemoCoins().filter((c: CoinTransaction) => c.symbol !== coin.symbol);
       this.saveDemoCoins(coins);
       return;
     }
@@ -744,39 +511,43 @@ export class CoinsService {
     return this.coins;
   }
 
-  deleteTransaction(key) {
+  deleteTransaction(key: string): void {
     if (this.isDemoMode) {
-      const coins = this.getDemoCoins().filter((c: any) => c.key !== key);
+      const coins = this.getDemoCoins().filter((c: CoinTransaction) => c.key !== key);
       this.saveDemoCoins(coins);
       return;
     }
     this.coinCollection.doc(key).delete();
   }
 
-  getCoins(): Observable<any[]> {
+  getCoins(): Observable<CoinTransaction[]> {
     if (this.isDemoMode) {
       // Auto-seed demo data if empty
       if (this.getDemoCoins().length === 0) {
         this.enableDemoMode();
       }
-      // Reactive: re-emits whenever demo coins change (add/edit/delete)
-      return this.demoChange$.pipe(map(() => this.getDemoCoins()));
+      this.demoCoinsSource.next(this.getDemoCoins());
+      return this.demoCoinsSource.asObservable();
     }
     return this.coinCollection.valueChanges();
   }
 
-  getCoinsPayload(): Observable<any[]> {
+  getCoinsPayload(): Observable<CoinPayloadSnapshot[]> {
     if (this.isDemoMode) {
-      return this.demoChange$.pipe(
-        map(() => this.getDemoCoins().map((c: any, i: number) => ({
+      if (this.getDemoCoins().length === 0) {
+        this.enableDemoMode();
+      }
+      this.demoCoinsSource.next(this.getDemoCoins());
+      return this.demoCoinsSource.pipe(map((coins: CoinTransaction[]) =>
+        coins.map((c: CoinTransaction, i: number) => ({
           payload: { doc: { id: c.key || `demo_${i}`, data: () => c } }
-        })))
-      );
+        }))
+      ));
     }
     return this.coinCollection.snapshotChanges();
   }
 
-  insertCoin(coin, name) {
+  insertCoin(coin: Pick<CoinTransaction, 'amount' | 'priceBought' | 'date' | 'exchange'>, name: string): void {
     if (this.isDemoMode) {
       const coins = this.getDemoCoins();
       coins.push({
@@ -785,7 +556,6 @@ export class CoinsService {
         priceBought: coin.priceBought,
         date: coin.date,
         exchange: coin.exchange,
-        currency: this.valuta,
         key: `demo_${Date.now()}`,
       });
       this.saveDemoCoins(coins);
@@ -797,7 +567,6 @@ export class CoinsService {
       priceBought: coin.priceBought,
       date: coin.date,
       exchange: coin.exchange,
-      currency: this.valuta,
     });
   }
 }

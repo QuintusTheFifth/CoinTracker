@@ -1,7 +1,8 @@
 /* ============================================================
-   Coin List — Dark minimal dashboard
+   Coin List — Modern Redesign
    ============================================================ */
 
+/* ── Reset / Layout ─────────────────────────────────────── */
 .contentTable {
   width: 100%;
   max-width: 100%;
@@ -9,399 +10,740 @@
   position: relative;
 }
 
-/* ── Portfolio summary (flat stat block) ─────────────────── */
+h1 {
+  margin-top: 20px;
+  margin-left: 10px;
+}
+
+.md-display-4 {
+  text-align: left;
+}
+
+.md-display-2 {
+  text-align: right;
+}
+
+.matHeaderCellDef-buttons {
+  text-align: left;
+}
+
+/* ── Summary / Portfolio Header (Glassmorphism) ────────── */
 .portfolio-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--s4);
-  margin: 0 0 var(--s5) 0;
-  padding: var(--s5) var(--s5);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0 2rem 0;
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .portfolio-header-left {
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  gap: var(--s5);
-}
-.portfolio-stat {
-  display: flex;
   flex-direction: column;
-  gap: var(--s2);
+  gap: 0.25rem;
+  min-width: 0;
 }
-.portfolio-stat--return {
-  justify-content: flex-start;
-  padding-left: var(--s5);
-  border-left: 1px solid var(--border);
-}
-.return-value {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--text-secondary);
-}
-.return-value.positive { color: var(--green); }
-.return-value.negative { color: var(--red); }
-.return-value .chg-arrow { font-size: 0.6em; }
-.return-sub {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-.return-sub.positive { color: var(--green); }
-.return-sub.negative { color: var(--red); }
 
 .portfolio-header-right {
   display: flex;
   align-items: center;
-  gap: var(--s3);
-}
-
-.portfolio-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  gap: 1rem;
+  justify-content: flex-end;
 }
 
 .portfolio-balance {
-  font-size: 2.25rem;
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 700;
   margin: 0;
   color: var(--text-primary);
-  letter-spacing: -0.03em;
-  line-height: 1.05;
+  letter-spacing: -0.02em;
 }
 
+.portfolio-balance .accent {
+  color: var(--accent);
+}
+/* ── Portfolio Meta ──────────────────────────────────────── */
 .portfolio-meta {
   display: flex;
-  align-items: center;
-  gap: var(--s2);
-  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--overlay-hover);
+  border-radius: 12px;
+  gap: 0;
+  font-size: 0.85rem;
   color: var(--text-secondary);
+  overflow: hidden;
 }
-.portfolio-meta-dot { color: var(--text-muted); }
 
-.portfolio-change {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
+.portfolio-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+  padding: 0.7rem 0.9rem;
+}
+
+.portfolio-meta-item + .portfolio-meta-item {
+  border-left: 1px solid var(--overlay-hover);
+}
+
+.portfolio-meta-value {
+  color: var(--text-primary);
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-.portfolio-change.positive { color: var(--green); }
-.portfolio-change.negative { color: var(--red); }
-.portfolio-change .chg-arrow { font-size: 0.7em; }
-.portfolio-change .chg-window {
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 0.92em;
 }
 
-/* ── Add coin button ─────────────────────────────────────── */
+.market-data-notice {
+  color: var(--text-primary);
+  display: block;
+  font-size: 0.72rem;
+  margin-top: 0.15rem;
+  opacity: 0.8;
+}
+
+.change-positive {
+  color: var(--green) !important;
+}
+
+.change-negative {
+  color: var(--red) !important;
+}
+
+/* ── Valuta Toggle ─────────────────────────────────────── */
+.valuta {
+  margin-left: 0;
+}
+
+.valuta ::ng-deep .mat-button-toggle-group {
+  border-radius: 10px !important;
+  overflow: hidden;
+  background: var(--overlay-hover) !important;
+  border: 1px solid var(--glass-border);
+}
+
+.valuta ::ng-deep .mat-button-toggle {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.8rem;
+  min-width: 56px;
+  transition: all 0.2s ease;
+}
+
+.valuta ::ng-deep .mat-button-toggle-checked {
+  background: linear-gradient(135deg, var(--accent), #d67e1a) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(247, 147, 26, 0.35);
+}
+
+.valuta ::ng-deep .mat-button-toggle-button {
+  padding: 6px 18px !important;
+}
+
+/* ── Add Coin Button (Gradient FAB) ────────────────────── */
 .add-coin-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--s2);
-  height: 38px;
-  padding: 0 var(--s4);
+  gap: 8px;
+  padding: 12px 28px;
   border: none;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
+  border-radius: 40px;
+  background: linear-gradient(135deg, var(--accent) 0%, #448aff 100%);
+  color: #fff;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.14s ease;
+  box-shadow: 0 4px 20px rgba(247, 147, 26, 0.30);
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
 }
-.add-coin-btn:hover { background: var(--accent-hover); }
+
+.add-coin-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(247, 147, 26, 0.45);
+}
+
+.add-coin-btn:active {
+  transform: translateY(0);
+}
+
 .add-coin-btn mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  line-height: 18px;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
 }
 
-.add-coin-fab { display: none; }
+/* ── Desktop FAB floating variant (hidden by default) ──── */
+.add-coin-fab {
+  display: none;
+}
 
-/* ── Table (flat surface card) ───────────────────────────── */
+/* ── Table (Dark Card Style) ───────────────────────────── */
+.table-scroll {
+  border-radius: 16px;
+  box-shadow: 0 4px 24px var(--glass-shadow);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
 .coin-table {
   width: 100%;
+  min-width: 760px;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: none;
+  background: var(--bg-card);
 }
 
+/* Table header */
 .coin-table ::ng-deep .mat-header-row {
-  background: transparent;
-  min-height: 44px;
-  border-bottom: 1px solid var(--border);
+  background: var(--overlay-hover);
+  min-height: 56px;
 }
+
 .coin-table ::ng-deep .mat-header-cell {
-  color: var(--text-muted);
-  font-size: 0.6875rem;
-  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border-bottom: none;
-  padding: 0 14px;
-  white-space: nowrap;
-}
-.coin-table ::ng-deep .mat-row {
-  min-height: 60px;
-  border-bottom: 1px solid var(--border);
-  box-shadow: inset 2px 0 0 transparent;
-  transition: background-color 0.12s ease, box-shadow 0.12s ease;
-  cursor: pointer;
-}
-.coin-table ::ng-deep .mat-row:last-child { border-bottom: none; }
-.coin-table ::ng-deep .mat-row:hover {
-  background: var(--overlay-hover);
-  box-shadow: inset 2px 0 0 var(--accent);
-}
-.coin-table ::ng-deep .mat-cell {
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  border-bottom: none;
-  padding: 0 14px;
+  border-bottom: 1px solid var(--overlay-hover);
+  padding: 0 12px;
 }
 
-/* ── Symbol column ───────────────────────────────────────── */
+/* Table rows */
+.coin-table ::ng-deep .mat-row {
+  min-height: 60px;
+  border-bottom: 1px solid var(--overlay-hover);
+  transition: background 0.2s ease, transform 0.15s ease;
+  cursor: pointer;
+  animation: rowFadeIn 0.4s ease both;
+}
+
+.coin-table ::ng-deep .mat-row:last-child {
+  border-bottom: none;
+}
+
+.coin-table ::ng-deep .mat-row:hover {
+  background: rgba(247, 147, 26, 0.06);
+}
+
+.coin-table ::ng-deep .mat-row:active {
+  background: rgba(247, 147, 26, 0.10);
+}
+
+.coin-table ::ng-deep .mat-cell {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  border-bottom: none;
+  padding: 0 12px;
+}
+
+.coin-table ::ng-deep .mat-column-price,
+.coin-table ::ng-deep .mat-column-amount,
+.coin-table ::ng-deep .mat-column-change,
+.coin-table ::ng-deep .mat-column-total,
+.coin-table ::ng-deep .mat-column-transactions {
+  justify-content: flex-end;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.coin-table ::ng-deep .mat-column-symbol {
+  flex: 0 0 15% !important;
+}
+
+.coin-table ::ng-deep .mat-column-price,
+.coin-table ::ng-deep .mat-column-total {
+  flex: 0 0 14% !important;
+}
+
+.coin-table ::ng-deep .mat-column-amount,
+.coin-table ::ng-deep .mat-column-transactions,
+.coin-table ::ng-deep .mat-column-change {
+  flex: 0 0 11% !important;
+}
+
+.coin-table ::ng-deep .mat-column-graph {
+  flex: 0 0 18% !important;
+}
+
+.coin-table ::ng-deep .mat-column-buttons {
+  flex: 0 0 8% !important;
+  justify-content: center;
+}
+
+@keyframes rowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger each row via inline style (set in HTML with [style.animation-delay]) */
+
+/* ── Symbol Column ─────────────────────────────────────── */
 .symbol-cell {
   display: flex;
   align-items: center;
-  gap: var(--s3);
+  gap: 12px;
 }
+
 .symbol-cell img {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  background: var(--surface-2);
 }
+
+.symbol-cell img[src=""],
+.symbol-cell img:not([src]) {
+  display: none;
+}
+
 .symbol-cell .symbol-name {
   font-weight: 600;
   color: var(--text-primary);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
-.symbol-cell a { text-decoration: none; color: inherit; }
-.mat-column-symbol .mat-cell > span { text-decoration: none; }
 
-/* Ledger alignment: symbol left, numeric columns right, graph centered */
-.coin-table ::ng-deep .mat-column-symbol { justify-content: flex-start; }
-.coin-table ::ng-deep .mat-column-amount,
-.coin-table ::ng-deep .mat-column-price,
-.coin-table ::ng-deep .mat-column-change,
-.coin-table ::ng-deep .mat-column-transactions,
-.coin-table ::ng-deep .mat-column-total {
-  justify-content: flex-end;
-  text-align: right;
+.symbol-cell a {
+  text-decoration: none;
+  color: inherit;
 }
-.coin-table ::ng-deep .mat-column-graph { justify-content: center; }
-.coin-table ::ng-deep .mat-column-buttons { justify-content: flex-end; }
 
-/* ── Numeric cells ───────────────────────────────────────── */
+/* Wrapper span around symbol cell — ensure no underline */
+.mat-column-symbol .mat-cell > span {
+  text-decoration: none;
+}
+
+/* ── Price Column (Monospace) ──────────────────────────── */
 .price-cell {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
   font-weight: 500;
   letter-spacing: -0.01em;
 }
 
+/* ── Price Change (with + sign, green/red) ─────────────── */
 .price-change {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
   font-weight: 600;
   font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-.price-change.positive { color: var(--green); }
-.price-change.positive::before { content: '▲'; font-size: 0.7em; margin-right: 4px; vertical-align: middle; }
-.price-change.negative { color: var(--red); }
-.price-change.negative::before { content: '▼'; font-size: 0.7em; margin-right: 4px; vertical-align: middle; }
-
-/* Subtle, brief flash on price update */
-.price-flash-green { animation: flashGreen 0.5s ease; }
-.price-flash-red { animation: flashRed 0.5s ease; }
-@keyframes flashGreen { 0% { background-color: var(--green-soft); } 100% { background-color: transparent; } }
-@keyframes flashRed { 0% { background-color: var(--red-soft); } 100% { background-color: transparent; } }
-@media (prefers-reduced-motion: reduce) {
-  .price-flash-green, .price-flash-red { animation: none; }
 }
 
-/* ── Graph column ────────────────────────────────────────── */
-.coin-table ::ng-deep .mat-column-graph { flex: 0 0 16% !important; }
-.chart-container { padding: var(--s3) 0; }
+.price-change.positive {
+  color: var(--green);
+}
 
-/* ── Buttons column ──────────────────────────────────────── */
+.price-change.negative {
+  color: #ff8a80;
+}
+
+/* ── Price Flash Animation (on update) ─────────────────── */
+.price-flash-green {
+  animation: flashGreen 0.6s ease;
+}
+
+.price-flash-red {
+  animation: flashRed 0.6s ease;
+}
+
+@keyframes flashGreen {
+  0%   { background-color: rgba(76, 175, 80, 0.25); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flashRed {
+  0%   { background-color: rgba(244, 67, 54, 0.25); }
+  100% { background-color: transparent; }
+}
+
+/* Graph column sizing */
+.coin-table ::ng-deep .mat-column-graph {
+  justify-content: center;
+}
+
+/* Chart container cell padding */
+.chart-container {
+  padding: 1em 0;
+}
+
+/* ── Buttons Column ────────────────────────────────────── */
 .coin-table ::ng-deep .mat-column-buttons .mat-icon-button {
-  width: 34px;
-  height: 34px;
-  line-height: 34px;
-  color: var(--text-muted);
-  transition: background-color 0.12s ease, color 0.12s ease;
+  width: 42px;
+  height: 42px;
+  line-height: 42px;
+  transition: all 0.2s ease;
 }
+
 .coin-table ::ng-deep .mat-column-buttons .mat-icon-button:hover {
+  background: var(--glass-border);
+}
+
+.delete-btn:hover {
+  background: rgba(244, 67, 54, 0.12);
+}
+
+.inline-confirm {
+  align-items: center;
+  background: rgba(244, 67, 54, 0.08);
+  border: 1px solid rgba(244, 67, 54, 0.28);
+  border-radius: 999px;
+  color: var(--text-primary);
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px 8px 6px 12px;
+}
+
+.inline-confirm span {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.inline-confirm button {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.confirm-danger {
+  background: var(--red);
+  color: #fff;
+}
+
+.confirm-cancel {
   background: var(--overlay-hover);
   color: var(--text-primary);
 }
-.coin-table ::ng-deep .mat-column-buttons .mat-icon-button[color="warn"]:hover {
-  background: var(--red-soft);
-  color: var(--red);
-}
 
-/* ── Paginator ───────────────────────────────────────────── */
-.coin-table ::ng-deep .mat-paginator {
-  background: transparent;
+/* ── Paginator (Dark Theme) ────────────────────────────── */
+:host ::ng-deep .mat-paginator {
+  background: var(--bg-secondary);
   color: var(--text-secondary);
-  font-size: 0.8rem;
-  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--overlay-hover);
+  border-radius: 0 0 16px 16px;
 }
-.coin-table ::ng-deep .mat-paginator .mat-paginator-container { min-height: 50px; padding: 0 14px; }
-.coin-table ::ng-deep .mat-paginator .mat-icon-button { color: var(--text-secondary); }
-.coin-table ::ng-deep .mat-paginator .mat-icon-button:hover { color: var(--text-primary); background: var(--overlay-hover); }
-.coin-table ::ng-deep .mat-paginator .mat-icon-button[disabled] { color: var(--text-muted); }
 
-/* ── Loading ─────────────────────────────────────────────── */
+:host ::ng-deep .mat-paginator .mat-paginator-container {
+  min-height: 52px;
+  padding: 0 16px;
+}
+
+:host ::ng-deep .mat-paginator .mat-paginator-page-size .mat-select-trigger {
+  color: var(--text-secondary);
+}
+
+:host ::ng-deep .mat-paginator .mat-paginator-range-label {
+  margin: 0 20px;
+}
+
+:host ::ng-deep .mat-paginator .mat-icon-button {
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+:host ::ng-deep .mat-paginator .mat-icon-button:hover {
+  color: var(--text-primary);
+  background: var(--overlay-hover);
+}
+
+:host ::ng-deep .mat-paginator .mat-icon-button[disabled] {
+  color: var(--text-primary);
+  opacity: 0.42;
+}
+
+/* ── Loading Spinner ───────────────────────────────────── */
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--s8) var(--s5);
-  gap: var(--s4);
+  padding: 6rem 2rem;
+  gap: 1rem;
 }
-.loading-text { color: var(--text-secondary); font-size: 0.875rem; }
 
-/* ── Empty state ─────────────────────────────────────────── */
+.loading-container ::ng-deep .mat-spinner circle {
+  stroke: var(--accent);
+}
+
+.loading-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+/* ── Empty State ───────────────────────────────────────── */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--s8) var(--s5);
+  padding: 5rem 2rem;
   text-align: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
 }
+
 .empty-state-icon {
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto var(--s4) auto;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px;
-  box-sizing: content-box;
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: var(--accent);
+  opacity: 0.6;
+  display: block;
+  margin: 0 auto 1.5rem auto;
 }
+
 .empty-state-title {
-  font-size: 1.15rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0 0 var(--s2) 0;
+  margin: 0 0 0.5rem 0;
 }
+
 .empty-state-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
-  max-width: 340px;
+  max-width: 320px;
   line-height: 1.6;
-  margin: 0 0 var(--s5) 0;
+  margin: 0 0 2rem 0;
 }
 
-th.mat-sort-header-sorted { color: var(--text-primary); }
+/* ── Positive / Negative Utils ─────────────────────────── */
+.positive {
+  color: var(--green);
+}
 
-/* ── Error card ──────────────────────────────────────────── */
-.error-card {
-  background: var(--surface);
-  border: 1px solid var(--red);
-  border-radius: var(--radius);
+.negative {
   color: var(--red);
-  padding: var(--s5);
+}
+
+th.mat-sort-header-sorted {
+  color: var(--accent);
+}
+
+/* ── Pulsating Circle (kept from original) ─────────────── */
+.pulsating-circle {
+  display: inline-block;
+  position: relative;
+  left: 6px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+}
+
+.pulsating-circle:before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #53c590;
+  animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.pulsating-circle:after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background-color: rgb(66, 165, 115);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--glass-shadow);
+  animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.33); opacity: 0.8; }
+  80%,
+  100% { opacity: 0; }
+}
+
+@keyframes pulse-dot {
+  0%   { transform: scale(0.8); }
+  50%  { transform: scale(1); }
+  100% { transform: scale(0.8); }
+}
+
+/* ── Error Card ────────────────────────────────────────── */
+.error-card {
+  background: var(--overlay-hover);
+  border: 1px solid var(--red);
+  border-radius: 12px;
+  color: var(--red);
+  padding: 1.5rem;
   text-align: center;
-  margin: var(--s5) 0;
+  margin: 2rem 0;
 }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+
+/* Medium screens: hide graph, transactions */
 @media (max-width: 1000px) {
-  .coin-table ::ng-deep .mat-column-graph { display: none; }
-  .coin-table ::ng-deep .mat-column-transactions { display: none; }
+  .coin-table ::ng-deep .mat-column-graph {
+    display: none;
+  }
+  .coin-table ::ng-deep .mat-column-transactions {
+    display: none;
+  }
 }
 
+/* Small screens: hide change, tweak header */
 @media (max-width: 768px) {
   .portfolio-header {
-    flex-direction: column;
-    align-items: stretch;
-    padding: var(--s4);
-    gap: var(--s4);
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    padding: 1.2rem 1.2rem;
+    gap: 0.75rem;
   }
-  .portfolio-header-right { width: 100%; justify-content: space-between; gap: var(--s3); }
-  .portfolio-header-left { flex-direction: column; gap: var(--s4); }
-  .portfolio-stat--return {
-    padding-left: 0;
-    border-left: none;
-    padding-top: var(--s4);
-    border-top: 1px solid var(--border);
+
+  .portfolio-header-right {
+    width: 100%;
+    justify-content: space-between;
+    gap: 1rem;
   }
-  .return-value { font-size: 1.3rem; }
-  .portfolio-balance { font-size: 1.85rem; }
-  .coin-table ::ng-deep .mat-column-change { display: none; }
-  .symbol-cell img { width: 26px; height: 26px; }
+
+  .portfolio-balance {
+    font-size: 1.5rem;
+  }
+
+  .portfolio-meta {
+    gap: 1rem;
+    font-size: 0.75rem;
+  }
+
+  .coin-table ::ng-deep .mat-column-graph {
+    display: none;
+  }
+  .coin-table ::ng-deep .mat-column-transactions {
+    display: none;
+  }
+
+  .valuta {
+    margin-left: 0;
+  }
+
+  .symbol-cell img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .empty-state-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+  }
 }
 
+/* Extra small screens: card layout, hide price/total/buttons, FAB */
 @media (max-width: 600px) {
-  .portfolio-header { border-radius: var(--radius); padding: var(--s4); }
-  .portfolio-balance { font-size: 1.6rem; }
-  .add-coin-btn { display: none; }
+  .portfolio-header {
+    border-radius: 12px;
+    padding: 1rem;
+  }
 
+  .portfolio-balance {
+    font-size: 1.25rem;
+  }
+
+  .portfolio-meta {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .add-coin-btn {
+    display: none;
+  }
+
+  /* Show floating FAB on mobile */
   .add-coin-fab {
     display: inline-flex;
     position: fixed;
-    bottom: calc(20px + env(safe-area-inset-bottom));
-    right: 20px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    right: 24px;
     z-index: 100;
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    background: var(--accent);
-    color: var(--accent-contrast);
+    background: linear-gradient(135deg, var(--accent) 0%, #448aff 100%);
+    color: #fff;
     border: none;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: var(--shadow-lg);
-    transition: background-color 0.14s ease;
+    box-shadow: 0 4px 20px rgba(247, 147, 26, 0.40);
+    transition: all 0.25s ease;
   }
-  .add-coin-fab:hover { background: var(--accent-hover); }
-  .add-coin-fab mat-icon { font-size: 24px; width: 24px; height: 24px; line-height: 24px; }
 
-  .coin-table ::ng-deep .mat-column-total { display: none; }
-  .coin-table ::ng-deep .mat-column-buttons { display: none; }
-  .coin-table { border-radius: var(--radius); }
-  .symbol-cell img { width: 24px; height: 24px; }
-  .symbol-cell .symbol-name { font-size: 0.85rem; }
+  .add-coin-fab:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 28px rgba(247, 147, 26, 0.55);
+  }
+
+  .add-coin-fab mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+  }
+
+  .coin-table ::ng-deep .mat-column-price {
+    display: none;
+  }
+  .coin-table ::ng-deep .mat-column-total {
+    display: none;
+  }
+  .coin-table ::ng-deep .mat-column-buttons {
+    display: none;
+  }
+  .coin-table ::ng-deep .mat-column-change {
+    display: none;
+  }
+
+  .coin-table {
+    border-radius: 12px;
+  }
+
+  :host ::ng-deep .mat-paginator {
+    border-radius: 0 0 12px 12px;
+  }
+
+  .symbol-cell img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .symbol-cell .symbol-name {
+    font-size: 0.85rem;
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
 }

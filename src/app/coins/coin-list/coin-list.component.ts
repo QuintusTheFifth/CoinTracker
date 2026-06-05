@@ -7,7 +7,7 @@ import { CoinsService } from '../services/coin.data.service';
 import { NotificationService } from '../services/notification.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { BehaviorSubject, forkJoin } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { MatPaginator } from '@angular/material/paginator';
@@ -48,10 +48,14 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   message: string;
 
   allCoins: any[] = [];
+  lastMarketRefresh: Date;
+  marketDataNotice = 'Live market data';
 
   dataSource = new MatTableDataSource<any>([]);
 
   private destroy$ = new Subject<void>();
+  private marketDataRequestId = 0;
+  pendingDeleteSymbol = '';
 
   constructor(
     public _coinService: CoinsService,
@@ -64,6 +68,11 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
       takeUntil(this.destroy$)
     ).subscribe(
       (valuta) => (this.valuta = valuta)
+    );
+    this._coinService.currentMarketStatus.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(
+      (status) => (this.marketDataNotice = status)
     );
   }
 
@@ -90,43 +99,6 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   prices = [];
   priceLive = '';
 
-  // Value-weighted 24h portfolio change (%), from per-symbol change data.
-  portfolioChange(changes: Record<string, string>): number {
-    if (!this.allCoins || !changes) { return 0; }
-    let totalValue = 0;
-    let weighted = 0;
-    for (const coin of this.allCoins) {
-      const value = (coin.amount || 0) * (coin.price || 0);
-      const pct = parseFloat(changes[coin.symbol]);
-      if (!isNaN(pct) && value > 0) {
-        totalValue += value;
-        weighted += value * pct;
-      }
-    }
-    return totalValue ? weighted / totalValue : 0;
-  }
-
-  // Cost basis stored in EUR; converted to the display currency for the P&L.
-  totalCost(): number {
-    if (!this.allCoins) { return 0; }
-    return this.allCoins.reduce((sum, c) => sum + (c.cost || 0), 0);
-  }
-
-  // Cost basis in the currently displayed currency.
-  private displayCost(): number {
-    return this._coinService.convertEurToDisplay(this.totalCost());
-  }
-
-  // All-time return = current value − cost basis (both in the display currency).
-  plAbsolute(): number {
-    return this.berekenEindTotaal(this.allCoins) - this.displayCost();
-  }
-
-  plPercent(): number {
-    const cost = this.displayCost();
-    return cost ? (this.plAbsolute() / cost) * 100 : 0;
-  }
-
   berekenEindTotaal(lijstCoins) {
     //
     var eindTotal = 0;
@@ -145,87 +117,60 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   prijs;
 
   geefCoins() {
-    // Auto-enable demo mode if auth is missing
     let obs;
     try {
       obs = this._coinService.getCoins();
     } catch (e) {
-      this._coinService.enableDemoMode();
-      obs = this._coinService.getCoins();
+      this.errorMessage = 'Please sign in or continue in demo mode to view your portfolio.';
+      this.router.navigate(['/login']);
+      return;
     }
-    obs.pipe(takeUntil(this.destroy$)).subscribe((rawCoins: any[]) => {
-      const aggregated = this.getUnique(
+    obs.subscribe((allCoins: any[]) => {
+      this.allCoins = this.getUnique(
         //Geeft coins met zelfde "symbol" gelijke 'amount'
-        rawCoins.map((c) => {
+        allCoins.map((c) => {
           const coin = {
             symbol: c.symbol,
             amount: c.amount,
+            //$key: c.key
             price: 0,
             transactions: 0,
-            cost: 0,
-            image_url: this._coinService.iconFor(c.symbol),
-            sparkline: [],
+            image_url: '',
           };
+          //
           coin.amount = 0;
-          for (let item of rawCoins) {
+          for (let item of allCoins) {
             if (coin.symbol === item.symbol) {
               coin.amount += item.amount;
               coin.transactions += 1;
-              // Normalise cost basis to EUR using the currency it was entered in.
-              coin.cost += (item.amount || 0) *
-                this._coinService.convertToEur(Number(item.priceBought) || 0, item.currency || 'EUR');
             }
           }
           return coin;
         }),
         'symbol'
       );
-      aggregated.sort((a, b) => a.symbol.localeCompare(b.symbol));
 
-      // Fetch market data (price/24h/sparkline/icons) in ONE /coins/markets call,
-      // THEN render — so the mini charts reuse the sparkline (no per-coin burst).
-      const render = () => this.applyMarketsAndShow(aggregated);
+      this.allCoins.sort((a, b) => a.symbol.localeCompare(b.symbol));
+      this.dataSource.data = this.allCoins;
+
+      // Wait for CoinGecko coin ID map before fetching prices/images
+      const loadPrices = () => {
+        for (var coin of this.allCoins) {
+          this.geefPrijs(coin);
+          this.geefImage(coin);
+        }
+      };
+
       if (Object.keys(this._coinService.coinIdMap).length > 0) {
-        render();
+        loadPrices();
       } else {
         const sub = this._coinService.coinIdMapSubject.subscribe((map) => {
           if (Object.keys(map).length > 0) {
-            render();
+            loadPrices();
             sub.unsubscribe();
           }
         });
       }
-    });
-  }
-
-  /** Load batched market data for the holdings, then publish to the table. */
-  private applyMarketsAndShow(coins: any[]): void {
-    if (!coins.length) {
-      this.allCoins = [];
-      this.dataSource.data = [];
-      return;
-    }
-    this._coinService.loadMarkets(coins.map((c) => c.symbol)).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      const changes = { ...this.priceChange$.value };
-      for (const coin of coins) {
-        coin.image_url = this._coinService.iconFor(coin.symbol);
-        const md = this._coinService.marketData[coin.symbol.toLowerCase()];
-        if (md) {
-          coin.price = md.price || 0;
-          coin.sparkline = md.sparkline || [];
-          if (md.change24h !== null && md.change24h !== undefined) {
-            changes[coin.symbol] = Number(md.change24h).toFixed(2);
-          }
-        } else {
-          // Coin not in the markets response — fall back to a per-coin fetch.
-          this.geefPrijs(coin);
-        }
-      }
-      this.priceChange$.next(changes);
-      this.allCoins = coins;
-      this.dataSource.data = coins;
     });
   }
 
@@ -252,41 +197,74 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   value;
-  geefPrijs(coin) {
+  geefPrijs(coin, requestId = this.marketDataRequestId) {
     // Fetch price independently — don't block on dailyChange
     this._coinService.getCoinPrice(coin.symbol).pipe(
       map((val: any) => {
         const coinId = this._coinService.coinIdMap[coin.symbol.toLowerCase()];
-        return val[coinId][(this.valuta || 'eur').toLowerCase()];
-      })
+        return val[coinId][(this.valuta || 'EUR').toLowerCase()];
+      }),
+      takeUntil(this.destroy$)
     ).subscribe({
       next: (price) => {
+        if (requestId !== this.marketDataRequestId) {
+          return;
+        }
         coin.price = price || 0;
+        this.lastMarketRefresh = new Date();
+        this.updatePriceChange(coin);
       },
       error: () => {
+        if (requestId !== this.marketDataRequestId) {
+          return;
+        }
         coin.price = 0;
+        this.lastMarketRefresh = new Date();
+        this.updatePriceChange(coin);
       }
     });
 
     // Fetch 24h change independently
     this._coinService.dailyChange(coin.symbol).pipe(
-      map((val: any) => val.prices?.[0]?.[1])
+      map((val: any) => val.prices?.[0]?.[1]),
+      takeUntil(this.destroy$)
     ).subscribe({
       next: (oldPrice) => {
+        if (requestId !== this.marketDataRequestId) {
+          return;
+        }
         coin.oldPrice = oldPrice;
-        const price = coin.price;
-        const percent = price && oldPrice ? (((price - oldPrice) / oldPrice) * 100).toFixed(2) : '0.00';
-        this.priceChange$.next({
-          ...this.priceChange$.value,
-          [coin.symbol]: percent
-        });
+        this.updatePriceChange(coin);
       },
       error: () => {}
     });
   }
 
+  private updatePriceChange(coin) {
+    const price = Number(coin.price || 0);
+    const oldPrice = Number(coin.oldPrice || 0);
+    const percent = price && oldPrice ? (((price - oldPrice) / oldPrice) * 100).toFixed(2) : '0.00';
+    this.priceChange$.next({
+      ...this.priceChange$.value,
+      [coin.symbol]: percent
+    });
+  }
+
+  private refreshMarketData() {
+    const requestId = ++this.marketDataRequestId;
+    this.priceChange$.next({});
+    this.allCoins.forEach((coin) => {
+      coin.price = 0;
+      coin.oldPrice = 0;
+      this.geefPrijs(coin, requestId);
+      this.geefImage(coin);
+    });
+  }
+
   geefImage(coin) {
-    this._coinService.getCoinImageUrl(coin.symbol).subscribe((url) => {
+    this._coinService.getCoinImageUrl(coin.symbol).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((url) => {
       coin.image_url = url;
     });
   }
@@ -301,7 +279,7 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.autoFocus = true;
     dialogConfig.maxWidth = '90vw';
-    dialogConfig.width = window.innerWidth < 600 ? '90vw' : '400px';
+    dialogConfig.width = window.innerWidth < 600 ? '92vw' : '520px';
     dialogConfig.maxHeight = '90vh';
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
@@ -312,35 +290,22 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onDelete(coin) {
-    if (confirm('Are you sure you want to delete this coin?')) {
-      this._coinService.deleteCoin(coin);
-      this.notificationService.warn('Removed successfully!');
-    }
+    this.pendingDeleteSymbol = coin && coin.symbol ? coin.symbol : '';
+  }
+
+  cancelDelete(): void {
+    this.pendingDeleteSymbol = '';
+  }
+
+  confirmDelete(coin): void {
+    this._coinService.deleteCoin(coin);
+    this.pendingDeleteSymbol = '';
+    this.notificationService.warn('Removed successfully!');
   }
 
   changeValuta(valuta) {
-    this.valuta = valuta;
-    this._coinService.changeValuta(valuta);
-    // Re-fetch prices/sparklines in the newly selected currency (one batch call,
-    // with a Coinbase fallback inside loadMarkets when CoinGecko is unavailable).
-    this._coinService.loadMarkets(this.allCoins.map((c) => c.symbol)).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      const changes = { ...this.priceChange$.value };
-      for (const coin of this.allCoins) {
-        const md = this._coinService.marketData[coin.symbol.toLowerCase()];
-        if (md) {
-          coin.price = md.price || 0;
-          coin.sparkline = md.sparkline || [];
-          if (md.change24h !== null && md.change24h !== undefined) {
-            changes[coin.symbol] = Number(md.change24h).toFixed(2);
-          }
-        } else {
-          // Not covered by either source — fetch this coin individually.
-          this.geefPrijs(coin);
-        }
-      }
-      this.priceChange$.next(changes);
-    });
+    this.valuta = valuta || 'EUR';
+    this._coinService.changeValuta(this.valuta);
+    this.refreshMarketData();
   }
 }

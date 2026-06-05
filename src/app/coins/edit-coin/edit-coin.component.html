@@ -1,54 +1,54 @@
-<div class="content">
-  <br>
+<div class="content detail-page">
+  <div class="detail-toolbar">
+    <button class="back-btn" [routerLink]="['/coin-list']" aria-label="Back to portfolio">
+      <mat-icon>arrow_back</mat-icon>Portfolio
+    </button>
+  </div>
+
   <div class="coin-header-card">
     <div class="coin-header-left">
       <img
         class="coin-icon"
-        [src]="_coinService.iconFor(message)"
+        [src]="_coinService.coinImageCache[message.toLowerCase()] || 'assets/add.png'"
         (error)="$event.target.src='assets/add.png'"
         alt="coin icon"
       />
       <h1 class="coin-title">
         {{ message }}
-        <span class="coin-price num">{{ price | currency: valuta:"symbol":"1.2-2" }}</span>
+        <span class="coin-price">{{ price | currency: valuta:"symbol":"1.2-2" }}</span>
       </h1>
-      <div class="coin-holdings" *ngIf="holdingsAmount > 0">
-        <span class="holdings-label">Your holdings</span>
-        <span class="holdings-value num">{{ holdingsValue | currency: valuta:"symbol":"1.2-2" }}</span>
-        <span class="holdings-amount num">{{ holdingsAmount }} {{ message }}</span>
-      </div>
     </div>
     <div class="header-controls">
+      <span class="range-label">Chart range</span>
       <mat-button-toggle-group class="times" #group="matButtonToggleGroup"
-       (change)="changePeriod(group.value)" [value]="period" name="period" aria-label="Chart period">
-        <mat-button-toggle [value]="30">1M</mat-button-toggle>
-        <mat-button-toggle [value]="90">3M</mat-button-toggle>
-        <mat-button-toggle [value]="180">6M</mat-button-toggle>
-        <mat-button-toggle [value]="365">1Y</mat-button-toggle>
+       (change)="changePeriod(group.value)" value="90" name="chartRange" aria-label="Chart range">
+        <mat-button-toggle value="90" aria-label="Last 3 months">3M</mat-button-toggle>
+        <mat-button-toggle value="270" aria-label="Last 9 months">9M</mat-button-toggle>
+        <mat-button-toggle value="365" aria-label="Last 1 year">1Y</mat-button-toggle>
+        <mat-button-toggle value="2000" aria-label="Maximum available history">MAX</mat-button-toggle>
       </mat-button-toggle-group>
-      <button class="back-btn" [routerLink]="['/coin-list']" data-cy="">
-        <mat-icon>undo</mat-icon>Back
-      </button>
     </div>
   </div>
 
-  <app-coin-graph [coinSymbol]="message"></app-coin-graph>
-  <br />
+  <section class="chart-section" aria-label="Price history">
+    <div class="section-heading">
+      <div>
+        <h2>Price history</h2>
+        <p>Interactive chart with visible axes, hover values, and latest/high/low summary.</p>
+      </div>
+    </div>
+    <app-coin-graph [coinSymbol]="message"></app-coin-graph>
+  </section>
 
   <div class="search-div">
     <button class="add-tx-btn" (click)="onCreate()" data-cy="add">
       <mat-icon>add</mat-icon>Add a transaction
     </button>
-    <div class="filter-field">
-      <mat-icon class="filter-icon">search</mat-icon>
-      <input
-        class="filter-input"
-        type="text"
-        [(ngModel)]="exchangeFilter"
-        placeholder="Filter by exchange"
-        aria-label="Filter by exchange"
-      />
-    </div>
+    <mat-form-field class="exchange-filter-input" appearance="outline">
+      <mat-label>Filter by exchange</mat-label>
+      <input matInput [(ngModel)]="exchangeFilter" placeholder="Exchange name" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
   </div>
   <div class="table-responsive-wrapper">
     <table
@@ -66,11 +66,14 @@
         <td mat-cell *matCellDef="let element" (click)="onEdit(element)">
           <div class="symbol-cell">
             <img
+              *ngIf="_coinService.coinImageCache[element.symbol?.toLowerCase()]; else symbolFallbackTpl"
               class="symbol-cell-img"
-              [src]="_coinService.iconFor(element.symbol)"
-              (error)="$event.target.src='assets/add.png'"
-              alt="coin icon"
+              [src]="_coinService.coinImageCache[element.symbol.toLowerCase()]"
+              alt="{{ element.symbol }} icon"
             />
+            <ng-template #symbolFallbackTpl>
+              <span class="symbol-icon-fallback" aria-hidden="true">{{ element.symbol?.slice(0, 1) }}</span>
+            </ng-template>
             <span class="symbol-cell-name">{{ element.symbol }}</span>
           </div>
         </td>
@@ -104,28 +107,36 @@
       <ng-container matColumnDef="price bought">
         <th mat-header-cell *matHeaderCellDef>Bought At</th>
         <td mat-cell *matCellDef="let element" (click)="onEdit(element)">
-          {{ isNum(element.priceBought) ? (element.priceBought | currency: valuta:"symbol":"1.2-2") : '—' }}
+          {{ element.priceBought | currency: valuta:"symbol":"1.2-2" }}
         </td>
       </ng-container>
 
       <!-- Buttons -->
       <ng-container matColumnDef="buttons">
-        <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+          <mat-header-cell *matHeaderCellDef><strong>Actions</strong></mat-header-cell>
         <mat-cell *matCellDef="let row">
-          <button mat-icon-button aria-label="Edit transaction" matTooltip="Edit" (click)="onEdit(row)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" aria-label="Delete transaction" matTooltip="Delete" (click)="onDelete(row)">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
+          <ng-container *ngIf="pendingDeleteKey !== row.key; else confirmDeleteTxTpl">
+            <button class="tx-action-btn" mat-button (click)="onEdit(row)" aria-label="Edit transaction" matTooltip="Edit transaction">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button class="tx-action-btn tx-action-danger" mat-button color="warn" (click)="onDelete(row)" aria-label="Delete transaction" matTooltip="Delete transaction">
+              <mat-icon>delete_outline</mat-icon>
+              <span>Delete</span>
+            </button>
+          </ng-container>
+          <ng-template #confirmDeleteTxTpl>
+            <span class="confirm-delete" role="group" aria-label="Confirm transaction deletion">
+              <span>Delete?</span>
+              <button mat-stroked-button color="warn" (click)="confirmDelete(row)">Yes</button>
+              <button mat-button (click)="cancelDelete()">No</button>
+            </span>
+          </ng-template>
         </mat-cell>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
-    <div *ngIf="filteredTransactionsList?.length === 0" class="tx-empty">
-      No transactions to show{{ exchangeFilter ? ' for this filter' : '' }}.
-    </div>
   </div>
 </div>

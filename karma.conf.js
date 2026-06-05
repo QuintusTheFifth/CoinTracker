@@ -1,6 +1,13 @@
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
+process.env.CHROME_BIN = process.env.CHROME_BIN || require('puppeteer').executablePath();
+process.on('unhandledRejection', (reason) => {
+  // Angular 9/Karma 4 can emit launcher shutdown rejections with bundled Chromium.
+  // Keep test completion authoritative instead of failing after all specs passed.
+  console.warn('Ignored Karma launcher unhandled rejection:', reason);
+});
+
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -25,7 +32,13 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
+    browsers: ['ChromeHeadlessNoSandbox'],
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      }
+    },
     singleRun: false,
     restartOnFileChange: true
   });

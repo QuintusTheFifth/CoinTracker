@@ -1,123 +1,172 @@
 # CoinTracker
 
-**A clean, modern cryptocurrency portfolio tracker** — see what you hold, what it's worth, and how it's performing, at a glance.
+A polished Angular + Firebase cryptocurrency portfolio tracker for monitoring holdings, transactions, live market prices, and historical performance.
 
 [![Angular](https://img.shields.io/badge/Angular-9-dd0031?logo=angular)](https://angular.io)
 [![Firebase](https://img.shields.io/badge/Firebase-Hosting-ffca28?logo=firebase)](https://firebase.google.com)
+[![Chart.js](https://img.shields.io/badge/Chart.js-2.9-ff6384?logo=chartdotjs)](https://www.chartjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
----
 
 ## Overview
 
-CoinTracker is a dark‑minimal portfolio dashboard for crypto. It pulls live prices and market data from CoinGecko, stores your transactions in Firebase, and presents everything in a restrained, focused interface — a single accent colour, a proper numeric ledger, and calm, purposeful charts.
+CoinTracker helps crypto investors keep a clean view of their portfolio:
 
-The UI follows a flat, Linear/Vercel‑style design system: layered surfaces with hairline borders (no glass or heavy shadows), [Inter](https://rsms.me/inter/) for text, tabular figures for every number, and a single Bitcoin‑orange accent used sparingly. A light theme is included; dark is the default.
+- Track multiple coins and transactions across exchanges.
+- View live prices, portfolio value, and 24-hour market moves.
+- Drill into a coin for historical charts and transaction history.
+- Sign in with Google or connect an Ethereum wallet.
+- Use demo mode when authentication is unavailable.
+
+Live app: [cointracker-26919.web.app](https://cointracker-26919.web.app)
 
 ## Features
 
-- **Portfolio at a glance** — total value, value‑weighted **24h change**, and **all‑time return** (current value vs. cost basis), side by side. The cost basis is currency‑aware: each transaction's `priceBought` is normalised using a live EUR↔USD rate (derived from BTC priced in both currencies, so it stays consistent with displayed prices), so the return converts sensibly when you switch EUR/USD.
-- **Per‑coin holdings** — drill into any asset to see your holding value, amount held, and full transaction history.
-- **Live prices & market data** — batched via CoinGecko `/coins/markets` (price, 24h change, 7‑day sparkline and icon in one call). If CoinGecko is rate‑limited or unavailable it falls back to **Coinbase** (keyless, real EUR/USD prices + OHLC history), then to deterministic offline data — so charts show *real* data, not placeholders.
-- **Add almost any coin** — the picker searches CoinGecko's full coin list (thousands of assets) and shows each coin's real icon.
-- **Trend‑coloured sparklines** — 7‑day mini‑charts coloured green/red by direction; full labelled price charts on the detail view (1M / 3M / 6M / 1Y of real history).
-- **Proper financial ledger** — right‑aligned, tabular numerals; directional ▲/▼ cues (not colour alone).
-- **Sign in with Google or MetaMask** — sign‑in is required to view your portfolio, which is saved to your account (`users/{uid}` in Firestore).
-- **Demo mode** — choose **Explore the demo** on the sign‑in screen to browse a seeded sample portfolio (stored locally), no account required.
-- **EUR / USD** toggle, sortable + paginated table, and exchange filtering.
-- **Responsive** — adaptive columns, mobile stat stacking, and a floating add button on small screens.
-- **Accessible** — WCAG‑AA contrast, visible focus states, ARIA labels, and reduced‑motion support.
-- **Dark & light themes** — with a one‑click toggle.
-
-## Live Demo
-
-[https://cointracker-26919.web.app](https://cointracker-26919.web.app)
-
-> Tip: click **Explore the demo** on the sign‑in screen to browse a populated sample portfolio right away — no account needed.
+- **Portfolio dashboard:** sortable holdings table, paginated rows, totals, live price indicators, and 7-day mini charts.
+- **Coin detail pages:** large historical price chart, range controls, transaction table, and exchange filtering.
+- **Transaction management:** add, edit, and delete coin transactions from modal dialogs.
+- **Market data:** CoinGecko prices, coin IDs, images, 24-hour change, and chart history.
+- **Resilient fallback mode:** top-coin static data keeps the UI usable if market APIs are unavailable.
+- **Authentication:** Google Sign-In via Firebase Auth and MetaMask wallet sign-in.
+- **Demo mode:** localStorage-backed portfolio for quick unauthenticated exploration.
+- **Responsive UI:** dark crypto-themed interface optimized for desktop and mobile.
+- **Production hardening:** deterministic install settings, headless test support, lint gate, production build script, and critical production audit gate.
 
 ## Screenshots
 
 ### Portfolio dashboard
-![Portfolio dashboard: portfolio value, 24h change and all-time return, with a right-aligned ledger of coins and trend-coloured 7-day sparklines](screenshots/portfolio-dashboard.png)
 
-*Portfolio value, value‑weighted 24h change and all‑time return up top; a clean ledger below with live prices, 24h change, trend‑coloured sparklines and per‑coin totals.*
+![Portfolio dashboard with crypto table and 7-day mini-graphs](screenshots/portfolio-dashboard.png)
 
-### Coin detail
-![Coin detail: BTC holdings, a one-year price chart with labelled axes, and the transaction history](screenshots/coin-detail.png)
+Live portfolio summary with tracked coins, price updates, 24-hour change indicators, mini charts, sorting, and pagination.
 
-*Your holdings for the asset, a labelled price chart (1M / 3M / 6M / 1Y), and the full transaction history with exchange filtering.*
+### Coin detail view
 
-### Add to portfolio
-![Add to portfolio dialog with coin autocomplete, amount, price bought, date and exchange fields](screenshots/add-coin.png)
+![Coin detail page with big price graph and transaction history](screenshots/coin-detail.png)
 
-*A focused dialog: coin autocomplete, amount, price bought, date and exchange.*
+Detailed coin page with historical chart ranges, exchange filtering, and transaction actions.
 
-### Sign in
-![Sign-in screen with Google and MetaMask options](screenshots/login.png)
+### Add transaction dialog
 
-*Sign in with Google or connect a wallet — no card required.*
+![Add coin form dialog](screenshots/add-coin.png)
 
-### 404
-![Not-found page with a link back to the portfolio](screenshots/404.png)
+Form dialog with coin symbol autocomplete, amount, bought price, date picker, and exchange fields.
 
-## Tech Stack
+### Login page
 
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | Angular 9, Angular Material |
-| **Charts** | Chart.js (theme‑aware, trend‑coloured) |
-| **Backend** | Firebase (Firestore, Auth, Hosting) |
-| **Market data** | CoinGecko API (prices, images, history) |
-| **Auth** | Google Sign‑In, MetaMask wallet |
-| **Styling** | CSS custom properties (design tokens), Inter, Bootstrap grid |
-| **Tooling** | Node 16, Angular CLI 9 |
+![Login page with dark glassmorphism card](screenshots/login.png)
 
-## Development
+Google Sign-In, MetaMask wallet login, and demo access.
+
+### 404 page
+
+![404 page](screenshots/404.png)
+
+Dark themed fallback page with navigation back to the portfolio.
+
+## Tech stack
+
+- **Frontend:** Angular 9, Angular Material, Angular Flex Layout
+- **Charts:** Chart.js 2.9
+- **Backend:** Firebase Auth, Firestore, Realtime Database rules, Firebase Hosting
+- **Market data:** CoinGecko REST API
+- **Styling:** CSS custom properties, responsive layouts, dark theme
+- **Testing:** Karma, Jasmine, Puppeteer Chrome Headless
+- **Tooling:** Angular CLI, TSLint, Firebase CLI
+
+## Getting started
 
 ### Prerequisites
-- **Node.js 16.x** — required. The Angular 9 / webpack 4 toolchain does **not** run on Node 17+. Use [nvm](https://github.com/nvm-sh/nvm): `nvm install 16 && nvm use 16`.
-- Angular CLI 9.x
-- (Optional) A Firebase project, for real auth + persistence.
 
-### Setup
+- Node.js 16+ or a newer Node version compatible with `NODE_OPTIONS=--openssl-legacy-provider`.
+- npm.
+- Firebase project if you want hosted auth/storage behavior.
+
+The repo includes `.npmrc` with `legacy-peer-deps=true` because this is an Angular 9 application with older peer dependency ranges.
+
+### Install
 
 ```bash
-# Clone
 git clone https://github.com/QuintusTheFifth/CoinTracker.git
 cd CoinTracker
-
-# Use Node 16
-nvm use 16
-
-# Install dependencies
-npm install --legacy-peer-deps
-
-# Run the dev server
-ng serve --proxy-config proxy.conf.json
-# open http://localhost:4200
+npm install
 ```
 
-To explore without configuring Firebase, open the app and click **Explore the demo** on the sign‑in screen. Demo data is stored locally in your browser, and add/edit/delete update the view live. Signing in with Google or a wallet instead gives you your own portfolio, persisted per account in Firestore.
+### Run locally
 
 ```bash
-# Production build
-ng build --prod
+npm start
 ```
 
-### Deploy to Firebase
+The app starts through Angular CLI with the legacy OpenSSL provider configured in `package.json`.
+
+### Production build
 
 ```bash
-# Local deploy (requires `firebase login`)
+npm run build:prod
+```
+
+Build output is written to:
+
+```text
+dist/coinTracker
+```
+
+Firebase Hosting is configured to serve that directory.
+
+## Quality checks
+
+Run the full local gate before deploying or merging:
+
+```bash
+npm run verify
+```
+
+Expected status:
+
+- Lint passes with no reported files.
+- Production build completes.
+- Karma/Jasmine runs in headless Chrome.
+- Critical production audit gate exits successfully.
+- Firestore rules restrict portfolio data to `/users/{uid}` and `/users/{uid}/coins` for the authenticated owner only.
+- `npm run verify` includes a Firestore rules assertion script (`npm run verify:rules`) so owner-scoping regressions fail CI.
+
+Note: the Angular 9/Firebase 7 dependency line may still report high or moderate advisories that require a breaking framework migration. Critical production advisories are blocked by `npm run audit:critical`; see [SECURITY.md](SECURITY.md) for the migration policy.
+
+## Firebase deployment
+
+### Local deploy
+
+```bash
 ./deploy.sh
 ```
 
-### CI/CD
+### GitHub Actions
 
-A GitHub Actions workflow (`.github/workflows/firebase-deploy.yml`) installs dependencies, builds with `ng build --prod`, and deploys to Firebase Hosting. Enable it by adding one of these repository secrets:
+The workflow in `.github/workflows/firebase-deploy.yml` installs dependencies, builds the production bundle, and deploys to Firebase Hosting.
 
-- `FIREBASE_TOKEN` — from `firebase login:ci`
-- `FIREBASE_SERVICE_ACCOUNT` — service‑account JSON key (recommended)
+Configure one of these repository secrets:
 
----
+- `FIREBASE_SERVICE_ACCOUNT` — recommended service account JSON.
+- `FIREBASE_TOKEN` — token from `firebase login:ci`.
 
-*Built with Angular & Firebase.*
+## Project structure
+
+```text
+src/app/authentication/      Firebase and wallet auth
+src/app/coins/               Portfolio, detail, chart, dialog, and data services
+src/app/user/login/          Login and demo entry UI
+src/app/page-not-found/      404 route
+scripts/                     Compatibility patches used after install
+.github/workflows/           Firebase deployment workflow
+```
+
+## Notes for maintainers
+
+- CoinGecko has duplicate symbols. The service preserves canonical mappings for common assets so symbols like BTC and ETH resolve predictably.
+- Demo mode stores data locally and is intentionally separate from authenticated Firestore data.
+- Wallet sessions are in-memory and require a fresh signature rather than trusting persisted wallet IDs.
+- The app displays when it is using estimated fallback prices instead of live CoinGecko responses.
+
+## License
+
+MIT

@@ -11,6 +11,15 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+interface TransactionRow {
+  symbol: string;
+  amount: number;
+  date: string;
+  exchange: string;
+  priceBought: number | string;
+  key: string;
+}
+
 @Component({
   selector: 'app-edit-coin',
   templateUrl: './edit-coin.component.html',
@@ -44,24 +53,10 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
   bigChart:boolean;
   price:number;
   valuta:string;
-  period: number = 90;
   exchangeFilter: string = '';
+  pendingDeleteKey = '';
 
-  /** True only for values the currency pipe can format (guards 'n/a', '', null). */
-  isNum(v: any): boolean {
-    return v !== null && v !== undefined && v !== '' && v !== 'n/a' && isFinite(Number(v));
-  }
-
-  get holdingsAmount(): number {
-    if (!this.transactionsList) { return 0; }
-    return this.transactionsList.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-  }
-
-  get holdingsValue(): number {
-    return this.holdingsAmount * (this.price || 0);
-  }
-
-  get filteredTransactionsList(): any[] {
+  get filteredTransactionsList(): TransactionRow[] {
     if (!this.exchangeFilter || this.exchangeFilter.trim() === '') {
       return this.transactionsList;
     }
@@ -78,12 +73,6 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
       this.message = routeSymbol;
       this._coinService.changeMessage(routeSymbol);
     }
-    // Declare this is the big (detail) chart and reset to the default 3-month
-    // period BEFORE the <app-coin-graph> child initialises, so it renders the
-    // big chart immediately and the toggle (3m) matches the data shown.
-    this._coinService.changeBigChart(true);
-    this._coinService.changePeriod(90);
-    this.period = 90;
     this._coinService.currentMessage.pipe(
       takeUntil(this.destroy$)
     ).subscribe(
@@ -123,24 +112,27 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     setTimeout(() => {
+      this._coinService.changeBigChart(true);
       this._coinService.setCoinSymbol(this.message);
     });
   }
 
-  changePeriod(value) {
-    this.period = Number(value);
-    this._coinService.changePeriod(this.period);
+  changePeriod(number) {
+    this._coinService.changePeriod(number)
   }
 
-  transactionsList: any[];
+  transactionsList: TransactionRow[] = [];
 
   getTransactions() {
-    this._coinService.getCoinsPayload().pipe(
+    (this._coinService.getCoinsPayload() as any).pipe(
       takeUntil(this.destroy$)
     ).subscribe((transactions: any[]) => {
-      (this.transactionsList = transactions.map((c: any) => {
+      this.transactionsList = transactions.reduce((rows: TransactionRow[], c: any) => {
         const data = c.payload.doc.data();
-        const coin = {
+        if (data.symbol !== this.message) {
+          return rows;
+        }
+        rows.push({
           symbol: data.symbol,
           amount: data.amount,
           date: data.date ? data.date : 'n/a',
@@ -149,14 +141,9 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
             ? data.priceBought
             : 'n/a',
           key: c.payload.doc.id,
-        };
-        if (data.symbol === this.message) {
-          return coin;
-        }
-      })),
-        (this.transactionsList = this.transactionsList.filter(function (c) {
-          return c != null;
-        }));
+        });
+        return rows;
+      }, []);
     });
   }
 
@@ -167,16 +154,23 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.autoFocus = true;
     dialogConfig.maxWidth = '90vw';
-    dialogConfig.width = window.innerWidth < 600 ? '90vw' : '400px';
+    dialogConfig.width = window.innerWidth < 600 ? '92vw' : '520px';
     dialogConfig.maxHeight = '90vh';
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
 
   onDelete(coin) {
-    if (confirm('Are you sure you want to delete this transaction?')) {
-      this._coinService.deleteTransaction(coin.key);
-      this.notificationService.warn('Removed successfully!');
-    }
+    this.pendingDeleteKey = coin && coin.key ? coin.key : '';
+  }
+
+  cancelDelete(): void {
+    this.pendingDeleteKey = '';
+  }
+
+  confirmDelete(coin): void {
+    this._coinService.deleteTransaction(coin.key);
+    this.notificationService.warn('Removed successfully!');
+    this.pendingDeleteKey = '';
   }
   onCreate() {
     this._coinService.setSymbolInit(this.message);
@@ -184,7 +178,7 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.autoFocus = true;
     dialogConfig.maxWidth = '90vw';
-    dialogConfig.width = window.innerWidth < 600 ? '90vw' : '400px';
+    dialogConfig.width = window.innerWidth < 600 ? '92vw' : '520px';
     dialogConfig.maxHeight = '90vh';
     this.dialog.open(AddCoinComponent, dialogConfig);
   }

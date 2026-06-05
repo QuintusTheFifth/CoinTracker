@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, HostListener } from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -10,9 +10,9 @@ import {
 import { Subject } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 
-import { Observable, combineLatest } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CoinsService, Coin } from '../services/coin.data.service';
-import { debounceTime, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../services/notification.service';
 
 @Component({
@@ -23,7 +23,7 @@ import { NotificationService } from '../services/notification.service';
 export class AddCoinComponent implements OnInit, OnDestroy {
   coinSubmit: Coin;
 
-  coinName = new FormControl();
+  coinName = new FormControl('', [Validators.required, Validators.minLength(2)]);
   coins = [];
 
   filteredCoins: Observable<Coin[]>;
@@ -48,12 +48,9 @@ export class AddCoinComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private notificationService: NotificationService
   ) {
-    // Re-filter when the user types OR when the coin universe finishes loading.
-    this.filteredCoins = combineLatest([
-      this.coinName.valueChanges.pipe(startWith(''), debounceTime(150), distinctUntilChanged()),
-      this.coinService.coinsSubject,
-    ]).pipe(
-      map(([coin, coins]) => this._filterCoins(typeof coin === 'string' ? coin : '', coins))
+    this.filteredCoins = this.coinName.valueChanges.pipe(
+      startWith(''),
+      map((coin) => this._filterCoins(coin || ''))
     );
 
     // this.coin = this.fb.group({
@@ -61,36 +58,26 @@ export class AddCoinComponent implements OnInit, OnDestroy {
     // });
   }
 
-  private _filterCoins(value: string, coins?: Coin[]): Coin[] {
-    const filterValue = (value || '').toLowerCase();
-    const list = (coins && coins.length) ? coins : this.coins;
-    if (!list || !list.length) { return []; }
-    const cache = this.coinService.coinImageCache;
-    // Empty query → show popular coins (those with a real icon), not all ~10k.
-    const matches = !filterValue
-      ? list.filter((coin: any) => coin.symbol && cache[coin.symbol.toLowerCase()])
-      : list.filter((coin: any) => coin.symbol && coin.symbol.toLowerCase().indexOf(filterValue) === 0);
-    matches.sort((a: any, b: any) => {
-      // Exact symbol match first, then well-known coins (those with a real icon).
+  private _filterCoins(value: string): Coin[] {
+    const filterValue = value.toLowerCase().trim();
+    if (!this.coins || !this.coins.length || filterValue.length < 2) { return []; }
+    return this.coins.filter(
+      (coin: any) => coin.symbol && coin.symbol.toLowerCase().indexOf(filterValue) === 0
+    ).sort((a: any, b: any) => {
       const aExact = a.symbol.toLowerCase() === filterValue ? 0 : 1;
       const bExact = b.symbol.toLowerCase() === filterValue ? 0 : 1;
       if (aExact !== bExact) { return aExact - bExact; }
-      const aKnown = cache[a.symbol.toLowerCase()] ? 0 : 1;
-      const bKnown = cache[b.symbol.toLowerCase()] ? 0 : 1;
-      if (aKnown !== bKnown) { return aKnown - bKnown; }
-      return a.symbol.localeCompare(b.symbol);
-    });
-    return matches.slice(0, 50);
+      const aCanonical = this.coinService.coinIdMap[a.symbol.toLowerCase()] === a.id ? 0 : 1;
+      const bCanonical = this.coinService.coinIdMap[b.symbol.toLowerCase()] === b.id ? 0 : 1;
+      if (aCanonical !== bCanonical) { return aCanonical - bCanonical; }
+      return (a.name || a.symbol).localeCompare(b.name || b.symbol);
+    }).slice(0, 10);
   }
 
   coinSymbols: any[] = [];
   message: string
 
   ngOnInit(): void {
-    // Ensure the searchable universe + top-coin icons are loaded for the picker.
-    this.coinService.addCoinsToList();
-    this.coinService.ensureTopMarkets();
-
     this.coinService.currentMessage.pipe(
       takeUntil(this.destroy$)
     ).subscribe(message => this.message = message)
@@ -126,18 +113,18 @@ export class AddCoinComponent implements OnInit, OnDestroy {
   getCoinSymbols() {
     this.coinService.getCoinSymbols().subscribe((res) => {
       if (!res) { return; }
-      res.forEach((coin: any) => {
-        this.coinSymbols.push(coin.symbol);
-      });
+      this.coinSymbols = Array.from(new Set(res.map((coin: any) => (coin.symbol || '').toUpperCase())));
     });
   }
   key;
 
   checkCoinSymbol(symbol) {
-    if (!symbol || !this.coins || !this.coins.length) { return true; }
+    if (!symbol) { return false; }
+    if (!this.coins || !this.coins.length) { return true; }
+    const normalizedSymbol = String(symbol).toUpperCase();
     var good = false;
     for (var coin of this.coins) {
-      if (coin.symbol == symbol) {
+      if (String(coin.symbol).toUpperCase() === normalizedSymbol) {
         good = true;
         break;
       }
@@ -150,18 +137,22 @@ export class AddCoinComponent implements OnInit, OnDestroy {
   submitted: boolean;
   
   onSubmit() {
-    this.addingSymbol = this.coinName.value;
+    this.addingSymbol = this.message || this.coinName.value;
+    if (!this.message) {
+      this.coinName.markAsTouched();
+    }
 
-    if (this.addingSymbol) this.coinService.setCoinSymbol(this.addingSymbol);
+    if (this.addingSymbol) {
+      this.coinService.setCoinSymbol(this.addingSymbol.toUpperCase());
+    }
     this.key = null;
     this.submitted = true;
 
     if (
       this.coinService.form.valid &&
-      (this.checkCoinSymbol(this.addingSymbol) ||
-        this.message)
+      (this.message || this.checkCoinSymbol(this.addingSymbol))
     ) {
-      if (this.coinService.form.get('$key').value == null) {
+      if (this.coinService.form.get('$key').value === null) {
         this.coinService.insertCoin(
           this.coinService.form.value,
           this.coinService.getCoinSymbol()
@@ -171,7 +162,7 @@ export class AddCoinComponent implements OnInit, OnDestroy {
         this.key = 1;
       }
 
-      this.coinService.form.get('$key').value == null
+      this.coinService.form.get('$key').value === null
         ? this.notificationService.success(':: Added successfully')
         : this.notificationService.success(':: Updated successfully');
 
@@ -185,14 +176,20 @@ export class AddCoinComponent implements OnInit, OnDestroy {
   }
 
   getImage(coin) {
-    // Real CoinGecko icon if known, else the bundled SVG (template falls back to add.png)
-    return this.coinService.iconFor(coin.symbol);
+    // Use CoinGecko image if cached, otherwise return a placeholder
+    const cached = this.coinService.coinImageCache[coin.symbol.toLowerCase()];
+    return cached || 'assets/add.png';
   }
 
   onClose() {
     this.coinService.form.reset();
     this.coinService.initializeFormGroup();
     this.dialogRef.close();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.onClose();
   }
 
   ngOnDestroy(): void {

@@ -3,55 +3,63 @@
   class="coin-form"
   (ngSubmit)="onSubmit()"
 >
-  <div class="dialog-header">
-    <h2 class="dialog-title">Add to portfolio</h2>
-    <button class="dialog-close" type="button" aria-label="Close" (click)="onClose()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
+  <h2 class="dialog-title">{{ coinService.formMode === 'edit' ? 'Edit transaction' : (coinService.formMode === 'addTransaction' ? 'Add transaction' : 'Add a coin') }}</h2>
+  <p class="dialog-subtitle">Enter the holding details. Required fields are clearly marked.</p>
   <input type="hidden" formControlName="$key" />
   <div class="controls-container">
-    <!-- Coin (autocomplete) when adding a new coin; locked symbol when editing -->
-    <div class="field" *ngIf="!message; else elseBlock">
-      <label class="field-label">Coin</label>
-      <mat-form-field floatLabel="never" class="coin-full-width">
-        <input
-          type="text"
-          matInput
-          placeholder="Search a coin"
-          aria-label="coin name"
-          [matAutocomplete]="auto"
-          [formControl]="coinName"
-          minlength="2"
-          [matAutocompleteDisabled]="!coins || !coins.length"
-        />
-        <mat-autocomplete #auto="matAutocomplete">
-          <mat-option
-            *ngFor="let coin of filteredCoins | async"
-            [value]="coin.symbol"
-          >
-            <img class="coin-option-img" aria-hidden [src]="getImage(coin)" (error)="$event.target.src='assets/add.png'" height="25" />
-            <span>{{ coin.symbol }}</span> |
-            <small>{{ coin.name }}</small>
-          </mat-option>
-        </mat-autocomplete>
-        <mat-error *ngIf="!checkCoinSymbol(coinName.value)">
-          Insert valid coin
-        </mat-error>
-      </mat-form-field>
-    </div>
-    <ng-template #elseBlock>
-      <div class="field">
-        <label class="field-label">Coin</label>
-        <mat-form-field floatLabel="never">
-          <input matInput disabled [value]="message" aria-label="coin name" />
+      <!-- Als coinsymbol leeg is, doe toevoeging met autocomplete field -->
+      <div *ngIf="!message; else elseBlock">
+        <mat-form-field class="coin-full-width">
+          <mat-label>Coin symbol (required)</mat-label>
+          <input
+            type="text"
+            matInput
+            placeholder="BTC, ETH, SOL..."
+            aria-label="coin name"
+            [matAutocomplete]="auto"
+            [formControl]="coinName"
+            minlength="2"
+            matTooltip="Type at least 2 characters to search coins"
+            [matAutocompleteDisabled]="!coins || !coins.length"
+          />
+
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option
+              *ngFor="let coin of filteredCoins | async"
+              [value]="coin.symbol"
+            >
+              <img
+                class="coin-option-img"
+                aria-hidden
+                [src]="getImage(coin)"
+                height="25"
+              />
+              <span>{{ coin.symbol }}</span> |
+              <small>Name: {{ coin.name }}</small>
+            </mat-option>
+          </mat-autocomplete>
+          <mat-hint>Type 2+ characters. Canonical coins are shown first.</mat-hint>
+          <mat-error *ngIf="!checkCoinSymbol(coinName.value)">
+            Enter a valid coin symbol before saving
+          </mat-error>
         </mat-form-field>
       </div>
-    </ng-template>
+      <ng-template #elseBlock>
+        <mat-form-field>
+          <mat-label>Coin Symbol</mat-label>
+          <input
+            placeholder="Coin Symbol"
+            matInput
+            disabled
+            [value]="message"
+            aria-label="coin name"
+            #spy
+          />
+        </mat-form-field>
+      </ng-template>
 
-    <div class="field">
-      <label class="field-label">Amount</label>
-      <mat-form-field floatLabel="never">
+      <mat-form-field>
+        <mat-label>Amount (required)</mat-label>
         <input
           formControlName="amount"
           type="number"
@@ -60,14 +68,12 @@
           placeholder="0.00"
           aria-label="amount"
           required
+          #spy
         />
         <mat-error>More than 0 units required</mat-error>
       </mat-form-field>
-    </div>
-
-    <div class="field">
-      <label class="field-label">Price bought</label>
-      <mat-form-field floatLabel="never">
+      <mat-form-field>
+        <mat-label>Price bought</mat-label>
         <input
           formControlName="priceBought"
           type="number"
@@ -77,22 +83,16 @@
           aria-label="price bought"
         />
       </mat-form-field>
-    </div>
-
-    <div class="field">
-      <label class="field-label">Date</label>
-      <mat-form-field floatLabel="never">
-        <input formControlName="date" type="date" matInput aria-label="date" />
+      <mat-form-field>
+        <mat-label>Date</mat-label>
+        <input formControlName="date" type="date" matInput placeholder="Date" aria-label="date" />
       </mat-form-field>
-    </div>
-
-    <div class="field">
-      <label class="field-label">Exchange</label>
-      <mat-form-field floatLabel="never">
+      <mat-form-field>
+        <mat-label>Exchange</mat-label>
         <input
           type="text"
           matInput
-          placeholder="e.g. Binance"
+          placeholder="Binance, Coinbase, Kraken..."
           aria-label="Exchange"
           formControlName="exchange"
           [matAutocomplete]="autoExchange"
@@ -103,17 +103,19 @@
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
+      <p class="save-helper" *ngIf="!coinService.form.valid || (!message && !checkCoinSymbol(coinName.value))">
+        Complete the required coin symbol and amount fields to enable Save.
+      </p>
+      <div class="button-row">
+        <button
+          class="save-btn"
+          type="submit"
+          [disabled]="!coinService.form.valid || (!message && !checkCoinSymbol(coinName.value))"
+        >
+          Save
+        </button>
+        <button class="close-btn" type="button" (click)="onClose()">Close</button>
+      </div>
     </div>
-
-    <div class="button-row">
-      <button
-        class="save-btn"
-        type="submit"
-        [disabled]="!coinService.form.valid"
-      >
-        Save
-      </button>
-      <button class="close-btn" type="button" (click)="onClose()">Close</button>
-    </div>
-  </div>
 </form>
+

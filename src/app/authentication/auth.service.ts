@@ -29,28 +29,19 @@ export class AuthService {
     this.user$ = this.afAuth.authState.pipe(
       switchMap((user) => {
         if (user) {
+          this.uid = user.uid;
           return this.afs.doc<User>(`users/${user.uid}`).valueChanges();
-        } else {
-          // Check for wallet-based user (stored in localStorage)
-          const walletUid = localStorage.getItem('walletUid');
-          if (walletUid) {
-            return this.afs.doc<User>(`users/${walletUid}`).valueChanges();
-          }
-          return of(null);
         }
+        this.uid = null;
+        return of(null);
       })
     );
-
-    // Restore wallet session on init
-    const savedWallet = localStorage.getItem('walletUid');
-    if (savedWallet) {
-      this.uid = savedWallet;
-    }
   }
 
   async googleSignin() {
     const provider = new auth.GoogleAuthProvider();
     const credential = await this.afAuth.auth.signInWithPopup(provider);
+    localStorage.removeItem('demoMode');
     return this.updateUserData(credential.user);
   }
 
@@ -84,36 +75,22 @@ export class AuthService {
 
     // Use the Ethereum address as the user UID
     const uid = account.toLowerCase();
-    this.uid = uid;
 
-    // Leaving demo mode now that the user is signing in for real
-    localStorage.removeItem('demoMode');
+    // Wallet sessions are local demo sessions unless a backend custom-token
+    // exchange is added. Owner-scoped Firestore rules intentionally require
+    // Firebase Auth, so this path proves wallet ownership and then uses the
+    // local demo portfolio instead of attempting unauthorized Firestore writes.
+    this.enableWalletDemoSession(uid);
 
-    // Persist wallet session
-    localStorage.setItem('walletUid', uid);
-
-    // Store user data in Firestore under /users/{address}/
-    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
-      `users/${uid}`
-    );
-
-    const displayName =
-      'Wallet ' + uid.substring(0, 6) + '...' + uid.substring(38);
-
-    const data = {
-      uid: uid,
-      email: '',
-      displayName: displayName,
-      photoURL: '',
-      walletAddress: uid,
-    };
-
-    await userRef.set(data, { merge: true });
-
-    // Navigate to coin-list inside Angular zone
     this.ngZone.run(() => {
       this.router.navigateByUrl('coin-list');
     });
+  }
+
+  private enableWalletDemoSession(uid: string): void {
+    this.uid = null;
+    localStorage.setItem('walletDemoAddress', uid);
+    localStorage.setItem('demoMode', '1');
   }
 
   getUID() {
@@ -121,8 +98,8 @@ export class AuthService {
   }
 
   async signOut() {
-    localStorage.removeItem('walletUid');
     localStorage.removeItem('demoMode');
+    this.uid = null;
     await this.afAuth.auth.signOut();
     this.ngZone.run(() => {
       this.router.navigate(['login']);
@@ -142,9 +119,6 @@ export class AuthService {
       photoURL: user.photoURL,
     };
     this.uid = data.uid;
-
-    // Leaving demo mode now that the user is signed in for real
-    localStorage.removeItem('demoMode');
     //
 
     this.ngZone.run(() => {
