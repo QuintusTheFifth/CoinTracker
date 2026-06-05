@@ -8,7 +8,7 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/firestore';
 
-import { switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { User } from './user.model';
 
 @Injectable({
@@ -30,7 +30,14 @@ export class AuthService {
       switchMap((user) => {
         if (user) {
           this.uid = user.uid;
-          return this.afs.doc<User>(`users/${user.uid}`).valueChanges();
+          return this.afs.doc<User>(`users/${user.uid}`).valueChanges().pipe(
+            map(profile => profile || {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName,
+              photoURL: user.photoURL,
+            })
+          );
         }
         this.uid = null;
         return of(null);
@@ -38,15 +45,16 @@ export class AuthService {
     );
   }
 
-  async googleSignin() {
+  async googleSignin(redirectUrl: string = 'coin-list') {
     const provider = new auth.GoogleAuthProvider();
     const credential = await this.afAuth.auth.signInWithPopup(provider);
     localStorage.removeItem('demoMode');
-    return this.updateUserData(credential.user);
+    localStorage.removeItem('walletDemoAddress');
+    return this.updateUserData(credential.user, redirectUrl);
   }
 
   /** Connect with MetaMask / Ethereum wallet */
-  async walletLogin(): Promise<void> {
+  async walletLogin(redirectUrl: string = 'coin-list'): Promise<void> {
     const eth = (window as any).ethereum;
     // Check if MetaMask is installed
     if (!eth || !eth.request) {
@@ -83,7 +91,7 @@ export class AuthService {
     this.enableWalletDemoSession(uid);
 
     this.ngZone.run(() => {
-      this.router.navigateByUrl('coin-list');
+      this.router.navigateByUrl(redirectUrl || 'coin-list');
     });
   }
 
@@ -99,6 +107,7 @@ export class AuthService {
 
   async signOut() {
     localStorage.removeItem('demoMode');
+    localStorage.removeItem('walletDemoAddress');
     this.uid = null;
     await this.afAuth.auth.signOut();
     this.ngZone.run(() => {
@@ -106,7 +115,7 @@ export class AuthService {
     });
   }
 
-  private updateUserData(user) {
+  private async updateUserData(user, redirectUrl: string = 'coin-list') {
     // Sets user data to firestore on login, add custom code here
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(
       `users/${user.uid}`
@@ -121,11 +130,11 @@ export class AuthService {
     this.uid = data.uid;
     //
 
-    this.ngZone.run(() => {
-      this.router.navigateByUrl('coin-list');
-    });
-
     //change only the properties that changed
-    return userRef.set(data, { merge: true });
+    await userRef.set(data, { merge: true });
+
+    this.ngZone.run(() => {
+      this.router.navigateByUrl(redirectUrl || 'coin-list');
+    });
   }
 }

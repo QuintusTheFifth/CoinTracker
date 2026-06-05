@@ -95,19 +95,65 @@
   margin-right: 8px;
 }
 
-.demo-link {
-  align-self: center;
-  color: var(--accent);
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 4px 8px;
-  text-decoration: none;
+.login-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
-.demo-link:hover,
-.demo-link:focus {
-  color: var(--text-primary);
-  text-decoration: underline;
+.login-brand img {
+  height: 54px;
+  width: 54px;
+}
+
+.login-divider {
+  align-items: center;
+  color: var(--text-secondary, #8b949e);
+  display: flex;
+  font-size: 0.78rem;
+  gap: 12px;
+  letter-spacing: 0.08em;
+  margin: 2px 0;
+  text-transform: uppercase;
+}
+
+.login-divider::before,
+.login-divider::after {
+  background: var(--border, rgba(139, 148, 158, 0.25));
+  content: '';
+  flex: 1;
+  height: 1px;
+}
+
+.demo-btn {
+  background: rgba(247, 147, 26, 0.12);
+  border: 1px solid rgba(247, 147, 26, 0.48);
+  border-radius: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  min-height: 44px;
+  padding: 11px 16px;
+  transition: all 0.22s ease;
+  width: 100%;
+}
+
+.demo-btn:hover,
+.demo-btn:focus {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(247, 147, 26, 0.28);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.login-hint {
+  color: var(--text-secondary, #8b949e);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  margin: 1rem 0 0;
+  text-align: center;
 }
 
 .eth-icon {

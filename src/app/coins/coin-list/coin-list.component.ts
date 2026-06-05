@@ -281,6 +281,7 @@ export class CoinListComponent implements OnInit, OnDestroy, AfterViewInit {
     dialogConfig.maxWidth = '90vw';
     dialogConfig.width = window.innerWidth < 600 ? '92vw' : '520px';
     dialogConfig.maxHeight = '90vh';
+    dialogConfig.data = { mode: 'addCoin' };
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
 

@@ -113,8 +113,8 @@
 
       <!-- Buttons -->
       <ng-container matColumnDef="buttons">
-          <mat-header-cell *matHeaderCellDef><strong>Actions</strong></mat-header-cell>
-        <mat-cell *matCellDef="let row">
+        <th mat-header-cell *matHeaderCellDef><strong>Actions</strong></th>
+        <td mat-cell *matCellDef="let row">
           <ng-container *ngIf="pendingDeleteKey !== row.key; else confirmDeleteTxTpl">
             <button class="tx-action-btn" mat-button (click)="onEdit(row)" aria-label="Edit transaction" matTooltip="Edit transaction">
               <mat-icon>edit</mat-icon>
@@ -132,7 +132,7 @@
               <button mat-button (click)="cancelDelete()">No</button>
             </span>
           </ng-template>
-        </mat-cell>
+        </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

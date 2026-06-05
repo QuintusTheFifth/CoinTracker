@@ -116,7 +116,8 @@ export class CoinsService {
     this.valutaSource.next(this.valuta);
   }
 
-  updateCoin(coin: CoinTransaction): void {
+  updateCoin(coin: CoinTransaction & { coinName?: string }): void {
+    const symbol = coin.symbol || coin.coinName || this.coinSymbol;
     if (this.isDemoMode) {
       const coins = this.getDemoCoins();
       const idx = coins.findIndex((c: CoinTransaction) => c.key === coin.$key);
@@ -127,7 +128,7 @@ export class CoinsService {
           date: coin.date,
           exchange: coin.exchange,
           priceBought: coin.priceBought,
-          symbol: coin.symbol,
+          symbol,
         };
         this.saveDemoCoins(coins);
       }
@@ -138,7 +139,7 @@ export class CoinsService {
       date: coin.date,
       exchange: coin.exchange,
       priceBought: coin.priceBought,
-      symbol: coin.symbol,
+      symbol,
     });
   }
 
@@ -215,7 +216,7 @@ export class CoinsService {
 
   /** Whether the app is running in demo mode (localStorage fallback) */
   private get isDemoMode(): boolean {
-    return !!localStorage.getItem('demoMode');
+    return localStorage.getItem('demoMode') === '1';
   }
 
   form: FormGroup = new FormGroup({
@@ -234,6 +235,7 @@ export class CoinsService {
     this.formMode = 'addTransaction';
     let today = new Date().toISOString().slice(0, 10);
 
+    this.form.reset();
     this.form.setValue({
       $key: null,
       coinName: symbol,

@@ -3,7 +3,7 @@
   class="coin-form"
   (ngSubmit)="onSubmit()"
 >
-  <h2 class="dialog-title">{{ coinService.formMode === 'edit' ? 'Edit transaction' : (coinService.formMode === 'addTransaction' ? 'Add transaction' : 'Add a coin') }}</h2>
+  <h2 class="dialog-title">{{ dialogTitle }}</h2>
   <p class="dialog-subtitle">Enter the holding details. Required fields are clearly marked.</p>
   <input type="hidden" formControlName="$key" />
   <div class="controls-container">

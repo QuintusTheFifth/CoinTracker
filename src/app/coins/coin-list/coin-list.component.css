@@ -280,8 +280,9 @@ h1 {
 }
 
 .coin-table ::ng-deep .mat-column-buttons {
-  flex: 0 0 8% !important;
+  flex: 0 0 13% !important;
   justify-content: center;
+  min-width: 172px;
 }
 
 @keyframes rowFadeIn {
@@ -386,19 +387,37 @@ h1 {
 }
 
 /* ── Buttons Column ────────────────────────────────────── */
-.coin-table ::ng-deep .mat-column-buttons .mat-icon-button {
-  width: 42px;
-  height: 42px;
-  line-height: 42px;
+.coin-table ::ng-deep .mat-column-buttons .action-btn {
+  align-items: center;
+  border: 1px solid rgba(201, 209, 217, 0.14);
+  border-radius: 999px;
+  color: var(--text-primary);
+  display: inline-flex;
+  gap: 0.35rem;
+  min-width: 78px;
+  padding: 0 0.7rem;
   transition: all 0.2s ease;
 }
 
-.coin-table ::ng-deep .mat-column-buttons .mat-icon-button:hover {
-  background: var(--glass-border);
+.coin-table ::ng-deep .mat-column-buttons .action-btn .mat-icon {
+  font-size: 18px;
+  height: 18px;
+  line-height: 18px;
+  width: 18px;
 }
 
-.delete-btn:hover {
+.coin-table ::ng-deep .mat-column-buttons .action-btn:hover {
+  background: var(--glass-border);
+  border-color: rgba(247, 147, 26, 0.38);
+}
+
+.coin-table ::ng-deep .mat-column-buttons .delete-btn {
+  color: #ffb4ac;
+}
+
+.coin-table ::ng-deep .mat-column-buttons .delete-btn:hover {
   background: rgba(244, 67, 54, 0.12);
+  border-color: rgba(244, 67, 54, 0.34);
 }
 
 .inline-confirm {

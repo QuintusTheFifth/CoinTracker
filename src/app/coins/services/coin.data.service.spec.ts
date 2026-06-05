@@ -50,6 +50,24 @@ describe('CoinsService', () => {
     });
   });
 
+  it('preserves a transaction symbol when editing from the form value', () => {
+    service.enableDemoMode();
+
+    service.updateCoin({
+      $key: 'demo_1',
+      coinName: 'BTC',
+      amount: 2,
+      priceBought: 46000,
+      date: '2026-06-05',
+      exchange: 'Kraken'
+    } as any);
+
+    const coins = JSON.parse(localStorage.getItem('cointracker_demo_coins') || '[]');
+    const btc = coins.find((coin: any) => coin.key === 'demo_1');
+    expect(btc.symbol).toBe('BTC');
+    expect(btc.amount).toBe(2);
+  });
+
   it('seeds demo payload transactions when demo flag is present', (done) => {
     localStorage.setItem('demoMode', '1');
     service.getCoinsPayload().subscribe((payloads: any[]) => {

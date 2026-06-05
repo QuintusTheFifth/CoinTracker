@@ -8,6 +8,7 @@ describe('CoinGraphComponent', () => {
       currentMessage: new BehaviorSubject('BTC'),
       currentBigChart: new BehaviorSubject(false),
       currentPeriod: new BehaviorSubject(7),
+      currentValuta: new BehaviorSubject('EUR'),
       weekData: () => of({ prices: [] }),
       bigData: () => of({ prices: [[Date.now() - 86400000, 100], [Date.now(), 125]] }),
       getFallbackPrice: () => 120,

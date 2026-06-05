@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, HostListener, Inject, Optional } from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 
 import { Subject } from 'rxjs';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { Observable } from 'rxjs';
 import { CoinsService, Coin } from '../services/coin.data.service';
@@ -42,11 +42,21 @@ export class AddCoinComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  get dialogTitle(): string {
+    if (this.dialogData && this.dialogData.mode === 'edit') { return 'Edit transaction'; }
+    if (this.dialogData && this.dialogData.mode === 'addTransaction') { return 'Add transaction'; }
+    if (this.dialogData && this.dialogData.mode === 'addCoin') { return 'Add a coin'; }
+    if (this.coinService.formMode === 'edit') { return 'Edit transaction'; }
+    if (this.coinService.formMode === 'addTransaction') { return 'Add transaction'; }
+    return this.coinService.form.get('$key').value ? 'Edit transaction' : (this.message ? 'Add transaction' : 'Add a coin');
+  }
+
   constructor(
     public coinService: CoinsService,
     public dialogRef: MatDialogRef<AddCoinComponent>,
     private fb: FormBuilder,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    @Optional() @Inject(MAT_DIALOG_DATA) public dialogData: { mode?: 'addCoin' | 'addTransaction' | 'edit' } = {}
   ) {
     this.filteredCoins = this.coinName.valueChanges.pipe(
       startWith(''),

@@ -22,18 +22,16 @@
         </span>
       </button>
 
-      <a class="demo-link" href="/coin-list" routerLink="/coin-list" aria-label="Continue in demo mode">
-        Continue in demo mode
-      </a>
+      <div class="login-divider"><span>or</span></div>
+
+      <button class="demo-btn" type="button" (click)="onDemo()" aria-label="Continue in demo mode">
+        Explore the demo portfolio
+      </button>
 
       <div *ngIf="errorMessage" class="error-msg">
         {{ errorMessage }}
       </div>
     </div>
-    <div class="login-divider"><span>or</span></div>
-    <button class="demo-btn" type="button" (click)="onDemo()">
-      Explore the demo
-    </button>
-    <p class="login-hint">Secure sign-in · No card required</p>
+    <p class="login-hint">Secure sign-in · No card required · Demo stores data locally</p>
   </div>
 </div>

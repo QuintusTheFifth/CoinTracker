@@ -199,11 +199,13 @@
           <mat-cell *matCellDef="let row; let i = index"
             [style.animation-delay]="i * 0.04 + 's'">
             <ng-container *ngIf="pendingDeleteSymbol !== row.symbol; else confirmDeleteTpl">
-              <button mat-icon-button class="action-btn" (click)="onEdit(row.symbol)" aria-label="Edit coin" matTooltip="Edit coin">
+              <button mat-button class="action-btn" (click)="onEdit(row.symbol)" aria-label="Edit coin" matTooltip="Edit coin">
                 <mat-icon>edit</mat-icon>
+                <span>Edit</span>
               </button>
-              <button mat-icon-button class="action-btn delete-btn" (click)="onDelete(row)" aria-label="Delete coin" matTooltip="Delete coin">
+              <button mat-button class="action-btn delete-btn" (click)="onDelete(row)" aria-label="Delete coin" matTooltip="Delete coin">
                 <mat-icon>delete_outline</mat-icon>
+                <span>Delete</span>
               </button>
             </ng-container>
             <ng-template #confirmDeleteTpl>

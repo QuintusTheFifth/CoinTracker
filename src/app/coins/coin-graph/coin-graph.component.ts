@@ -42,6 +42,7 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
   chartLatest = 0;
   chartStart = '';
   chartEnd = '';
+  valuta = 'EUR';
 
   ngOnInit(): void {
     this._coinService.currentMessage.pipe(
@@ -74,6 +75,11 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
         }
       }
     );
+    this._coinService.currentValuta.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((valuta) => {
+      this.valuta = valuta || 'EUR';
+    });
     if (!this.bigChart) {
       this.getWeekData();
     } else {
@@ -141,7 +147,6 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
           ],
         },
         options: {
-          plugins: [darkBackgroundPlugin],
           layout: {
             padding: { left: 8, right: 18, top: 8, bottom: 0 },
           },
@@ -180,6 +185,7 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
             ],
           },
         },
+        plugins: [darkBackgroundPlugin],
       });
       }, 0);
     },
@@ -250,7 +256,6 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
           ],
         },
         options: {
-          plugins: [darkBackgroundPlugin],
           legend: {
             display: false,
           },
@@ -319,6 +324,7 @@ export class CoinGraphComponent implements OnInit, OnDestroy {
             ],
           },
         },
+        plugins: [darkBackgroundPlugin],
       });
       }, 0);
     },

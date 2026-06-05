@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/authentication/auth.service';
 import { CoinsService } from 'src/app/coins/services/coin.data.service';
 
@@ -15,7 +15,8 @@ export class LoginComponent implements OnInit {
   constructor(
    public auth: AuthService,
    private coinService: CoinsService,
-   private router: Router
+   private router: Router,
+   private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
@@ -24,14 +25,18 @@ export class LoginComponent implements OnInit {
   /** Explicitly enter demo mode (seeded sample portfolio, no account). */
   onDemo() {
     this.coinService.enableDemoMode();
-    this.router.navigate(['coin-list']);
+    this.router.navigateByUrl(this.getReturnUrl());
+  }
+
+  private getReturnUrl(): string {
+    return this.route.snapshot.queryParamMap.get('returnUrl') || 'coin-list';
   }
 
   async onWalletLogin() {
     this.walletLoggingIn = true;
     this.errorMessage = '';
     try {
-      await this.auth.walletLogin();
+      await this.auth.walletLogin(this.getReturnUrl());
     } catch (err) {
       this.errorMessage = this.friendlyAuthError(err, 'wallet');
     } finally {
@@ -42,7 +47,7 @@ export class LoginComponent implements OnInit {
   async onGoogleLogin() {
     this.errorMessage = '';
     try {
-      await this.auth.googleSignin();
+      await this.auth.googleSignin(this.getReturnUrl());
     } catch (err) {
       this.errorMessage = this.friendlyAuthError(err, 'google');
     }

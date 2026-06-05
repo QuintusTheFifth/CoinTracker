@@ -156,6 +156,7 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogConfig.maxWidth = '90vw';
     dialogConfig.width = window.innerWidth < 600 ? '92vw' : '520px';
     dialogConfig.maxHeight = '90vh';
+    dialogConfig.data = { mode: 'edit' };
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
 
@@ -180,6 +181,7 @@ export class EditCoinComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogConfig.maxWidth = '90vw';
     dialogConfig.width = window.innerWidth < 600 ? '92vw' : '520px';
     dialogConfig.maxHeight = '90vh';
+    dialogConfig.data = { mode: 'addTransaction' };
     this.dialog.open(AddCoinComponent, dialogConfig);
   }
 
