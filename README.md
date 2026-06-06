@@ -14,8 +14,8 @@ CoinTracker helps crypto investors keep a clean view of their portfolio:
 - Track multiple coins and transactions across exchanges.
 - View live prices, portfolio value, and 24-hour market moves.
 - Drill into a coin for historical charts and transaction history.
-- Sign in with Google or connect an Ethereum wallet.
-- Use demo mode when authentication is unavailable.
+- Sign in with Google, connect an Ethereum wallet for a local demo session, or explicitly enter demo mode.
+- Preserve deep links through login so protected coin-detail routes return to the requested page after authentication.
 
 Live app: [cointracker-26919.web.app](https://cointracker-26919.web.app)
 
@@ -26,8 +26,9 @@ Live app: [cointracker-26919.web.app](https://cointracker-26919.web.app)
 - **Transaction management:** add, edit, and delete coin transactions from modal dialogs.
 - **Market data:** CoinGecko prices, coin IDs, images, 24-hour change, and chart history.
 - **Resilient fallback mode:** top-coin static data keeps the UI usable if market APIs are unavailable.
-- **Authentication:** Google Sign-In via Firebase Auth and MetaMask wallet sign-in.
-- **Demo mode:** localStorage-backed portfolio for quick unauthenticated exploration.
+- **Authentication:** Google Sign-In via Firebase Auth, with guarded deep links returning to their original route after login.
+- **Wallet demo sessions:** MetaMask wallet connection enables the local demo portfolio without pretending to be a Firebase-authenticated user.
+- **Explicit demo mode:** localStorage-backed portfolio for quick unauthenticated exploration; demo mode is only enabled after the user selects it.
 - **Responsive UI:** dark crypto-themed interface optimized for desktop and mobile.
 - **Production hardening:** deterministic install settings, headless test support, lint gate, production build script, and critical production audit gate.
 
@@ -55,7 +56,7 @@ Form dialog with coin symbol autocomplete, amount, bought price, date picker, an
 
 ![Login page with dark glassmorphism card](screenshots/login.png)
 
-Google Sign-In, MetaMask wallet login, and demo access.
+Google Sign-In, MetaMask wallet demo login, and explicit demo access.
 
 ### 404 page
 
@@ -125,7 +126,7 @@ Expected status:
 
 - Lint passes with no reported files.
 - Production build completes.
-- Karma/Jasmine runs in headless Chrome.
+- Karma/Jasmine runs in headless Chrome; the current suite contains 31 specs.
 - Critical production audit gate exits successfully.
 - Firestore rules restrict portfolio data to `/users/{uid}` and `/users/{uid}/coins` for the authenticated owner only.
 - `npm run verify` includes a Firestore rules assertion script (`npm run verify:rules`) so owner-scoping regressions fail CI.
@@ -142,9 +143,9 @@ Note: the Angular 9/Firebase 7 dependency line may still report high or moderate
 
 ### GitHub Actions
 
-The workflow in `.github/workflows/firebase-deploy.yml` installs dependencies, builds the production bundle, and deploys to Firebase Hosting.
+The workflow in `.github/workflows/firebase-deploy.yml` installs dependencies, runs `npm run verify`, builds the production bundle, and uploads `dist/coinTracker/` as a build artifact. The workflow intentionally acts as a CI gate; Firebase Hosting deployment is still handled by `./deploy.sh` unless a deploy step is added later.
 
-Configure one of these repository secrets:
+If you add a deploy step later, configure one of these repository secrets:
 
 - `FIREBASE_SERVICE_ACCOUNT` — recommended service account JSON.
 - `FIREBASE_TOKEN` — token from `firebase login:ci`.
@@ -163,8 +164,9 @@ scripts/                     Compatibility patches used after install
 ## Notes for maintainers
 
 - CoinGecko has duplicate symbols. The service preserves canonical mappings for common assets so symbols like BTC and ETH resolve predictably.
-- Demo mode stores data locally and is intentionally separate from authenticated Firestore data.
-- Wallet sessions are in-memory and require a fresh signature rather than trusting persisted wallet IDs.
+- Demo mode stores data locally and is intentionally separate from authenticated Firestore data; the guard only accepts the explicit `demoMode=1` flag.
+- Wallet sessions are local demo sessions and require a fresh signature rather than trusting persisted wallet IDs or writing wallet-only users to Firestore.
+- Protected routes redirect unauthenticated users to `/login?returnUrl=...`; Google, wallet, and demo login paths all honor that return URL.
 - The app displays when it is using estimated fallback prices instead of live CoinGecko responses.
 
 ## License
